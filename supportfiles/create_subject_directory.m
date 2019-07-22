@@ -14,6 +14,8 @@ subject.start_time  = clock;
 subject.name        = num2str(subject.id);  
 subject.screen      = 0;
 
+cfg.debugging       =0;
+
 % testing mode
 if isempty(subject.id) || isempty(subject.restart)
     warning('TESTING MODE');
@@ -24,6 +26,8 @@ if isempty(subject.id) || isempty(subject.restart)
     subject.name            = 'test';
     subject.id              = 999;
     subject.restart         = 0;
+    
+    cfg.debugging           =1; % for PTB window.
 end
 if isempty(subject.name)
     subject.name = 'test';
@@ -34,11 +38,12 @@ end
 % Unique filename depending on computer clock (avoids overwriting)
 subject.fileName = [num2str(round(datenum(subject.start_time)*100000)) '_' num2str(subject.id)];
 %% create directory if does not already exist
-if ~exist([savedir  filesep 'DotsandAudio_behaviour'], 'dir'),        
+if ~exist([savedir  filesep 'DotsandAudio_behaviour'], 'dir')        
     mkdir([savedir filesep 'DotsandAudio_behaviour']);
 end
 %make participants outpath.
 mkdir([[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName]]);
 
+ppantsavedir=[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName];
 
 

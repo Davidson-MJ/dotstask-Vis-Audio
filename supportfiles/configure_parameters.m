@@ -1,4 +1,4 @@
-cfg                         = [];
+
 % Reseed the random-number generator for each expt.
 cfg.resetrn                 = rng('shuffle');
 cfg.computer                = computer;
@@ -26,16 +26,22 @@ cfg.ntotalblocks    = cfg.nblocks + cfg.nblocksprac;    % there are 3 prac block
 
 cfg.ntrialsall      = [cfg.ntrialsprac repmat(cfg.ntrials, 1, cfg.nblocks)]; %outputs array containing number of trials in each block
 
-%%
- 
-% Trial condition definitions
+%% Stimulus (Screen) variables
+
+cfg.backgroundColour = [123,123,123];           % grey
+cfg.offscreen=1;                              % throw PTB off screen.
+cfg.fontsize=20;
+%% Trial condition definitions
 cfg.trialDif                = [1 2];                                       % 1=easy, 2=hard
-cfg.blockTypes              = [1,2,3,4];                                    %1 = Aud(InfoSeeking), 2= VIS(InfoSeeking), 3,4 = no info seeking.
+cfg.blockTypes              = [1,2,3];                                   %1 = Aud(InfoSeeking), 2= VIS(InfoSeeking), 3= no info seeking.
+
 % stimulus variables
 cfg.stim.duration           = 1.500;                                       % timeout for primary task
-cfg.initialDotDifference    = 20;                                          % staircase initialization
+cfg.initialDotDifference    = 20;                                          % staircase initialization (VIS)
+cfg.initialHzDifference     = 100;                                         % staircase initialization (AUD)
+
 cfg.stim.durstim            = .15;                                         % time first order stimulus is shown on screen
-cfg.stim.durstim2           = .3;                                          % time stimulus is shown on screen for second view
+cfg.stim.durstim2           = .15; %was .3                                 % time stimulus is shown on screen for second view
 cfg.stim.durAdv             = 1.5;                                         % time advice is shown on screen
 cfg.stim.RSI1               = 0.3;                                         % time between information choice and advisor presentation
 cfg.stim.RSI2               = 0.8;                                         % time between confidence decision and next-t first-order stimulus presentation
@@ -47,9 +53,10 @@ cfg.stim.beeprate           = 22254;                                       % err
 cfg.stim.beepvolume         = .5;                                          % error tone volume
 
 %% configure audio masks for discrimination:
-% make noise maskers. cf. Zakrzewski et al., Brain & Cognition, 2019
+aud_samprate=44100;
 
-% 2400ms white noise
+if cfg.useAuditorymasks==1    % make noise maskers. cf. Zakrzewski et al., Brain & Cognition, 2019
+                    % 2400ms white noise
 maskerlength=2.4; %seconds
 aud_samprate=44100;
 wn= randn([1,maskerlength*aud_samprate]);
@@ -58,38 +65,43 @@ wn= randn([1,maskerlength*aud_samprate]);
 R=1.5/2.4;% rampratio. Length of taper (2*.75) to total window.
 tukey_win= tukeywin(maskerlength*aud_samprate, R)';
 cfg.maskerTone = wn.*tukey_win;
+end
 
-%audio stim = 80ms sinusoid, 1000Hz or 2500 Hz
+%audio stim = 80ms sinusoid, 1000Hz or 2500 Hz, detection task is to choose
+%higher pitch.
+
 cfg.stimLow = sin(2*pi*1000*[0:1/aud_samprate:.08]);
 cfg.stimHigh = sin(2*pi*2500*[0:1/aud_samprate:.08]);
+    
+  
+    
+
 %%
-InitializePsychSound 
-%%
-%%
+
 % advisor related variables
-% cfg.nadvisers                            = 6;
-% cfg.advisor.accLevels               = [.5 .6 .7 .8 .9 1];                        %Accuracy levels
-% cfg.advisor.trainAcc                = .8;
+cfg.nadvisers                       = 6;                                    % 
+cfg.advisor.accLevels               = linspace(.5,1, cfg.nadvisers);        % space accuracy levels by nadvisors,
+cfg.advisor.trainAcc                = .8; 
 
 %randomise the advisor parameters
-% cfg.advisor.pics                    = [randperm(6)];
-% cfg.advisor.acc                     = [randperm(6)];
+cfg.advisor.pics                    = ones(1,6); % was [randperm(6)];       % single advisor pic.
+cfg.advisor.acc                     = randperm(6);
 
 % define the grid for the placement of the dots:
 cfg.xymatrix = [repmat(linspace(-57,57,20),1,20);...
     sort(repmat(linspace(-57,57,20),1,20))]; 
 
 % instructions on screen
-cfg.instr.cjtext        = {'50%' '60%' '70%' '80%' '90%' '100%'};
-cfg.instr.finaldecision = {'What is your final decision?'};
+cfg.instr.cjtext        = {'50%' '60%' '70%' '80%' '90%' '100%'};           % confidence judgement text
+cfg.instr.finaldecision = {'What is your final decision?'};                 
 cfg.instr.interval      = {'LEFT' 'RIGHT'};
-% cfg.instr.estimated_obsacc  = ...
-%     {'Your baseline accuracy (before any advice) was 71%' ...
-%     'What do you think this person''s accuracy was?' ...
-%     'In the next screen you will be prompted to enter a value.' ...
-%     'Press any button when you are ready.' ...
-%     'Enter a number (using the keyboard upper digits) between 0 and 100 and press Enter: '};
-% cfg.instr.groups        = [1 11 12 18 22];                                       % groupings of instruction slides
+cfg.instr.estimated_obsacc  = ...
+    {'Your baseline accuracy (before any advice) was 71%' ...
+    'What do you think this person''s accuracy was?' ...
+    'In the next screen you will be prompted to enter a value.' ...
+    'Press any button when you are ready.' ...
+    'Enter a number (using the keyboard upper digits) between 0 and 100 and press Enter: '};
+cfg.instr.groups        = [1 11 12 18 22];                                       % groupings of instruction slides
 
 % save paths in cfg
 cfg.my_path                 = basedir; %prev. my_path;
