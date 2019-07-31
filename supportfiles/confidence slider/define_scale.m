@@ -11,15 +11,26 @@
     
     cfg.bar.positiony           = .7;
     
-    cfg.bar.barrect  = CenterRectOnPoint([0 0 (cfg.bar.nScale*cfg.bar.cursorwidth) (cfg.bar.cursorheight)], ...
-window.Center(1),window.Rect(4)*cfg.bar.positiony);
-
+    %define rect for confidence slider
+    cfg.bar.barrect             = CenterRectOnPoint([0 0 (cfg.bar.nScale*cfg.bar.cursorwidth) (cfg.bar.cursorheight)], ...
+                                window.Center(1),window.Rect(4)*cfg.bar.positiony);
     cfg.bar.barlength           = cfg.bar.barrect(3)- cfg.bar.barrect(1);
     cfg.bar.gap_size            = 11;
+    
+    
+    %define rect for gap in middle (separate L/R)
     cfg.bar.gaprect            = CenterRectOnPoint([0,0,cfg.bar.cursorwidth * cfg.bar.gap_size,cfg.bar.cursorheight],...
-        window.Center(1), window.Rect(4)*cfg.bar.positiony);
-
+                                window.Center(1), window.Rect(4)*cfg.bar.positiony);
     cfg.bar.gaplength           = 10;
+
+    % define increments along bar, that cursor can rest on    
+    cfg.bar.xshift              = [linspace(cfg.bar.barrect(1)+cfg.bar.cursorwidth.*.5,...
+                            cfg.bar.gaprect(1)-cfg.bar.cursorwidth.*.5,cfg.bar.maxScale) ...
+                            linspace(cfg.bar.gaprect(3)+cfg.bar.cursorwidth.*.5, ...
+                            cfg.bar.barrect(3)-cfg.bar.cursorwidth.*.5,cfg.bar.maxScale)];
+    
+    cfg.bar.gaplength               =(cfg.bar.gaprect(3)-cfg.bar.gaprect(1)).*.5; % define difference between bars for gap.
+
     
     %% -- previous parameters (old variable names:)
     % cfg.bar.maxScale            = 55;

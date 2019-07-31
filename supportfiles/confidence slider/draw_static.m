@@ -1,9 +1,10 @@
-Screen('TextSize', window.Number, cfg.fontsize);
+Screen('TextSize', window.Number, cfg.fontsize*2);
 
+drawBig=0; % passed into add_fixation to determine fix cross params.
 % add fixation
 add_fixation;
 
-Screen('TextSize',window.Number, cfg.fontsize);
+Screen('TextSize',window.Number, cfg.fontsize*2);
 
 % draw scale
 draw_scale_(window,cfg);

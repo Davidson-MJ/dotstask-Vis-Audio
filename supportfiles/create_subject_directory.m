@@ -2,7 +2,9 @@
 prompt = {'Subject ID:','Gender(m/f):','Age:',...
     'hand(r/l): ', ...
     'Experiment restarted? Yes=1 or No=0: '};
+
 answer = inputdlg(prompt);
+
 
 subject.id          = answer{1};
 subject.gender      = answer{2};
@@ -46,4 +48,21 @@ mkdir([[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName]]);
 
 ppantsavedir=[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName];
 
-
+%% note that the experiment order (V-A or A-V) is predetermined.
+% 
+% while ~df_order
+%     % randomize participant trial types
+%     % 1= V-A; 2= A-V
+%     randExpOrder=randi(2,1,26);
+%     
+%     %break when even numbers    
+%     if length(randExpOrder(randExpOrder==1))>12
+%         df_order=1;
+%         dt=date;
+%         save(['ExperimentOrder set ' date], 'randExpOrder')
+%         break
+%     end
+%     
+% end
+%    
+    

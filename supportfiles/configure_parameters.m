@@ -16,43 +16,38 @@ if ~isfield(cfg,'pause'),           cfg.pause = 'P';end
 if ~isfield(cfg,'until_release'),   cfg.until_release = true;end
 if ~isfield(cfg,'restarted'),       cfg.restarted = false;end
 
-%% initialise variables
-% number of trials definition
-cfg.ntrials         = 60 ; % per block
-cfg.nblocks         = 6; % total exp.
-cfg.nblocksprac     = 3;
-cfg.ntrialsprac     = repmat(6, 1, cfg.nblocksprac);    %practice trials per prac block. 
-cfg.ntotalblocks    = cfg.nblocks + cfg.nblocksprac;    % there are 3 prac blocks in total:
-
-cfg.ntrialsall      = [cfg.ntrialsprac repmat(cfg.ntrials, 1, cfg.nblocks)]; %outputs array containing number of trials in each block
-
-%% Stimulus (Screen) variables
-
-cfg.backgroundColour = [123,123,123];           % grey
-cfg.offscreen=1;                              % throw PTB off screen.
-cfg.fontsize=20;
-%% Trial condition definitions
-cfg.trialDif                = [1 2];                                       % 1=easy, 2=hard
-cfg.blockTypes              = [1,2,3];                                   %1 = Aud(InfoSeeking), 2= VIS(InfoSeeking), 3= no info seeking.
+%% Stimulus variables
 
 % stimulus variables
 cfg.stim.duration           = 1.500;                                       % timeout for primary task
 cfg.initialDotDifference    = 20;                                          % staircase initialization (VIS)
 cfg.initialHzDifference     = 100;                                         % staircase initialization (AUD)
 
-cfg.stim.durstim            = .15;                                         % time first order stimulus is shown on screen
-cfg.stim.durstim2           = .15; %was .3                                 % time stimulus is shown on screen for second view
-cfg.stim.durAdv             = 1.5;                                         % time advice is shown on screen
-cfg.stim.RSI1               = 0.3;                                         % time between information choice and advisor presentation
-cfg.stim.RSI2               = 0.8;                                         % time between confidence decision and next-t first-order stimulus presentation
-cfg.stim.RSI3               = 0.4;                                         % time after fixation that preparation fixation appears 
-cfg.stim.RSI4               = 0.1;                                         % time bold preparation fixation is presented for 
+cfg.stim.durstim            = .150;                                         % time first order stimulus is shown on screen
+cfg.stim.durstim2           = .3; %was .3                                   % time stimulus is shown on screen for second view (if vis), 
+% % cfg.stim.durAdv             = 1.5;                                         % time advice is shown on screen
+
+%interval timings:
+%segmenting 400ms for preperation fixation cross:
+cfg.stim.TW1               = 0;%.2; %,0.3;                                    % TW1= down-time before 'getready' indicated by large fix cross
+cfg.stim.TW2               = .2; %0.4;                                        % TW2= 'get ready' indicator pre stim presentation.
+
+%long wait between stim/response presentations.
+cfg.stim.TW3               = .4;% 0.2;                                        % TW3= time after Stim before response/next presentation (small fix cross).
+
+%NB; in expA, time between response and next stim= TW3+(TW1+TW2);
+
+% feedback?
 cfg.stim.beep               = sin(2*pi*[0:1/44100:.1]*1000);               % error tone
 cfg.stim.beep2              = sin(pi*[0:1/44100:.1]*1000);                 % finish tone
 cfg.stim.beeprate           = 22254;                                       % error tone rate
 cfg.stim.beepvolume         = .5;                                          % error tone volume
 
 %% configure audio masks for discrimination:
+cfg.useAuditorymasks=0;                     % change to 1 for masking auditory tone in white noise. (different aud. task). Otherwise uses pitch discrimination
+
+
+
 aud_samprate=44100;
 
 if cfg.useAuditorymasks==1    % make noise maskers. cf. Zakrzewski et al., Brain & Cognition, 2019
@@ -73,12 +68,11 @@ end
 cfg.stimLow = sin(2*pi*1000*[0:1/aud_samprate:.08]);
 cfg.stimHigh = sin(2*pi*2500*[0:1/aud_samprate:.08]);
     
-  
-    
-
-%%
+     
+%% Configure information seking types.
 
 % advisor related variables
+if cfg.useInfoSeeking_or_Advice==0
 cfg.nadvisers                       = 6;                                    % 
 cfg.advisor.accLevels               = linspace(.5,1, cfg.nadvisers);        % space accuracy levels by nadvisors,
 cfg.advisor.trainAcc                = .8; 
@@ -86,6 +80,9 @@ cfg.advisor.trainAcc                = .8;
 %randomise the advisor parameters
 cfg.advisor.pics                    = ones(1,6); % was [randperm(6)];       % single advisor pic.
 cfg.advisor.acc                     = randperm(6);
+end
+
+
 
 % define the grid for the placement of the dots:
 cfg.xymatrix = [repmat(linspace(-57,57,20),1,20);...
@@ -93,8 +90,12 @@ cfg.xymatrix = [repmat(linspace(-57,57,20),1,20);...
 
 % instructions on screen
 cfg.instr.cjtext        = {'50%' '60%' '70%' '80%' '90%' '100%'};           % confidence judgement text
+cfg.instr.instr = {'Left click with the mouse' '\n' 'Press spacebar to confirm response'}; % how to respond.
+
+
 cfg.instr.finaldecision = {'What is your final decision?'};                 
 cfg.instr.interval      = {'LEFT' 'RIGHT'};
+
 cfg.instr.estimated_obsacc  = ...
     {'Your baseline accuracy (before any advice) was 71%' ...
     'What do you think this person''s accuracy was?' ...

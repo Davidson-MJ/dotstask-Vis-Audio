@@ -2,8 +2,17 @@
 Sc.rect=window.Rect;
 
 %note that this is very hardcoded! - check params.
+%Let's define box width to be 5 dva 
+
+boxwidthDVA= 5;
+approxviewDist=60; %cm
+
+screenRes_X=2048;
+screenRes_Y=1152;
 
 innerrect1 = [Sc.rect(3)/2-160,Sc.rect(3)/2-46;Sc.rect(4)/2-57,Sc.rect(4)/2+57];
+
+
 innerrect1outer = [Sc.rect(3)/2-167,Sc.rect(3)/2-39;Sc.rect(4)/2-64,Sc.rect(4)/2+64];
 innerrect1out = [Sc.rect(3)/2-167 Sc.rect(3)/2-39 ...
     Sc.rect(3)/2-167 Sc.rect(3)/2-39 ...

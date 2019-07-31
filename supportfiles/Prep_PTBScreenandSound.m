@@ -1,14 +1,23 @@
 % Prep_PTBScreenandSound
+% script to set up basic screen background for running dots task in PTB
 % prep screen in PTB:
+close all
 
-%%
-% reset psych toolbox
-try    Screen('CloseAll'); 
-catch
-end                 
+
+%% Stimulus (Screen) variables
+
+cfg.backgroundColour = [123,123,123];           % grey
+cfg.fontsize=20;
+
+
+%% INITIALIZE PsychToolBox.
 
 % select offscreen window if we can
+if offscreen==1
 scrnwin=max(Screen('Screens'));
+else
+    scrnwin=min(Screen('Screens'));
+end
 
 %note because we are on a MAC, need to skip synctests, PTB drivers are not
 %well supported for new releases.

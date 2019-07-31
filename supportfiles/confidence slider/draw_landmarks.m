@@ -1,4 +1,4 @@
-function [] = draw_landmarks(Sc,cfg)
+function [cfg] = draw_landmarks(Sc,cfg)
 % Usage: 
 % [] = draw_landmarks(Sc,cfg)
 % 
@@ -28,7 +28,7 @@ end
 if ~isfield(cfg.instr,'instr')
     cfg.instr.interval = {'LEFT' 'RIGHT'};
 end
-if ~isfield(cfg.instr, 'xshift')
+if ~isfield(cfg.instr, 'xshift'); % places along barrect to adapt cursor
     cfg.instr.xshift = [linspace(cfg.bar.gaprect(1)-cfg.bar.cursorwidth.*.5,...
             cfg.bar.barrect(1)+cfg.bar.cursorwidth.*.5,length(cfg.instr.cjtext)) ...
         linspace(cfg.bar.gaprect(3)+cfg.bar.cursorwidth.*.5, ...

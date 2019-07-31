@@ -1,7 +1,12 @@
-function img_dsg(struct,fields,t)
+function img_dsg(struct,fields,t);
+
+% plot an image of the experimental outline, for sanity checks.
+
+%field names
 if nargin<2
     fields = fieldnames(struct);
 end
+%all trials
 if nargin<3
     t = 1:length(struct);
 end
