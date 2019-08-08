@@ -8,6 +8,7 @@ function [cj resp_t interval hasconfirmed] = drag_slider(window,cfg,varargin)
 %
 % function by niccolo.pescetelli@psy.ox.ac.uk
 
+%Updated by MDavidson July 2019.
 
 if nargin < 3
     cj1 = [];
@@ -71,7 +72,7 @@ while ~hasconfirmed
         if isempty(cj1)
             ft = display_response_(window,cfg,[haschanged,resp]);
         else
-            ft = display_response_(window,cfg,[haschanged,resp],cj1);
+            ft = display_respon se_(window,cfg,[haschanged,resp],cj1);
         end
     end
     

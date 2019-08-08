@@ -7,6 +7,8 @@
 % number of trials definition
 cfg.allblockTypes              = [1,2,3,4];  %1 = Vis(noIS), Aud(IS), Aud(noUS), VIS(w/IS);
 
+
+
 %type of Experiment we are running:
 if strcmp(cfg.df_order,'vA')
     cfg.stimTypes={['visual'],['AUDIO']};
@@ -242,6 +244,7 @@ alltrials = [practiceblocks_A, experimentalblocks_A, practiceblocks_B, experimen
 if length(alltrials)~=N_alltrials
     error('check code: ntrial count incorrect')
 end
+
 
 
 %% check the design manually

@@ -1,19 +1,19 @@
-function out = staircase(correct,value)
+function out = staircase(correct,varargin)
 % 2Dvalue = staircase(correct,varargin)
 % correct(1): last trial accuracy
 % correct(2): second last trial accuracy
 % - optional
-%   value:  2D vector [0 1]; last two values
+%   value:  2D vector [0 1]; last two values used in Staircase
 %   ratio:  [.5488] => converge towards 80.35% accuracy
 % traditional 2D 1 up 2 down staircase based on 
-% Forced-choice staircases with ям?xed step sizes: asymptotic and
+% Forced-choice staircases with Fixed step sizes: asymptotic and
 % small-sample properties, M. Garcia Perez, Vision Research 1998
 
-%-- what's the point of this varargin thing?
-% if nargin == 1, varargin = {}; end
-% for ii = 1:2:length(varargin)
-%     eval([varargin{ii} '=varargin{ii+1};'])
-% end
+
+if nargin == 1, varargin = {}; end
+for ii = 1:2:length(varargin)
+    eval([varargin{ii} '=varargin{ii+1};'])
+end
 
 if ~exist('value','var'),       value = 0;  end
 if ~exist('ratio','var'),       ratio = 1; end %ratio = .5488 should converge toward 0.8035 accuracy 

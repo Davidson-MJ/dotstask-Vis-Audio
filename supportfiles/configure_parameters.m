@@ -19,35 +19,73 @@ if ~isfield(cfg,'restarted'),       cfg.restarted = false;end
 %% Stimulus variables
 
 % stimulus variables
-cfg.stim.duration           = 1.500;                                       % timeout for primary task
-cfg.initialDotDifference    = 20;                                          % staircase initialization (VIS)
-cfg.initialHzDifference     = 100;                                         % staircase initialization (AUD)
+cfg.stim.respduration           = 1.500;                                       % timeout for primary task
 
-cfg.stim.durstim            = .150;                                         % time first order stimulus is shown on screen
-cfg.stim.durstim2           = .3; %was .3                                   % time stimulus is shown on screen for second view (if vis), 
-% % cfg.stim.durAdv             = 1.5;                                         % time advice is shown on screen
+
+cfg.stim.durstim                = .3;%
+% cfg.stim.durstim2           = .3; %was .3                                   % time stimulus is shown on screen for second view (if vis), 
+
 
 %interval timings:
 %segmenting 400ms for preperation fixation cross:
-cfg.stim.TW1               = 0;%.2; %,0.3;                                    % TW1= down-time before 'getready' indicated by large fix cross
-cfg.stim.TW2               = .2; %0.4;                                        % TW2= 'get ready' indicator pre stim presentation.
+cfg.stim.TW1               = .2;                                    % TW1= down-time before 'getready' indicated by large fix cross
+cfg.stim.TW2               = .2;                                         % TW2= 'get ready' indicator pre stim presentation.
 
 %long wait between stim/response presentations.
-cfg.stim.TW3               = .4;% 0.2;                                        % TW3= time after Stim before response/next presentation (small fix cross).
+cfg.stim.TW3               = 1;% 0.2;                                        % TW3= time after Stim before response/next presentation (small fix cross).
 
 %NB; in expA, time between response and next stim= TW3+(TW1+TW2);
 
-% feedback?
-cfg.stim.beep               = sin(2*pi*[0:1/44100:.1]*1000);               % error tone
-cfg.stim.beep2              = sin(pi*[0:1/44100:.1]*1000);                 % finish tone
-cfg.stim.beeprate           = 22254;                                       % error tone rate
-cfg.stim.beepvolume         = .5;                                          % error tone volume
+%% feedback?
+cfg.auddur                  =0.1; 
+cfg.tonegap                 = 0.1; %seconds, gap between tones to be discriminated
+cfg.audrate                 = 44100;
+cfg.stim.beepvolume         = 1;                                          % error tone volume
+
+%% configure STAIRCASE parameters (using Palamedes toolbox).
+cfg.stepDown_partA             = 4; % 4 incorrect before stim change = 84% accuracy 
+cfg.stepDown_partB           = 2; %harder difficulty ~71%, encourage see-again choices.
+%Set up up/down procedure:
+up      = 1;                       % increase difficulty after 'up' correct
+down    = cfg.stepDown_partA;      % decrease after incorrect.
+
+%Note that this just initializes (70% accuracy)
+% the 'down' value above will be updated based on experiment type, as
+%different accuracy levels are requested.
+
+StepSizeDown = 5;        % 
+StepSizeUp =   5;          %  step size (ndots)
+stopcriterion = 'trials';   %
+stoprule = 10;             % Updated based on ntrials per experiment.
+startvalue = 15;           % difference between dot boxes
+xmax= 199;
+xmin=1; 
+
+% prep Palamedes structure
+UD = PAL_AMUD_setupUD('up',up,'down',down);
+UD = PAL_AMUD_setupUD(UD,'StepSizeDown',StepSizeDown,'StepSizeUp', ...
+    StepSizeUp,'stopcriterion',stopcriterion,'stoprule',stoprule, ...
+    'startvalue',startvalue,'xMax', xmax, 'xMin', xmin);
+% 
+% %Determine and display targetd proportion correct based on above params:
+targetP = (StepSizeUp./(StepSizeUp+StepSizeDown)).^(1./down);
+message = sprintf('\rTargeted proportion correct: %6.4f',targetP);
+disp(message);
+
+%%
+%note that to start experiment, we need to convert this log unit diff into
+%dots difference (or Hz).
+%natural log units can be converted to percentage change using the formula:
+% e.g. if initial dot difference is 175 vs 225
+% percntDiff = log(225)-log(175);
+
+
+
+cfg.initialstimDifference    = startvalue; % staircase initialization (both!)
+
 
 %% configure audio masks for discrimination:
 cfg.useAuditorymasks=0;                     % change to 1 for masking auditory tone in white noise. (different aud. task). Otherwise uses pitch discrimination
-
-
-
 aud_samprate=44100;
 
 if cfg.useAuditorymasks==1    % make noise maskers. cf. Zakrzewski et al., Brain & Cognition, 2019
@@ -84,9 +122,6 @@ end
 
 
 
-% define the grid for the placement of the dots:
-cfg.xymatrix = [repmat(linspace(-57,57,20),1,20);...
-    sort(repmat(linspace(-57,57,20),1,20))]; 
 
 % instructions on screen
 cfg.instr.cjtext        = {'50%' '60%' '70%' '80%' '90%' '100%'};           % confidence judgement text
@@ -96,13 +131,15 @@ cfg.instr.instr = {'Left click with the mouse' '\n' 'Press spacebar to confirm r
 cfg.instr.finaldecision = {'What is your final decision?'};                 
 cfg.instr.interval      = {'LEFT' 'RIGHT'};
 
-cfg.instr.estimated_obsacc  = ...
-    {'Your baseline accuracy (before any advice) was 71%' ...
-    'What do you think this person''s accuracy was?' ...
-    'In the next screen you will be prompted to enter a value.' ...
-    'Press any button when you are ready.' ...
-    'Enter a number (using the keyboard upper digits) between 0 and 100 and press Enter: '};
-cfg.instr.groups        = [1 11 12 18 22];                                       % groupings of instruction slides
+
+% %% not in use
+% cfg.instr.estimated_obsacc  = ...
+%     {'Your baseline accuracy (before any advice) was 71%' ...
+%     'What do you think this person''s accuracy was?' ...
+%     'In the next screen you will be prompted to enter a value.' ...
+%     'Press any button when you are ready.' ...
+%     'Enter a number (using the keyboard upper digits) between 0 and 100 and press Enter: '};
+% cfg.instr.groups        = [1 11 12 18 22];                                       % groupings of instruction slides
 
 % save paths in cfg
 cfg.my_path                 = basedir; %prev. my_path;

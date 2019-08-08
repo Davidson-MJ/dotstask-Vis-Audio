@@ -34,7 +34,7 @@ end
 % rect = [cfg.bar.barrect' cfg.bar.gaprect'];
 %   Screen('FillRect', Sc.Number, [[1 1 1]' [1 1 1]'],rect);
 Screen('FillRect', Sc.Number, [.3 .3 .3], cfg.bar.barrect); % draw bar for response:
-Screen('FillRect', Sc.Number, [128 128 128], cfg.bar.gaprect); % draw gap on top of response bar
+Screen('FillRect', Sc.Number, [123 123 123], cfg.bar.gaprect); % draw gap on top of response bar
 Screen('TextFont', Sc.Number, 'Myriad Pro');
 
 end

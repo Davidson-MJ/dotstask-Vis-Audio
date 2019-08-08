@@ -37,6 +37,6 @@ imagesc(ntrials, [], X');
 set(gca,'ytick',1:length(fieldsare),'yticklabel',fieldsare, 'fontsize', 20);
 title('Experiment outline')
 xlabel('trial number')
-cd(
+
 
 end

@@ -1,7 +1,6 @@
 
-%% -- MD July 2019, adapting old code for new pilotting.
+%% -- MD July 2019, adapting old code for new scripts, using DVA:
 
-%need to change to dva if possible (i.e. pre-define values, based on screen res, and distance).
 
     cfg.bar.maxScale            = 55;
     cfg.bar.minScale            = -55;

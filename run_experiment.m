@@ -8,11 +8,11 @@
 % All participants then perform the alternate modality (vis or aud) in the 
 % second half.
 % In this second half, 75% of trials will have the option to see/hear the 
-% stimulus again. 25% are forced response (no option to see again).
+% stimulus again. 25% are forced respons e (no option to see again).
 
 % VisTask = dots (choose left/right)
 % AudTask = pitch discrimination (first/second tone higher pitch)
-
+ 
 %%%%%%%%%%%%%%%%%%%%%%%  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % June 2019 - MD      
 % - first pilot
@@ -25,11 +25,11 @@
 
 % expB= second half of exp : (n=420) [0.7 w/IS; 0.3 wResp now]
 % Trial structure:
-% [ + ],[ stim2a],[resp],[ + ] , [ISc], [ + ],[stim2b],[ + ],[resp] ; % onscreen, ISc=info seeking choice
-% [200],[   150 ],[ sp.],[400] , [sp.], [200],[  200 ],[400],[ sp ] ; % msec.
-% trial total ~ 3.5s,
-
-%%
+% [ + ],[ sti  m2a],[resp],[ + ] , [ISc], [ + ],[stim2b],[ + ],[resp] ; % onscreen, ISc=info seeking choice
+% [200],[   z15 0  ],[ sp.],[400] , [sp.], [200],[  200 ],[400],[ sp ] ; % msec.
+% trial total ~ 3.5s, 
+  
+%% 
 clear all; close all; clc;
 %% Experiment pre-requisites.
 %what type of experiment are w  e running?
@@ -39,7 +39,7 @@ clear all; close all; clc;
 % created, in create_subject_directory.
 
 % df_order=0;                                 % set to 1 for first PP, sets exp order.
-cfg.df_order='vA';
+cfg.df_order='aV';
 
 cfg.offscreen=0;                            % 0 = use builtin, 1=use external monitor.
 cfg.giveAudiofeedback=0;                    % change to 1 to provide beeps when correct/incorrect.

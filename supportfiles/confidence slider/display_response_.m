@@ -56,7 +56,7 @@ switch sign(cj)
 end
 
 % draw cursor only after first click
-if haschanged,
+if haschanged
     cursorrect = CenterRectOnPoint([0,0,cfg.bar.cursorwidth,cfg.bar.cursorheight],...
         positions(abs(cj)), ...
         window.Rect(4) .* cfg.bar.positiony);

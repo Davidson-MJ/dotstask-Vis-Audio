@@ -13,15 +13,15 @@ cfg.fontsize=20;
 %% INITIALIZE PsychToolBox.
 
 % select offscreen window if we can
-if offscreen==1
-scrnwin=max(Screen('Screens'));
+if cfg.offscreen==1
+    scrnwin=max(Screen('Screens'));
 else
     scrnwin=min(Screen('Screens'));
 end
 
 %note because we are on a MAC, need to skip synctests, PTB drivers are not
 %well supported for new releases.
-if isMac==1
+if strcmp(cfg.computer, 'MACI64')
      Screen('Preference', 'SkipSyncTests', 1);
 end
 
@@ -60,23 +60,21 @@ Screen('TextColor', window.Number , [255 255 255]);      % fontcolour
 %% define stimulus boxes
 define_boxes;
 
-%% define & create informtion typ@e choices boxes and images
-define_choices;
+%% define & create informtion type choices boxes and images
+% define_choices;
 
-%% define confidence scale
+
+%% define confidence scale (second half of exp).
 define_scale;
+
+%% define simple response boxes (Left/Right click)
+% used for first half of each experiment:
+define_mouseboxes;
 
 %% Set priority for script execution to realtime priority:
 priorityLevel=MaxPriority(window.Number);
 Priority(priorityLevel);
 cfg.startexp = GetSecs;
-
-%%  initialize dotdifference
-alltrials(1).dotdifference = cfg.initialDotDifference;
-alltrials(2).dotdifference = cfg.initialDotDifference;
-currentDotDiff(1:2) = cfg.initialDotDifference; %This will be updated if staircase is run
-currentDotCor(1:2) = 0; 
-
 
 
 %% -- prep AUDIO

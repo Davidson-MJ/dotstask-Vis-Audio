@@ -44,9 +44,9 @@ if ~exist([savedir  filesep 'DotsandAudio_behaviour'], 'dir')
     mkdir([savedir filesep 'DotsandAudio_behaviour']);
 end
 %make participants outpath.
-mkdir([[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName]]);
+mkdir([[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName filesep 'behaviour']]);
 
-ppantsavedir=[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName];
+ppantsavedir=[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName ];
 
 %% note that the experiment order (V-A or A-V) is predetermined.
 % 
