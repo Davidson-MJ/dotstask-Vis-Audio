@@ -1,4 +1,4 @@
-function [cfg] = draw_landmarks(Sc,cfg)
+function [cfg] = draw_landmarks(Sc,cfg, stimtype)
 % Usage: 
 % [] = draw_landmarks(Sc,cfg)
 % 
@@ -14,21 +14,30 @@ function [cfg] = draw_landmarks(Sc,cfg)
 %% ---- Updated MD July 2019 to accomodate new var names.
 
 %% define font and font size
-Screen('TextSize', Sc.Number, 13);
+Screen('TextSize',Sc.Number, cfg.fontsize);
 Screen('TextFont', Sc.Number, 'Myriad Pro');
+
+
+switch stimtype
+    case {'visual', 'VISUAL'}
+        instrsAR= {'LEFT', 'RIGHT'};        
+    case {'audio', 'AUDIO'}        
+        instrsAR= {'FIRST', 'SECOND'};
+        
+end
+            
+cfg.instr.interval = instrsAR;
 
 %% check for required fields
 if ~isfield(cfg,'instr')
     cfg.instr.cjtext = {'Certainly' 'Maybe'};
-    cfg.instr.interval = {'LEFT' 'RIGHT'};
+    cfg.instr.interval = instrsAR;
 end
-if ~isfield(cfg.instr,'cjtext')
-    cfg.instr.cjtext = {'Certainly' 'Maybe'};
-end
+
 if ~isfield(cfg.instr,'instr')
-    cfg.instr.interval = {'LEFT' 'RIGHT'};
+    cfg.instr.interval = instrsAR;
 end
-if ~isfield(cfg.instr, 'xshift'); % places along barrect to adapt cursor
+if ~isfield(cfg.instr, 'xshift') % places along barrect to adapt cursor
     cfg.instr.xshift = [linspace(cfg.bar.gaprect(1)-cfg.bar.cursorwidth.*.5,...
             cfg.bar.barrect(1)+cfg.bar.cursorwidth.*.5,length(cfg.instr.cjtext)) ...
         linspace(cfg.bar.gaprect(3)+cfg.bar.cursorwidth.*.5, ...

@@ -1,4 +1,4 @@
-function draw_simpleResponseinstructions(window,cfg)
+function draw_simpleResponseinstructions(window,cfg, stimtype)
 %Usage:
 
 % Simple text displayed on screen, below presentation of Dots (if
@@ -25,15 +25,17 @@ DrawFormattedText(window.Number, '(Mouse Click) \n Left/Right ', 'center', (wind
 %
 % 
 % Select appropriate text instr.
-if strcmp(cfg.stimTypes{1}, 'visual')
+switch stimtype
+    case {'visual', 'VISUAL'}
 %     %visual click instructions.
     %Left instructions.
     DrawFormattedText(window.Number, 'Left Box', window.Center(1)-cfg.MouseRect(3)*.75, window.Rect(4)*cfg.bar.positiony, [255,255,255]);
     DrawFormattedText(window.Number, 'Right Box', window.Center(1)+cfg.MouseRect(3)*.25, window.Rect(4)*cfg.bar.positiony, [255,255,255]);
     
-elseif strcmp(cfg.stimTypes{1}, 'audio')
+    case {'audio', 'AUDIO'}
     DrawFormattedText(window.Number, '1st Tone', window.Center(1)-cfg.MouseRect(3)*.75, window.Rect(4)*cfg.bar.positiony, [255,255,255]);
     DrawFormattedText(window.Number, '2nd Tone', window.Center(1)+cfg.MouseRect(3)*.25, window.Rect(4)*cfg.bar.positiony, [255,255,255]);    
+end
 end
 
 

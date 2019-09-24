@@ -15,9 +15,9 @@ function [] = add_responseinstr(Sc,cfg)
 % - - New font cfgs (size and colour).
 
 %% check required fields
-if ~isfield(cfg.instr,'instr')
-    cfg.instr.instr = {'Left click with the mouse \n Press spacebar to confirm response'};
-end
+% if ~isfield(cfg.instr,'instr')
+    cfg.instr.instr = {'Left click with the mouse \n \n Press spacebar to confirm response'};
+% end
 
 
 %% add response istructions

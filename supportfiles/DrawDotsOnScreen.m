@@ -4,32 +4,8 @@
 %
 %Run staircase  (Changes dot density difference).
 
+Run_staircase;
 
-
-if t > 2 % need two previous trials
-  %using PAL toolbox. update for previous responses.        
-    response = alltrials(t-1).cor;
-    UD = PAL_AMUD_updateUD(UD, response); %update UD structure
-    
-    %we have the new difference in log units.
-    % convert to ndots:
-    %
-alltrials(t).stimdifference = UD.xCurrent;
-
-%     previous accuracy (trials 2 back) [ logical]
-% currentDotCor = [alltrials(t-2).cor,alltrials(t-1).cor];    
-% prevvalues =  [alltrials(t-2).dotdifference, alltrials(t-1).dotdifference]; 
-%     
-% desiredDifficulty =1;
-% 
-% alltrials(t).dotdifference = staircase(currentDotCor, 'value', prevvalues, 'ratio', desiredDifficulty, 'stepsize', cfg.stepsinLog);
-%         
-%     % keep track of current and previous dot differences.
-%         currentDotDiff = [currentDotDiff(1), alltrials(t).dotdifference];
-
-else 
-    alltrials(t).stimdifference = cfg.initialstimDifference;
-end
 
 %determine dot difference based on PAL output.
 % dDiff = UD.xCurrent*200;

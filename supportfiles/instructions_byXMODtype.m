@@ -21,7 +21,7 @@ switch setlist
     case 3
         instructions_folder = ['instructions' filesep 'auditorytask no infoseeking instructions'];        
     case 4
-        instructions_folder = ['instructions' filesep 'Visualtask with infoseeking instructions'];
+        instructions_folder = ['instructions' filesep 'visualtask with infoseeking instructions'];
         
 end
 
@@ -43,7 +43,7 @@ while r<= length(allinstr)
     WaitSecs(.25);
     %wait for response (allows backtracking)
     
-      [responded tilde code] = collect_response(cfg,inf);
+      [~,~, code] = collect_response(cfg,inf);
     
     switch code
         case 'LeftArrow'

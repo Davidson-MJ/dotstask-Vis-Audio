@@ -10,22 +10,27 @@ Screen('TextSize',window.Number, cfg.fontsize*2);
 %expA = simple respponse, speeded.
 %expB = confidence slider.
 
-if strcmp(alltrials(t).ExpType, 'A')
+
+%otherwise defined in earlier sections of trials.
+if strcmp(trialpos, 'A')
 
 %draws instructions only (Left click or right click).
    
-draw_simpleResponseinstructions(window, cfg);
+draw_simpleResponseinstructions(window, cfg, stimtype);
     
 
 
-elseif strcmp(alltrials(t).ExpType, 'B')
+elseif strcmp(trialpos, 'B')
     
-% second half experiment, present confdidence slider response screen.
+% second half experiment, present confdidence slider response screen.    
+
+
+
 % draw scale
 draw_scale_(window,cfg);
 
 % draw confidence and interval landmarks
-draw_landmarks(window,cfg);
+draw_landmarks(window,cfg, stimtype);
 
 % add response instructions
 add_responseinstr(window,cfg);

@@ -1,19 +1,8 @@
 % FillAudiointoBuffer
 
 
-if t > 2 % need two previous trials
-    %using PAL toolbox. update for previous responses.
-    response = alltrials(t-1).cor;
-    UD = PAL_AMUD_updateUD(UD, response); %update UD structure
-    
-    %we have the new difference in log units.
-    % convert to ndots:
-    %
-    alltrials(t).stimdifference = UD.xCurrent;
-    
-else
-    alltrials(t).stimdifference = cfg.intialstimDifference;
-end
+
+Run_staircase;
 
 %Following Ais et al., Cognition, 2016:
 %first tone randomly selected between 300-700 Hz. Different to second tone
@@ -23,7 +12,14 @@ firstHz = randi([300, 700], 1);
 lowtone               = firstHz;
 lowtoneplay            = sin(2*pi*[0:1/cfg.audrate:cfg.auddur]*lowtone);
 
-hightone              = firstHz + alltrials(t).stimdifference;
+%note that the ratio difference between two frequencies determines pitch
+%discrimination. therefore 150 Hz difference is not always equivalent. 
+
+%.:. we need to convert our staircase difference (in Hz), to a ratio of the
+%first frequency:
+hightone = lowtone * (1 + alltrials(t).stimdifference/100);
+% hightone              = firstHz + alltrials(t).stimdifference;
+
 hightoneplay          = sin(2*pi*[0:1/cfg.audrate :cfg.auddur]*hightone);
 
 

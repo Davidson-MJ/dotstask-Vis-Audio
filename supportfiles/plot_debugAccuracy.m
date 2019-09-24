@@ -8,7 +8,7 @@ ntrials = t-1;
 responses = [alltrials(1:ntrials).cor];
 trialID= 1:ntrials;
 
-if alltrials(t).stimtype(1)
+
 accuracyTIME = cumsum(responses)./trialID;
 
 %% plotting:

@@ -1,15 +1,33 @@
 %cycle through first practice trials, then all experimental trials
 
-%listen for pause or quit keys:
+% in case debugging or restart, allow 2s for first trial, as well as
+% initialize relevant PTB dependencies:
 
-ListenChar(2); %suppresses output to matlab windows.
 
-for  t  =  starttrial : length(alltrials)
+
+if cfg.debugging==1
+    whentoFlip_NEW=GetSecs+2;
+     Initialize PsychSound
+     cfg.pahandle = PsychPortAudio('Open', [], [], 0, [], 2);
+end
+
+   %--- Get the          KbQueue up and running, to monitor for escape keys.
+    KbQueueCreate();
+    KbQueueStart();
+      
+    %partBstart = trial index at start of practice for part B (IS with
+    %confidence).
     
-  
+for  t  = 1:length(alltrials) 
+    
+    
+   %flush    previously held keys:
+    KbReleaseWait();
+    KbQueueFlush([],3); % reset key-event buffer;
+    
     %% if first trial in practice
-    if alltrials(t).trialid== .01 
-    
+    if alltrials(t).trialid== .01
+        
         % if auditory stimui are needed, open psychport audio once (now).
         if strcmp(alltrials(t).stimtype, 'audio') ||  strcmp(alltrials(t).stimtype, 'AUDIO')
             InitializePsychSound
@@ -18,114 +36,92 @@ for  t  =  starttrial : length(alltrials)
         
         
         %% Play correct instructions per experiment type.
-        instructions_byXMODtype(window, cfg, alltrials(t).xmodtype)
-        
+        instructions_byXMODtype(window, cfg, alltrials(t).xmodtype)        
         time = GetSecs;
         whentoFlip_NEW = time+2;
         
     end
     
     %% Restart staircase if Exp Part B. Define stop trial when staircase
-    %should end.
+    %should end, as end of staircase length.
     updateStaircase_trialstart;
     
     %% experimenter output (Show details of previous trial)
     if t > 1
-        commandwindowOUTPUT
+        try
+        commandwindowOUTPUT        
+        end
     end
     %% save and break if between blocks:
-    if alltrials(t).break
+    if alltrials(t).break>0
         tempSave_and_BreakInstructions;
+        
+        %send trigger code to EEG for block begin:        
+        % Trigger
+        if cfg.EEG==1
+            %     io64(params.ioObj,params.port,iblock); % 1 = Start of block
+        end
+        
     end
     
-    %     %% feedback
-    %     if alltrials(t).feedback % give feedback only between blocks;
-    %         feedback_interblock;
-    %     end
-    
-    
+  
     
     %% Run through locked stimulus sequence for first half of presentation
     %note that this sequence will be either visual/auditory, with only first
     % order discrimination.
+    trialpos = 'A';
+    stimtype = alltrials(t).stimtype; 
     
-    Trial_sequence_partA;
     
-    
+    Trial_sequence_partA; %includes practice trials
+     
+   
     %% For first half of blocks, no option to see again.
     % otherwise, present option to see again (when relevant).
     if  strcmp(alltrials(t).ExpType, 'B')
+               
+        % update trial   pos to throw correct instructions/stim timing.
+            trialpos= 'B';
         
-        %come back to this code.
-        error('code unfinished')
+        % now we will either  see again, or respond immediately with
+        % confidence: 
+        
         Trial_Loop_Seeagain_opt;
+    else
         
         
-        [alltrials(t).cj1, ...
-            alltrials(t).resp1_t, ...
-            alltrials(t).int1, ...
-            alltrials(t).responded1] = drag_slider(window,cfg);
-        %          %% second decision
-        %             [alltrials(t).cj2, alltrials(t).resp2_t, alltrials(t).int2, alltrials(t).responded2] = ...
-        %                 drag_slider(window,cfg,alltrials(t).cj1);
-        %
-        %             % define accuracy
-        %             alltrials(t).cor2 = alltrials(t).int2 == alltrials(t).whereTrue;
-        %             % define reaction times
-        %             if alltrials(t).adviceTrial == 1
-        %                 alltrials(t).rt2 = alltrials(t).resp2_t - alltrials(t).offsetAdvice;
-        %             elseif alltrials(t).adviceTrial == 0
-        %                 alltrials(t).rt2 = alltrials(t).resp2_t - alltrials(t).offsetstim2;
-        %             end
-        %             time = alltrials(t).resp2_t;
-        
-        
-        
-    end
-    
-    
-    %Save data from this trial.
-    
-    %% %%%%%%%%%% PRESENTATION END < store data.
-    
-    %     %% compute timing variables
-    %     %actual stimulus presentation:
-    %     alltrials(t).act_stimdur       = alltrials(t).offsetstim - alltrials(t).onsetstim;
-    % %
-    % %     if t>1
-    % %         alltrials(t-1).RSI2        = alltrials(t).onsetstim - alltrials(t-1).resp2_t;
-    % %     end
-    % %
-    %
-    %     if strcmp(alltrials(t).SeeAgainOpt, 'y') % if stim presented again.
-    %
-    %         alltrials(t).RSI1          = NaN;
-    %         alltrials(t).act_stimdur2  = alltrials(t).offsetstim2 - alltrials(t).onsetstim2;  %stim2 duration
-    %         %time between info choice and confidence
-    %
-    %     end
-    
-    %% closescreen buffers
-    Screen('Close');
-    
-    % error feedback, but only on practice trials
-    if alltrials(t).blockcount<1
-        if (alltrials(t).cor == 0 || isnan(alltrials(t).cor))
-            %             pahandle = PsychPortAudio('Open', [], [], 0, [], 2);
-            %             PsychPortAudio('FillBuffer', pahandle, ...
-            %                 repmat(cfg.stim.beep.*cfg.stim.beepvolume,2,1));
-            %             PsychPortAudio('Start', pahandle, 1, 0, 1);
-            %             PsychPortAudio('Close',pahandle);
+        %%%%%%%%%%%%%%%% Determine whether audio feedback should be given
+        %%%%%%%%%%%%%%%% (within-trial).
+        if cfg.giveAudioFeedback==1 % feedback throughout experiment (every trial).
+            if (alltrials(t).cor == 0 || isnan(alltrials(t).cor))
+                %play matlab error beep
+                beep
+            end
             
-            %play matlab error beep
-            beep
-            %%
+        elseif alltrials(t).blockcount<1 && cfg.giveAudioFeedback==1
+           %provide feedback if practice trials
+        % error feedback, but only on practice trials     
+         if (alltrials(t).cor == 0 || isnan(alltrials(t).cor))
+                
+                %play matlab error beep(?)                                
+                beep
+                
+         end
         end
     end
     
-    %check to see if   quit keys have been pressed
-%     keyspressed = GetChar;
     
+    %% closescreen buffers
+    Screen('Close');
+      
+    %Check if escape key has been pressed
+   %Flush previously stored keys (avoids buffer overflow), and begin
+    %collecting keys incase of user input to quit.
    
-    
+    [~,pressedTiVec] = KbQueueCheck();
+    if pressedTiVec(cfg.response.escape)
+    % user quit, run escape protocol (saves, displays instructions).
+     escape_protocol
+     break
+    end
 end

@@ -7,8 +7,6 @@
 % number of trials definition
 cfg.allblockTypes              = [1,2,3,4];  %1 = Vis(noIS), Aud(IS), Aud(noUS), VIS(w/IS);
 
-
-
 %type of Experiment we are running:
 if strcmp(cfg.df_order,'vA')
     cfg.stimTypes={['visual'],['AUDIO']};
@@ -19,11 +17,11 @@ else
 end
 
 % practice blocks cfgs
-cfg.ntrialsprac             = 10;
+cfg.ntrialsprac             = 30;
 cfg.nblocksprac             = 3;
 
 % experimental blocks cfg
-cfg.ntrials                 = 60 ; % per block;
+cfg.ntrials                 = 60 ; % 60 per block;
 cfg.nblocks_partA           = 5; 
 cfg.nblocks_partB           = 7; 
 cfg.SeeAgain_proportion     =.7; % on how many trials should the 'see-again' response be available for partB?
@@ -31,7 +29,7 @@ cfg.ntotalblocks            = cfg.nblocksprac*2 + cfg.nblocks_partA + cfg.nblock
 
 N_alltrials = cfg.ntrialsprac*cfg.nblocksprac*2 + ... %prac blocks
                     cfg.ntrials*cfg.nblocks_partA + ... % part A (no InfoSeeking)
-                    cfg.ntrials*cfg.nblocks_partB ; % part B (w InfoSeeking)
+                    cfg.ntrials*cfg.nblocks_partB ; % part B (w/ InfoSeeking)
                 
 %% -  - Begin Experiment build.
 %% Build  practice trials first.
@@ -54,6 +52,7 @@ wheretrue_vec = [ones(1, cfg.ntrialsprac*.5), ones(1, cfg.ntrialsprac*.5)+1];
 %1 = left side / first tone, 2 = right side/second tone.
 
 %% build both series of practice blocks
+
 for iEXP=1:2 % for first then second type. (partA vs partB).
     %begin counter;
     trialid= 1;
@@ -84,6 +83,7 @@ for iEXP=1:2 % for first then second type. (partA vs partB).
   
             if itrial==1 
                 block_trialsPRAC(itrial).break                = true; %break after last trial of each block. 
+                
             else
                 block_trialsPRAC(itrial).break                = false; %continue otherwise
             end
@@ -136,11 +136,16 @@ expBtrials= [seeQ, rQ];
 wheretrue_vecA = [ones(1, cfg.ntrials*.5), ones(1, cfg.ntrials*.5)+1]; 
 
 
-% for part B to keep even numbers of each, define separately for the each case.
+% for part B to keep even numbers of each, define separately for the see again/ respond case.
 ntrialsSeeagain= length(seeQ);
-%need to distribute for both see again, AND respond now types.
-wheretrue_vecSeeagain = [ones(1, ntrialsSeeagain*.5), ones(1, ntrialsSeeagain*.5)+1]; 
-wheretrue_vecRespnow = [ones(1, (cfg.ntrials-ntrialsSeeagain)*.5), ones(1, (cfg.ntrials-ntrialsSeeagain)*.5)+1]; 
+
+%need to distribute 'wheretrue' class equally for both see again, AND respond now types:
+halfsee_trials = ceil(ntrialsSeeagain*.5);
+halfresp_trials = ceil((cfg.ntrials -ntrialsSeeagain)*.5);
+
+wheretrue_vecSeeagain = [ones(1, halfsee_trials), ones(1,halfsee_trials)+1]; 
+
+wheretrue_vecRespnow = [ones(1, halfresp_trials), ones(1, halfresp_trials)+1]; 
 
 %now we can pull from correct vector to ensure equal distribution of 'true'
 %response locations.
@@ -238,8 +243,11 @@ end
 
 
 % combine all practice and experimental blocks.
-
 alltrials = [practiceblocks_A, experimentalblocks_A, practiceblocks_B, experimentalblocks_B];
+
+%Index if debugging and want to jump straight to second half:
+partBstart = length(practiceblocks_A)+ length(experimentalblocks_A);
+
 %sanity checks:
 if length(alltrials)~=N_alltrials
     error('check code: ntrial count incorrect')
@@ -260,11 +268,16 @@ end
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % in case experiment was restarted after crash
-if (subject.restart)
+ if (subject.restart)
     [filename, pathname] = uigetfile('*.mat', 'Pick last saved file ');
     load([pathname filename]);
-    starttrial = itrial;
-    cfg.restarted = 1;
+    % prompt dubject info
+
+prompt = {'Restart at trial:'};
+starttrial_r = inputdlg(prompt);
+starttrial = str2num(cell2mat(starttrial_r));
+
+cfg.restarted = 1;
 else
     starttrial=1;
 end

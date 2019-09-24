@@ -7,11 +7,10 @@ close all
 %% Stimulus (Screen) variables
 
 cfg.backgroundColour = [123,123,123];           % grey
-cfg.fontsize=20;
+cfg.fontsize=32;
 
 
-%% INITIALIZE PsychToolBox.
-
+%% INITIALIZE PsychToolBox
 % select offscreen window if we can
 if cfg.offscreen==1
     scrnwin=max(Screen('Screens'));

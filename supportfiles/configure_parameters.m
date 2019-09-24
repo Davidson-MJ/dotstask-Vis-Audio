@@ -2,11 +2,11 @@
 % Reseed the random-number generator for each expt.
 cfg.resetrn                 = rng('shuffle');
 cfg.computer                = computer;
-% cfg.scripts                 = getscripts(); % save scripts in cfg;
-%-- Input device
+
+%-- Configure Input keys for current device
 cfg.response.until_release  = 1;
-cfg.response.escape         = 'ESCAPE';
-cfg.response.pause          = 'p';
+cfg.response.escape         = KbName('ESCAPE');
+cfg.response.pause          = KbName('p');
 
 %% default
 if ~isfield(cfg,'port'),            cfg.port = 'keyboard';end
@@ -18,33 +18,37 @@ if ~isfield(cfg,'restarted'),       cfg.restarted = false;end
 
 %% Stimulus variables
 
+cfg.useInfoSeeking_or_Advice=1;             % change to 1 to include 'see again' as the option, 2 for advice from an agent (2 unfinished).
+
 % stimulus variables
-cfg.stim.respduration           = 1.500;                                       % timeout for primary task
-
-
-cfg.stim.durstim                = .3;%
-% cfg.stim.durstim2           = .3; %was .3                                   % time stimulus is shown on screen for second view (if vis), 
-
+cfg.stim.durstim                = .3;                                       % presentation time of sensory stimuli.
+cfg.stim.respduration           = 1 ;                                    % timeout for primary task (only first half of exp.)
 
 %interval timings:
 %segmenting 400ms for preperation fixation cross:
-cfg.stim.TW1               = .2;                                    % TW1= down-time before 'getready' indicated by large fix cross
-cfg.stim.TW2               = .2;                                         % TW2= 'get ready' indicator pre stim presentation.
+cfg.stim.TW1               = .4;                                    % TW1= down-time before 'getready' indicated by large fix cross
+% cfg.stim.TW2               = .2;
+% % TW2= 'get ready' indicator pre stim presentation. not in use
 
-%long wait between stim/response presentations.
-cfg.stim.TW3               = 1;% 0.2;                                        % TW3= time after Stim before response/next presentation (small fix cross).
+%long wait between stim/response presentations, for decoding.
+cfg.stim.TW3               = .8;% 0.2;                                        % TW3= time after Stim before response/next presentation (small fix cross).
 
-%NB; in expA, time between response and next stim= TW3+(TW1+TW2);
+
 
 %% feedback?
+cfg.dispFeedback_stats      =0;  % change to 1 to give audio feedback, and hard feedback (stats between blocks)
+cfg.giveAudioFeedback       =0;  %1 will provide trial level feedback during practice.
+
 cfg.auddur                  =0.1; 
 cfg.tonegap                 = 0.1; %seconds, gap between tones to be discriminated
 cfg.audrate                 = 44100;
 cfg.stim.beepvolume         = 1;                                          % error tone volume
 
+
+
 %% configure STAIRCASE parameters (using Palamedes toolbox).
 cfg.stepDown_partA             = 4; % 4 incorrect before stim change = 84% accuracy 
-cfg.stepDown_partB           = 2; %harder difficulty ~71%, encourage see-again choices.
+cfg.stepDown_partB            = 2; %harder difficulty ~71%, encourage see-again choices.
 %Set up up/down procedure:
 up      = 1;                       % increase difficulty after 'up' correct
 down    = cfg.stepDown_partA;      % decrease after incorrect.
@@ -53,12 +57,12 @@ down    = cfg.stepDown_partA;      % decrease after incorrect.
 % the 'down' value above will be updated based on experiment type, as
 %different accuracy levels are requested.
 
-StepSizeDown = 5;        % 
-StepSizeUp =   5;          %  step size (ndots)
+StepSizeDown = 2;        % 
+StepSizeUp =   2;          %  step size (ndots), Hzratio(85%, 90% increment etc).
 stopcriterion = 'trials';   %
-stoprule = 10;             % Updated based on ntrials per experiment.
-startvalue = 15;           % difference between dot boxes
-xmax= 199;
+stoprule = NaN;             % Updated based on ntrials per experiment, see 'updateStaircase_trialstart.m'
+startvalue = 50;           % difference between dot boxes/ Hz, start easy.
+xmax= 100;                 % difference bound
 xmin=1; 
 
 % prep Palamedes structure

@@ -3,7 +3,8 @@
 % displays stimuli in sequence after waiting the correct amount of time
 % between each flip interval.
 
-
+%% for partA, we want left / right click, so hide the cursor.
+HideCursor
 
 %% -- INTERVAL 1a --  small fixation cross on screen 
     % this is displayed for cfg.stim.TW1, indicating start of a trial.
@@ -13,7 +14,7 @@
     
     %Note that whentoFlip_NEW is defined by previous trial.
     
-    draw_static_largeFix; % draw fix cross and response options
+    draw_static; % draw fix cross and response options
     
 % - - Flip to show small FIX CROSS: 
     % collect trial start time (in VBL stamps). Note that first output is
@@ -28,24 +29,25 @@
 % - - Fill buffer
  % note that this flip needs to be appropriate time after first fix
     % cross   
-    
-    whentoFlip = flipestimate + cfg.stim.TW1;  %% if small cross has been on for long enough  
-        
-    draw_static_largeFix;     
-    
-    %flip screen to show larget fixation cross, and record flip intervals.   
-% - - Flip  
-    %flip to show large cross (once time elapsed).    
-    [alltrials(t).VBLtime_largeFix, flipestimate,...
-       alltrials(t).time_largeFix,...
-       alltrials(t).flip_accuracy_largeFix] = Screen('Flip', window.Number, ...
-        whentoFlip);       
+%     
+%     whentoFlip = flipestimate + cfg.stim.TW1;  %% if small cross has been on for long enough  
+%         
+%     draw_static_largeFix;     
+%     
+%     %flip screen to show larget fixation cross, and record flip intervals.   
+% % - - Flip  
+%     %flip to show large cross (once time elapsed).    
+%     [alltrials(t).VBLtime_largeFix, flipestimate,...
+%        alltrials(t).time_largeFix,...
+%        alltrials(t).flip_accuracy_largeFix] = Screen('Flip', window.Number, ...
+%         whentoFlip);       
 %%   
 %% STIMULUS PRESENTATION     
 % - - Fill buffer    
     %prep small cross for next interval
-    whentoFlip = flipestimate + cfg.stim.TW2; %if large fix cross has been up long enough
+%     whentoFlip = flipestimate + cfg.stim.TW2; %if large fix cross has been up long enough
     
+whentoFlip = flipestimate +cfg.stim.TW1; %increased length to avoid large fix cross
     
     
     %% depending on STIMULUS category, present either dots or tones:
@@ -56,7 +58,7 @@
             %draw dots on screen, leave there for cfg.durstim.
             
             DrawDotsOnScreen;    % draw dots
-            draw_static_largeFix;% draw response options.
+            draw_static;         % draw response options.
             
             % Show stimulus on screen at next possible display refresh cycle,
             % and record stimulus onset time in 'onsetstim':
@@ -72,11 +74,11 @@
             % determine audio tones based on staircasing:
             FillAudiointoBuffer;
             
-            
+            alltrials(t).time_stim1pres = whentoFlip;            
             %present AUDIO tones, require response after cfg.durstim.            
-          alltrials(t).time_stim1pres=  PsychPortAudio('Start', cfg.pahandle, 1, whentoFlip);
+            alltrials(t).flip_accuracy_stim1pres=  PsychPortAudio('Start', cfg.pahandle, 1, whentoFlip);
 
-            flipestimate=alltrials(t).time_stim1pres;
+            
             
     end
  %% Remove stimulus to show only response screen and instructions.
@@ -92,35 +94,27 @@
     
     
 % - - Flip
- [alltrials(t).VBLtime_stim1offset, flipestimate,... 
+ [alltrials(t).VBLtime_stim1offset, ~,... 
      alltrials(t).time_stim1offset, ...
      alltrials(t).flip_accuracy_stim1offset] =  Screen('Flip', window.Number, whentoFlip);
     
 %% %% COLLECT timing of RESPONSE, also show on screen
   
+    draw_static % redraw boxes, to avoid visual change on screen with mouse click.
+    
         [~, ...
         alltrials(t).resp1_time, ...
         alltrials(t).resp1_loc, ... % left or right
-        alltrials(t).didrespond] = fill_mouseboxes(window,cfg, alltrials(t).time_stim1offset);
+        alltrials(t).didrespond] = fill_mouseboxes(window,cfg, alltrials(t).time_stim1offset, stimtype,trialpos);
    
-    
-    %if timed-out:
-    if isempty(alltrials(t).didrespond)
-        alltrials(t).resp1_time    = NaN;
-        alltrials(t).resp1_loc     = NaN;
-       
-        alltrials(t).cor           = NaN;
-        alltrials(t).rt            = NaN;
-    
-    else %store accuracy and reaction time:
-    
+  
     % define reaction time (resp - time previous screen flip executed).
         alltrials(t).rt = alltrials(t).resp1_time- alltrials(t).time_stim1offset;
-    %define accuracy by location    
+    % define accuracy by location    
         alltrials(t).cor=  alltrials(t).resp1_loc == alltrials(t).whereTrue;        
-    end
-    
-           
+      
+        %note that the staircase update
+        
     %% revert to small fix cross: 
     
  
@@ -147,14 +141,6 @@
     % begin trial sequence B.
     
     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %                    STORE DATA from this sequence:
-    
-     %% compute timing variables
-     %actual stimulus presentation:
-%         alltrials(t).act_stimdur       = alltrials(t).offsetstim - alltrials(t).onsetstim;
-    
-    
-    
+ 
     
   

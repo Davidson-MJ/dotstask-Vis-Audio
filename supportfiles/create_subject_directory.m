@@ -19,7 +19,7 @@ subject.screen      = 0;
 cfg.debugging       =0;
 
 % testing mode
-if isempty(subject.id) || isempty(subject.restart)
+if isempty(subject.id) 
     warning('TESTING MODE');
     subject.male            = NaN;
     subject.age             = NaN;
@@ -27,9 +27,7 @@ if isempty(subject.id) || isempty(subject.restart)
     subject.screen          = 0; % small size screen:1
     subject.name            = 'test';
     subject.id              = 999;
-    subject.restart         = 0;
-    
-    cfg.debugging           =1; % for PTB window.
+            
 end
 if isempty(subject.name)
     subject.name = 'test';
@@ -50,19 +48,36 @@ ppantsavedir=[savedir filesep 'DotsandAudio_behaviour' filesep subject.fileName 
 
 %% note that the experiment order (V-A or A-V) is predetermined.
 % 
-% while ~df_order
-%     % randomize participant trial types
-%     % 1= V-A; 2= A-V
-%     randExpOrder=randi(2,1,26);
-%     
-%     %break when even numbers    
-%     if length(randExpOrder(randExpOrder==1))>12
-%         df_order=1;
-%         dt=date;
-%         save(['ExperimentOrder set ' date], 'randExpOrder')
-%         break
-%     end
-%     
-% end
-%    
+% try to load a previously generated experiment order:
+expfile = dir([pwd filesep  'ExperimentOrder*']);
+try load(expfile(1).name, 'randExpOrder')
+catch
+    %first ppant. so generate block design   
+    while ~exist('df_order', 'var')
+        % randomize participant trial types
+        % 1= V-A; 2= A-V
+        randExpOrder=randi(2,1,32);
+        
+        %break when even numbers
+        if length(randExpOrder(randExpOrder==1))>12
+            df_order=1;
+            dt=date;
+            save(['ExperimentOrder set ' date], 'randExpOrder')
+            break
+        end
+        
+        %set experiment type:
+        if subject.id < 999 % i.e. if not debugging.
+            %change experiment based on subject order
+            switch randExpOrder(subject.id)
+                case 1
+                    cfg.df_order='vA'; % visual - then audio
+                    
+                case 2
+                    cfg.df_order='aV' ;% audio- then visual discrimination
+            end
+        end
+        
+    end
+end
     

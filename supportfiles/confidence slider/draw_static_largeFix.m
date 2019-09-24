@@ -9,23 +9,20 @@ add_fixation;
 % Screen('TextStyle', window.Number, 0);
 Screen('TextSize', window.Number, cfg.fontsize*2);
 
-if strcmp(alltrials(t).ExpType, 'A')
+if strcmp(trialpos, 'A')
 
-%draws instructions only (Left click or right click).
-   
-draw_simpleResponseinstructions(window, cfg);
-    
-
-
-elseif strcmp(alltrials(t).ExpType, 'B')
+% draws instructions only (Left click or right click). 
+draw_simpleResponseinstructions(window, cfg, stimtype);
+elseif strcmp(trialpos, 'B')
     
 % second half experiment, present confdidence slider response screen.
 % draw scale
 draw_scale_(window,cfg);
 
 % draw confidence and interval landmarks
-draw_landmarks(window,cfg);
+draw_landmarks(window,cfg, stimtype);
 
 % add response instructions
 add_responseinstr(window,cfg);
+
 end

@@ -1,4 +1,4 @@
-function [ft] = display_response(window,cfg,temp,varargin)
+function [ft] = display_response_(window,cfg,temp,stimtype)
 % Usage:
 % [ft] = display_response(Sc,cfg,temp [,cj1])
 %
@@ -7,23 +7,29 @@ function [ft] = display_response(window,cfg,temp,varargin)
 % cfg: cfg strucure
 % temp: vector containing haschanged boolean and current confidence 
 %       judgement
-% cj1: first confidece judgement if one is available
-% 
 
-if nargin < 4, 
+% 
+% 
+% if nargin < 4
     show_cj1    = false; 
-else
-    show_cj1    = true;
-    cj1         = varargin{1};
-    int1        = sign(cj1);
-end
+% else
+%     show_cj1    = true;
+%     cj1         = varargin{1};
+%     int1        = sign(cj1);
+% end
 gs = round(cfg.bar.gap_size/2);
 [haschanged,cj] = deal(temp(1),temp(2));
 fdTxt = cfg.instr.finaldecision{1};
 
 %% display response
 % draw static elements
-draw_static
+
+% draw scale
+draw_scale_(window,cfg);
+% draw confidence and interval landmarks
+draw_landmarks(window,cfg, stimtype);
+% add response instructions
+add_responseinstr(window,cfg);
 
 % display previous confidence
 if show_cj1
