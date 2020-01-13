@@ -41,9 +41,9 @@ clear all; close all; clc;
 %if debugging, set here:
 cfg.df_order='aV';                           % which t   ype o f experiment?
                                              %visual-audio, or audio-visual order. Note that this is overridden in
-                                              %create_subject_directory for real experiment.
+                                            %create_subject_directory for real experiment.
 
-cfg.offscreen=0;                            % 0 = use builtin, 1=use external monitor.
+cfg.offscreen=1;                            % 0 = use builtin, 1=use external monitor.
 
 %% set up load/save directories:
 setup_directories;                          % first determines if mac(laptop) or experimental PC (A Watts bldg). 
