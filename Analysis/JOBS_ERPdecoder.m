@@ -20,14 +20,14 @@ job.plot_A_vs_Untrainedtrials= 0;       %  PFX_ Plots the results of discrim com
 job.plot_A_vs_Untrainedtrials_GFX= 0;    %  GFX_ of above
 
 
-job.plot_A_vs_RTtercile =1; % see if classifier accuracy in A, is affected by RT (implying capture of confidence).
+job.plot_A_vs_RTtercile =0; % see if classifier accuracy in A, is affected by RT (implying capture of confidence).
 
 
 %plot results from classifier trained on part B of exp, on predicting
 %confidence.
-job.plot_A_vs_RTsinA =0;
+job.plot_A_vs_RTsinA =1;
 
-job.plot_A_vs_Confidence_corr=1;  % using the A vector, multiple part B ERP, and see check performance correlation with confidence over time..
+job.plot_A_vs_Confidence_corr=0;  % using the A vector, multiple part B ERP, and see check performance correlation with confidence over time..
 job.plot_A_vs_Confidence_split=0;  % using the A vector, multiple part B ERP, and see if we see quantile definition in confidence.
 
 job.plot_B_vs_Confidence =0; % uses the amplitude of discriminator performance (in quantiles), to collect confidence
@@ -54,9 +54,9 @@ if job.plot_A_vs_Untrainedtrials_GFX==1
 end
 
 
-if job.plot_A_vs_RTtercile ==1 % using ROC to compare RT affect on classifier accuracy.    
-Plot_decA_vs_RTsinA_ROC;
-end
+% if job.plot_A_vs_RTtercile ==1 % using ROC to compare RT affect on classifier accuracy.    
+% Plot_decA_vs_RTsinA_ROC; % unfinished.
+% end
 
 if job.plot_A_vs_RTsinA==1
  Plot_decA_vs_RTsinA_correlation;

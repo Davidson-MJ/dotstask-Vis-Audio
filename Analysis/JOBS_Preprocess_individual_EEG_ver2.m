@@ -2,16 +2,14 @@
 clear variables
 close all
 
-%set up directories, find participant folders.
 basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/EEG/ver2';
 cd(basedir);
 pfols = dir([pwd filesep 'p_*']);
 
-
 %preprocessing pipeline
 job.loadraw_chandata_reref = 1;
-job.filter_epoch_saveinfo  = 0 ;
-job.epochrejbyinspectino_saverejidx = 0;
+job.filter_epoch_saveinfo  = 1 ;
+job.epochrejbyinspectino_saverejidx = 1;
 
 % run ICA after epoch rejection:
 

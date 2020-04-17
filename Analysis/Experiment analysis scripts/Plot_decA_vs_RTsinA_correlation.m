@@ -17,7 +17,8 @@ job1.plotGFX=1;
 
 normON = 0; % normalize EEG data.
 
-
+RTbugfix = 1; % when collecting RTs, restrict to a longer window (>330ms), 
+%to avoid the bug.
 
 
 
@@ -64,11 +65,27 @@ for ippant = 1:length(pfols)
     end
         
     %%
-    % collect confj for this dataset
+    % collect RTs for this dataset
+    
+    if RTbugfix==1
+    % also, we may want to restrict to only certain RTs (outside bug
+    % window).
+    listRTs =[alltrials_matched(partAindx).rt];
+    % if we have a bug (minimum and mode are the same), skip those values.
+    % .to be safe. Just look at all RTs > 330ms.
+    
+    keepvec = listRTs>.330;
+    
+    %update data and params.
+    allRTs = zscore(listRTs(keepvec));
+    partAdata = partAdata(:,:,keepvec);
+    %new trial count.
+    ntrials =length(keepvec(keepvec>0));
+    else
+    
     allRTs= zscore([alltrials_matched(partAindx).rt]);
     
-    %collect RTs for this .
-    
+    end
     
     %before continuing, we want to apply the spatial discrim to each trial.
     %% we are using the decoder from part A (correct vs Errors)
@@ -119,7 +136,7 @@ for ippant = 1:length(pfols)
     winmid=winstart+round(Nwin/2);
     t=winmid/Fs;
     %%
-    set(gcf, 'units', 'normalized', 'position',[-.5 0 .5 .5], 'color', 'w');
+    set(gcf, 'units', 'normalized', 'position',[0 0 .5 .5], 'color', 'w');
     clf
     subplot(1,3,1:2)
     plot(plotXtimes(winmid),outgoing, 'color', 'k', 'linew', 3);
