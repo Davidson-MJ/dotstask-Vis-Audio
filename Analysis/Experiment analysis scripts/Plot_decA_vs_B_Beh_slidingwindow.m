@@ -1,5 +1,8 @@
-% plot classifer trained on part B (C vs E), to predict confidence.
+% plot classifer trained on part B (C vs E), to predict confidence or RT
+% with a sliding window analysis
+
 %called from JOBS_ERPdecoder.m
+basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/EEG/ver2';
 getelocs;
 cmap = flip(cbrewer('seq', 'RdPu', 5));
 %%
@@ -70,6 +73,7 @@ for ippant = 1:length(pfols)
     
     
     %%
+    clf
     for iSLIDE = 1:2 % compare classifier output based on RT and confidence.
         
     % collect relevant behavioural data per ppant.
@@ -131,9 +135,10 @@ for ippant = 1:length(pfols)
     winmid=winstart+round(Nwin/2);
     t=winmid/Fs;
     %%
-    set(gcf, 'units', 'normalized', 'position', [-0.5151    0.1380    0.5000    0.5512], 'color', 'w');
+    set(gcf, 'units', 'normalized', 'position', [0    1    0.5000    0.6], 'color', 'w');
 %     clf
-    subplot(iSLIDE,3,1:2)
+plotloc = [1:2] +(iSLIDE-1)*3;    
+subplot(2,3,plotloc)
     plot(plotXtimes(winmid),outgoing, 'color', 'k', 'linew', 3);
     title({['P' num2str(ippant) ', Classifier trained on ERP A (C vs E) x ERP B'];[ExpOrder{1} '- ' ExpOrder{2} ]});
 xlabel(['Time [ms] after response in part B']);
@@ -143,7 +148,7 @@ hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
 hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
 set(gca, 'fontsize', 15)
 
-subplot(iSLIDE,3,3)
+subplot(2,3,3*iSLIDE)
  topoplot(DEC_Pe_window.scalpproj, biosemi64);
  title(['Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']'])
  set(gca, 'fontsize', 15)
@@ -183,66 +188,80 @@ cd('Classifier Results')
 cd('PFX_Trained on Correct part A, conf x sliding window part B');
 load('GFX_DecA_slidingwindow_predictsConfidence');
     %% plot results across participants:
-showt1 = [200, 350];
-for iorder =3%:3
-    figure(1); clf
-    switch iorder
-        case 1            
-            useppants = vis_first;
-            ordert='visual-audio';
-        case 2
-            useppants = aud_first;
-            ordert= 'audio-visual';
-        case 3
-            useppants = 1:size(GFX_DECA_Conf_corr_slid,1);
-            ordert= 'all combined';
-    end
-    
-    dataIN = squeeze(GFX_DECA_Conf_corr_slid(useppants,:));
-    
-Ste = CousineauSEM(dataIN);
-
-subplot(1,3,1:2)
-set(gcf, 'color', 'w')
-  ylim([-.1 .1])  
-%place patches (as background) first:
-    ytx= get(gca, 'ylim');    
-hold on
-%plot topo patches.
-ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
-ph.FaceAlpha=.4;
-ph.LineStyle= 'none';
-    
-hold on
-shadedErrorBar(plotXtimes(winmid), mean(dataIN,1), Ste, ['b'],1);
-shg
-
-
-xlabel(['Time [ms] after response in part B']);
-ylabel('Part B (prob) and confidence [r]')
-ylabel('Part B (prob) and rt [r]')
-
-hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
-hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
-set(gca, 'fontsize', 25)
-title({['Classifier trained on ERP A (C vs E) x ERP B'];[ordert ', n=' num2str(length(useppants))]}, 'fontsize', 20)
-title ''
-box on
-% add sig tests:
-%ttests
-pvals= nan(1, length(winmid));
-%%
-for itime = 1:length(winmid)
-    [~, pvals(itime)] = ttest(dataIN(:,itime));
-    
-    if pvals(itime)<.05
-        text(plotXtimes(winmid(itime)), [-.1], '*', 'color', 'k','fontsize', 25);
-    end
-end
+    showt1 = [200, 350];
+    for iorder =1%:3
+        figure(1); clf
+        switch iorder
+            case 1
+                useppants = vis_first;
+                ordert='visual-audio';
+            case 2
+                useppants = aud_first;
+                ordert= 'audio-visual';
+            case 3
+                useppants = 1:size(GFX_DECA_Conf_corr_slid,1);
+                ordert= 'all combined';
+        end
+        
+        for idata = 1:2
+            %plot the CONF and RT sliding correlation with decoder score.
+            switch idata
+                case 1
+                    dataIN = squeeze(GFX_DECA_Conf_corr_slid(useppants,:));
+                    ylabis ={['DECODER and confidence'];['(correct only) [r]']};
+                    usecol = 'b';
+                case 2
+                    dataIN = squeeze(GFX_DECA_RT_corr_slid(useppants,:));
+                    ylabis ={['DECODER and RT'];['(correct only) [r]']};
+                    usecol='k';
+            end
+            
+            Ste = CousineauSEM(dataIN);
+            
+            plotloc = [1:2]+(idata-1)*3; % adjust subplot location
+            
+            subplot(2,3,plotloc)
+            set(gcf, 'color', 'w')
+            ylim([-.1 .1])
+            %place patches (as background) first:
+            ytx= get(gca, 'ylim');
+            hold on
+            %plot topo patches.
+            ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
+            ph.FaceAlpha=.4;
+            ph.LineStyle= 'none';
+            
+            hold on
+            shadedErrorBar(plotXtimes(winmid), mean(dataIN,1), Ste, [usecol],1);
+            shg
+            
+            
+            xlabel(['Time [ms] after response in part B']);
+            ylabel(ylabis)
+            
+            
+            hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
+            hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
+            set(gca, 'fontsize', 25)
+            title({['Classifier trained on ERP A (C vs E) x ERP B'];[ordert ', n=' num2str(length(useppants))]}, 'fontsize', 20)
+            title ''
+            box on
+            % add sig tests:
+            %ttests
+            pvals= nan(1, length(winmid));
+            %%
+            for itime = 1:length(winmid)
+                [~, pvals(itime)] = ttest(dataIN(:,itime));
+                
+                if pvals(itime)<.05
+                    text(plotXtimes(winmid(itime)), [-.1], '*', 'color', 'k','fontsize', 25);
+                end
+            end
+        end
 %%
 % add topoplot of discrim used to aid interpretation.
 % 
-subplot(1,3,3)
+subplot(2,3,3)
 topoplot(mean(GFX_DecA_ScalpProj(useppants,:)), biosemi64);
 title(['Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']']);
 set(gca, 'fontsize', 25)

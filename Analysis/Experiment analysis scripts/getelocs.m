@@ -1,5 +1,5 @@
 % getelocs
-basedir=pwd;
+retdir=pwd;
 try cd('/Users/MattDavidson/Desktop/XM_Project/EEGData/Analysis')
 catch
     cd('/Users/mdavidson/DOCUMENTS/matlab/matlab toolboxes/MD misc')
@@ -9,8 +9,6 @@ elocs= readlocs('channellocs.loc');
 elocs32=readlocs('JMac-32.locs');
 biosemi64 = readlocs('BioSemi64.loc'); 
 %%
-cd(basedir);
-
 electrodeAXIS=[];
 for ieloc = 1:64
 
@@ -36,3 +34,5 @@ chanorder = [{'FP1'},{'FPZ'},{'FP2'},{'F7'},{'F3'},{'FZ'},{'F4'},...
 for i=1:64
     biosemi64(i).labels = upper(biosemi64(i).labels);
 end
+
+cd(retdir);
