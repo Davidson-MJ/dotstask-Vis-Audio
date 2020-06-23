@@ -19,7 +19,7 @@ idatatypes = {'STIM', 'RESP'};
 %important step!
 if job1.calcindividual == 1
 
-for ippant=3%11:12;%length(pfols)
+for ippant=2%11:12;%length(pfols)
     
     %load eeg folder
     cd(basedir)     

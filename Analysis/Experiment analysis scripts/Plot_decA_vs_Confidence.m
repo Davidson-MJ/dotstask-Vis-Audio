@@ -5,7 +5,10 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 %%
 
 
+%% Note that this script can save a sliding window of classifier performance, correlated 
+% with RT or confidence in part B.
 
+%amended 23/06/20 -MD
 
 
 job1.calcandconcat_PFX =1;
@@ -26,7 +29,8 @@ if job1.calcandconcat_PFX ==1
 
 
 
-GFX_DECA_Conf_corr_slid =nan(length(pfols), 28);
+[GFX_DECA_Conf_corr_slid ,GFX_DECA_RT_corr_slid ]=deal(nan(length(pfols), 28));
+
 GFX_DecA_ScalpProj=nan(length(pfols), 64);
 
 for ippant = 1:length(pfols)
@@ -66,13 +70,17 @@ for ippant = 1:length(pfols)
     
     
     %%
-    % collect confj for this dataset
-    allconfj= zscore([alltrials_matched(partBindx).confj]);
-%     allconfj= zscore([alltrials_matched(partBindx).rt]);
-    
-    
-    
-    
+    for iSLIDE = 1:2 % compare classifier output based on RT and confidence.
+        
+    % collect relevant behavioural data per ppant.
+    switch iSLIDE
+        case 1
+    allBEH= zscore([alltrials_matched(partBindx).confj]);
+    ytitle = 'Confidence - correct only';
+        case 2
+    allBEH= zscore([alltrials_matched(partBindx).rt]);
+    ytitle = 'RT- correct only';
+    end
     
     %before continuing, we want to apply the spatial discrim to each trial.
     %% we are using the decoder from part A (correct vs Errors)
@@ -113,7 +121,7 @@ for ippant = 1:length(pfols)
         datawin = mean(ytest_trials(indx,:));
         %correlate with confidence (all trials)
         
-        [R,p] = corrcoef(datawin, allconfj);
+        [R,p] = corrcoef(datawin, allBEH);
         
         %store sliding probability :
         outgoing(n)= R(1,2);
@@ -124,25 +132,33 @@ for ippant = 1:length(pfols)
     t=winmid/Fs;
     %%
     set(gcf, 'units', 'normalized', 'position', [-0.5151    0.1380    0.5000    0.5512], 'color', 'w');
-    clf
-    subplot(1,3,1:2)
+%     clf
+    subplot(iSLIDE,3,1:2)
     plot(plotXtimes(winmid),outgoing, 'color', 'k', 'linew', 3);
     title({['P' num2str(ippant) ', Classifier trained on ERP A (C vs E) x ERP B'];[ExpOrder{1} '- ' ExpOrder{2} ]});
 xlabel(['Time [ms] after response in part B']);
-ylabel('performance x confidence, correlation, [r]')
+ylabel({['DECODE x ' ytitle ];['[r]']})
 ylim([-.2 .2])
 hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
 hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
 set(gca, 'fontsize', 15)
 
-subplot(1,3,3)
+subplot(iSLIDE,3,3)
  topoplot(DEC_Pe_window.scalpproj, biosemi64);
  title(['Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']'])
  set(gca, 'fontsize', 15)
     
-  %%
-
+ %% %% store output participants:
+ if iSLIDE==1
+     GFX_DECA_Conf_corr_slid(ippant,:) = outgoing;
+ else
+     GFX_DECA_RT_corr_slid(ippant,:) = outgoing;
+ end
+ 
+    end % iSLIDE
     
+  GFX_DecA_ScalpProj(ippant,:) = DEC_Pe_window.scalpproj;
+
 cd(basedir);
 cd ../../Figures/
 cd('Classifier Results')
@@ -151,18 +167,24 @@ printname = ['Participant ' num2str(ippant) ' Dec A sliding window confidence co
 print('-dpng', printname)
 
 
-%% store output participants:
-  GFX_DECA_Conf_corr_slid(ippant,:) = outgoing;
-  GFX_DecA_ScalpProj(ippant,:) = DEC_Pe_window.scalpproj;
-end
-save('GFX_DecA_slidingwindow_predictsConfidence', 'GFX_DECA_Conf_corr_slid', 'GFX_DecA_ScalpProj', 'winmid', 'plotXtimes');
 
 end
+save('GFX_DecA_slidingwindow_predictsConfidence', ...
+    'GFX_DECA_Conf_corr_slid',...
+    'GFX_DECA_RT_corr_slid', 'GFX_DecA_ScalpProj', 'winmid', 'plotXtimes');
 
+end
+%%
 if job1.plotGFX==1
-%% plot results across participants:
+
+cd(basedir);
+cd ../../Figures/
+cd('Classifier Results')
+cd('PFX_Trained on Correct part A, conf x sliding window part B');
+load('GFX_DecA_slidingwindow_predictsConfidence');
+    %% plot results across participants:
 showt1 = [200, 350];
-for iorder =1%:3
+for iorder =3%:3
     figure(1); clf
     switch iorder
         case 1            

@@ -1,8 +1,8 @@
 
 %PLOT GFX, stim and response locked ERPs
 
-job1.plotStimlocked =0;
-job1.plotResplocked =0;
+job1.plotStimlocked =1;
+job1.plotResplocked =1;
 
 basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
 cd(basedir)

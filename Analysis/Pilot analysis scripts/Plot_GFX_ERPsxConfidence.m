@@ -25,7 +25,7 @@ set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .6]);
 
 %plot types separately. visual - audio, then audio - visual
 confis = {'low', 'high'};
-for iorder=1%:2 % third case is all together.
+for iorder=3%:2 % third case is all together.
     
     figure(1);  clf;
     
@@ -63,7 +63,12 @@ for iorder=1%:2 % third case is all together.
         
         lg=[];
         
-        
+        % no point in plotting the combined sensory ERP s (Vis+AUDIO)
+        if iorder==3 && idtype==1 
+            
+            continue  % skip to resp locked.
+            
+        end
         for iterc =1:2
             %%
             figure(1); 
@@ -150,6 +155,8 @@ for iorder=1%:2 % third case is all together.
       
     end
     
+    %% add label above all subplots.
+    sgtitle(orderi, 'fontsize', 20)
     %%
     set(gcf, 'color', 'w')
     cd(basedir);

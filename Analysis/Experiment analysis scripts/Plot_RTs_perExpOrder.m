@@ -22,7 +22,7 @@ audcolour=cmap(9,:);
 %plots individual participant level histograms of RT, as well as Bar
 
 
-% AA_Adjust_behavioural_output_data;
+AA_Adjust_behavioural_output_data;
 
 
 %%

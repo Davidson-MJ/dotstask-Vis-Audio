@@ -17,7 +17,7 @@ job1.plotGFX=1;
 
 normON = 0; % normalize EEG data.
 
-RTbugfix = 1; % when collecting RTs, restrict to a longer window (>330ms), 
+RTbugfix = 0; % when collecting RTs, restrict to a longer window (>330ms), 
 %to avoid the bug.
 
 

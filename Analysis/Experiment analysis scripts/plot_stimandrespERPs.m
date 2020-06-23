@@ -4,10 +4,10 @@
     
     meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57];
     
-    job1.plotStimlocked=1;
-    job1.plotResplocked=1;
+    job1.plotStimlocked=0;
+    job1.plotResplocked=0;
     
-for ippant=3%1:length(pfols)
+for ippant=1:length(pfols)
   
     
     cd(basedir)
@@ -229,7 +229,8 @@ for ippant=3%1:length(pfols)
 %         ylim([-10 10])
         title(['Response ERP after ' titleis ' ' exppart{ixmod}])
         
-        ylim 'auto'
+%         ylim 'auto'
+ylim([-10 10])
         
         ytx= get(gca, 'ylim');
         

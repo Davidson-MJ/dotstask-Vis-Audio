@@ -221,12 +221,12 @@ if strcmp(dec_params.type,'lr')
     show=0; 
     regularize=0; % if suspecting two similar sources, improves sensitivity to error.
     lambda=1.00e-06;
-      lambdasearch=0;
- eigvalratio=1.00e-06; 
-  vinit=zeros(size(chansubset,2)+1,1);
+    lambdasearch=0;
+    eigvalratio=1.00e-06; 
+    vinit=zeros(size(chansubset,2)+1,1);
     
     % 
-  truth=[zeros(trainingwindowlength.*C,1); ones(trainingwindowlength.*E,1)];
+    truth=[zeros(trainingwindowlength.*C,1); ones(trainingwindowlength.*E,1)];
   
   
   % difference for Boldt decoding:
