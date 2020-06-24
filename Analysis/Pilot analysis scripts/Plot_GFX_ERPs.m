@@ -1,7 +1,7 @@
 
 %PLOT GFX, stim and response locked ERPs
 
-job1.plotStimlocked =1;
+job1.plotStimlocked =0;
 job1.plotResplocked =1;
 
 basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
@@ -66,7 +66,7 @@ for ixmod = 1:2
         printname=['GFX stimulus locked ERP topography no detrend'];
     end
     
-    topoX=dsearchn(plotXtimes', showt');
+    
     %
     %%
      %times for topography
@@ -173,14 +173,18 @@ set(gcf, 'units', 'normalized', 'position', [0 .35 .7 .6], 'color', 'w');
 %
 getelocs;
 %
-for iorder=1%:2
+for iorder=3%1:2 3 = all.
    
-    if iorder==1
+    switch iorder
+        case 1
         useppants = vis_first;
         orderw = 'visual-audio';
-    else
+        case 2
         useppants = aud_first;
         orderw = 'audio-visual';
+        case 3
+            useppants = 1:size(GFX_visrespCOR,1);
+            orderw = 'All resp';
     end
         
 for ixmod = 1:2 % which order to use?
@@ -188,13 +192,25 @@ for ixmod = 1:2 % which order to use?
     if ixmod==1
      g1=GFX_visrespCOR(useppants,:,:);
         g2=GFX_visrespERR(useppants,:,:);
+        if iorder==1
         titleis = 'Visual response Part A';
+        elseif iorder==2
+            titleis = 'Visual response, part B';
+        elseif iorder==3
+            titleis = 'All Visual response locked';
+        end
     else
         %         dataCOR = squeeze(nanmean(GFX_visrespCOR,1));
         %         dataErr = squeeze(nanmean(GFX_visrespERR,1));        
            g1=GFX_audrespCOR(useppants,:,:);
         g2=GFX_audrespERR(useppants,:,:);
-        titleis = 'Auditory response, part B';
+        if iorder==1
+            titleis = 'Auditory response Part B';
+        elseif iorder==2
+            titleis = 'Auditory response, part A';
+        elseif iorder==3
+                    titleis = 'All Auditory response locked';
+        end
     end
     
     %apply smoothing to dataset, for plotting:

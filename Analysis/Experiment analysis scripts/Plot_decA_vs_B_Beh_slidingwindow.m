@@ -47,7 +47,7 @@ for ippant = 1:length(pfols)
     %
 %     partBindx = contains({alltrials_matched.ExpType}, 'B');  % includes
 %     practice trials.
-    partBindx = sort([corBindx]); % correct only.
+    partBindx = [corBindx]; % correct only.
     
     partBdata = resplockedEEG(:,:,partBindx);
 %     partBdata = stimlockedEEG(:,:,partBindx);
@@ -79,7 +79,7 @@ for ippant = 1:length(pfols)
     % collect relevant behavioural data per ppant.
     switch iSLIDE
         case 1
-    allBEH= zscore([alltrials_matched(partBindx).confj]);
+    allBEH= zscore(abs([alltrials_matched(partBindx).confj]));
     ytitle = 'Confidence - correct only';
         case 2
     allBEH= zscore([alltrials_matched(partBindx).rt]);

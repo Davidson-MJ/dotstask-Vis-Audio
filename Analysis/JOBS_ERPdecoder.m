@@ -17,15 +17,15 @@ pfols = dir([pwd filesep 'p_*']);
 job.trainclassifierpartA_CvsE=0;
 
 job.plot_A_vs_Untrainedtrials= 0;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
-job.plot_A_vs_Untrainedtrials_GFX= 0;    %  GFX_ of above
+job.plot_A_vs_Untrainedtrials_GFX= 1;    %  GFX_ of above
 
 
-job.plot_A_vs_RTtercile =0; % see if classifier accuracy in A, is affected by RT (implying capture of confidence).
+% job.plot_A_vs_RTtercile =0; % see if classifier accuracy in A, is affected by RT (implying capture of confidence).
 
 
 job.plot_A_vs_RTsinA =0;
 
-job.plot_A_vs_SLIDINGwindow_corr_in_B=1;  % using the A vector, multiple part B ERP, and see check performance correlation with confidence (or RT) over time..
+job.plot_A_vs_SLIDINGwindow_corr_in_B=0;  % using the A vector, multiple part B ERP, and see check performance correlation with confidence (or RT) over time..
 job.plot_A_vs_Confidence_split=0;  % using the A vector, multiple part B ERP, and see if we see quantile definition in confidence.
 
 %plot results from classifier trained on part B of exp, on predicting

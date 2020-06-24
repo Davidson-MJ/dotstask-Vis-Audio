@@ -9,8 +9,8 @@ meanoverChans_AUD = [4:15,39:52];
 
 
 smoothON=0;
-plottopos_sep = 0; % create a separate figure for the topoplots over defined window.
-
+plottopos_sep = 1; % create a separate figure for the topoplots over defined window.
+alltopos=[]; topocounter=1;% store topos for plotting a difference topo at end.
 %% PLOT Group level ERPs.
 cd(basedir)
 
@@ -28,7 +28,7 @@ confis = {'low', 'high'};
 for iorder=3%:2 % third case is all together.
     
     figure(1);  clf;
-    
+    alltopos=[]; 
     switch iorder
         case 1
             useppants = vis_first;
@@ -72,12 +72,7 @@ for iorder=3%:2 % third case is all together.
         for iterc =1:2
             %%
             figure(1); 
-            subplot(3,2,idtype)
-            % add topoplot of electrode locations
-            cn = zeros(1,64);                        
-            topoplot(cn, biosemi64, 'emarker2', {[usechans], 's' 'w'} );
-            
-            
+          
             %%
 %             datatoplot = squeeze(nanmean(datac(:,meanoverChans,:,iterc),2));
             datatoplot = squeeze(nanmean(datac(:,usechans,:,iterc),2));
@@ -125,7 +120,7 @@ for iorder=3%:2 % third case is all together.
              box on
             if plottopos_sep ==1
                 figure(10);
-                subplot(1,4,tcount);
+                subplot(2,4,tcount);
                 set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .4]);
                 %average over window:
                 winav = dsearchn(plotXtimes', [200 350]');
@@ -143,18 +138,27 @@ for iorder=3%:2 % third case is all together.
 %                 caxis([-2 2])
                 ylabel(c, 'uV');
                 title({['after ' dtype ' ' orderi ];[confis{iterc} ' confidence'];['200-350ms']});
-                set(gca, 'fontsize', 25);
+                set(gca, 'fontsize', 15);
                     tcount=tcount+1;
-%                     colormap('magma')
+
+                alltopos(tcount,:) = plotme;
+%add difference topo
+            if mod(tcount,2)==0
+                subplot(2,2,(tcount/2)+2);
+                diffT = alltopos(tcount,:)-alltopos(tcount-1,:); % high -low conf.
+                topoplot(diffT, biosemi64);
+                c=colorbar;                
+                ylabel(c, 'uV');
+                title({['high - low'];['200-350ms']});
+                set(gca, 'fontsize', 15);                
             end
-            
             %%
         end
         %     legend(lg, {'lowest confidence', 'medium confidence', 'highest confidence'}, 'location', 'SouthEast', 'fontsize', 15) ;
         
       
     end
-    
+    end
     %% add label above all subplots.
     sgtitle(orderi, 'fontsize', 20)
     %%

@@ -30,10 +30,10 @@ for ippant=1:length(pfols)
         [conf_x_slEEG ,conf_x_rlEEG] = deal(zeros(size(resplockedEEG,1), size(resplockedEEG,2), 3));                            
         
         %changed to corrects only:
-        partBindx = sort([corBindx]);
+        partBindx = corBindx;
                 
-        %Using both correct and error trials, collect confj
-       confjmnts = [alltrials_matched(partBindx).confj]; 
+        %Using both correct  trials, collect confj
+       confjmnts = abs([BEH_matched(partBindx).confj]); 
         
         % take zscore to compare across participants.
         zconfj = zscore(confjmnts);
@@ -101,6 +101,8 @@ for ippant=1:length(pfols)
 % plot(plotXtimes, squeeze(conf_x_rlEEG(31,:,:))); 
 % set(gca, 'ydir' , 'reverse')%     
 %%
+disp(['saving conf x ERP for ppant ' num2str(ippant)]);
+
     save('part B ERPs by confidence', ...
         'conf_x_rlEEG', 'terclists',...
         'conf_x_slEEG', 'plotXtimes', 'ExpOrder');

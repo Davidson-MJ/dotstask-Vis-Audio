@@ -4,26 +4,30 @@ close all
 
 %set up directories, find participant folders.
 basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/EEG/ver2';
+behdatadir = '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/Exp_output/DotsandAudio_behaviour/ver2';
+
 cd(basedir);
 pfols = dir([pwd filesep 'p_*']);
 
 
 %preprocessing pipeline
-job.loadraw_chandata_reref = 1;
+job.loadraw_chandata_reref = 0;
 job.filter_epoch_saveinfo  = 0 ;
 job.epochrejbyinspectino_saverejidx = 0;
 
 % run ICA after epoch rejection:
 
-job.runICA  =0;
+job.runICA  =1;
 job.rejICA_comps  =0;
 
+
+job.matchPPanttrials =0; 
 
 %% >>>>>>>>>>>>>>>>>>>>>>>>>
 % BEGIN participant loop
 % >>>>>>>>>>>>>>>>>>>>>>>>>
 
-for ippant=1
+for ippant=7%:length(pfols)
     
     cd(basedir)
     cd(pfols(ippant).name);
@@ -151,7 +155,7 @@ for ippant=1
         
         
         %%
-        for itype =1:2
+        for itype =1%:2
             
             %load prev stim and resp based sets, reject and save as:
             if itype==1
@@ -177,7 +181,7 @@ for ippant=1
                 %             rejected_trials= str2double(regexp(rejind, '\d*', 'match'));
                 %             rejected_trials= str2double(regexp(rejind, '\s', 'split'));%, 'match', 'forceCellOutput'));
                 rejected_trials = str2num(rejind);
-                %%
+                %
                 %save rejected epoch indices.
                 if itype==1
                     rejected_trials_stim = rejected_trials;
@@ -217,7 +221,7 @@ for ippant=1
             
             %% reject epochs, run ICA, reject components in GUI.
             
-            EEG = pop_runica(EEG, 'extended',1,'interupt','on');
+            EEG = pop_runica(EEG, 'extended',0,'interupt','on');
             EEG = eeg_checkset( EEG );
             %save as we go.
             %%
@@ -233,7 +237,8 @@ for ippant=1
         %% plot comps for rejection, use SASICA
         
         used = {'stim', 'resp'};
-        for idset =1:2
+        %%
+        for idset =1%:2
             eeglab
 %                        EEG= pop_loadset('filename', ...
 %                 ['p_' sstr ' resampled reref filt epochs ' used{idset} ' wICA.set'],...
@@ -260,7 +265,7 @@ for ippant=1
                 rejind = EEGh(1,startat-1:rejEp_end+startat);
                 %extract only numbers:
                 rejected_components= str2num(rejind);
-                %%
+                %
                 %save
                  if idset==1
                     rejected_comps_stim = rejected_components;
@@ -277,11 +282,15 @@ for ippant=1
             end
               
                 %%
-                eeglab
+%                 eeglab
             end
             
     end
   
+    %% after all Preprocessing, we need to match the EEG to BEH.
+    if job.matchPPanttrials ==1; 
+        matchEEG2BEH;
+    end
 end
 
 

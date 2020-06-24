@@ -60,6 +60,8 @@ vec = zeros(1,size(allD,3));
 vec(errAindx)=1;
 error_index=  vec;
 dec_params.error_index= error_index; % in binary.
+
+vec = zeros(1,size(allD,3));
 vec(corAindx)=1;
 corr_index=  vec;
 dec_params.correct_index= corr_index; % in binary.

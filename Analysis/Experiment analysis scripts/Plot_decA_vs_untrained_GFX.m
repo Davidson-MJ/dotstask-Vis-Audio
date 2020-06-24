@@ -23,7 +23,7 @@ clear PFX_classifierA_onERP;
  Xtimes = DEC_Pe_windowparams.wholeepoch_timevec;
     smoothON=1;
     
- for iorder = 1%:3
+ for iorder = 3%:3
      switch iorder
          case 1
              useppants = vis_first;
