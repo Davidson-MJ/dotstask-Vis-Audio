@@ -25,7 +25,7 @@ set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .6]);
 
 %plot types separately. visual - audio, then audio - visual
 confis = {'low', 'high'};
-for iorder=3%:2 % third case is all together.
+for iorder=1%:2 % third case is all together.
     
     figure(1);  clf;
     alltopos=[]; 

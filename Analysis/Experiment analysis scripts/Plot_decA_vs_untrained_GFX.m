@@ -14,8 +14,8 @@
     %% load the Classifer and behavioural data:
     load('Classifier_objectivelyCorrect');
     
-    GFX_classifierA_onERP(ippant,:,:) = PFX_classifierA_onERP;
-    GFX_classifierA_topo(ippant,:) = DEC_Pe_window.scalpproj;
+    GFX_classifierA_onERP(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP,2));
+    GFX_classifierA_topo(ippant,:) = squeeze(mean(DEC_Pe_window.scalpproj,1));
 clear PFX_classifierA_onERP;
     end
     %%
@@ -23,7 +23,7 @@ clear PFX_classifierA_onERP;
  Xtimes = DEC_Pe_windowparams.wholeepoch_timevec;
     smoothON=1;
     
- for iorder = 3%:3
+ for iorder = 1%:3
      switch iorder
          case 1
              useppants = vis_first;
@@ -97,7 +97,7 @@ end
     xlabel('Time since response (ms)')
     ylabel('A.U');
     %%
-    title({['Order ' orderis ];['Time-course of discriminating component, (trained Corr A vs Err A)']}, 'fontsize', 25);
+    title({['Order ' orderis ', nreps ' num2str(nIter)];['Time-course of discriminating component, (trained Corr A vs Err A)']}, 'fontsize', 25);
     %%
     legend(leg, {['Corr A'],['Corr B '], ['Err A'], ['Err B']})
     set(gca, 'fontsize', 15)
@@ -115,7 +115,7 @@ end
     
     %%
         set(gcf, 'color', 'w')
-printname = ['GFX classifier trained on Correct part A-Pe,' orderis];%', ERP weighted' ]);
+printname = ['GFX classifier trained on Correct part A-Pe,' orderis ', w-' num2str(nIter) 'reps' ];
 
 if smoothON==1
     printname = [printname ', smoothed'];

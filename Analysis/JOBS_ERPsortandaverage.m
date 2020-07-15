@@ -22,8 +22,8 @@ job.plot_StimandResplocked_grandaverage_GFX =0;
 
 % Calculated ERPs, after stratifying by subjective confidence.
 job.calc_individualERPsxConfidence =0; %Response locked, also concatenates across participants for GFX.
-job.plot_PFXxConf =1;
-job.plot_GFXxConf =0;
+job.plot_PFXxConf =0;
+job.plot_GFXxConf =1;
 
 %% Stimulus and response locked ERPs >
 if job.calc_individualERPs == 1 % Trig and response locked, also concatenates across participants for GFX.        

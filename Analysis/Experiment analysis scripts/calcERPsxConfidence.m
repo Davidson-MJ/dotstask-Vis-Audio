@@ -33,12 +33,14 @@ for ippant=1:length(pfols)
         partBindx = corBindx;
                 
         %Using both correct  trials, collect confj
-       confjmnts = abs([BEH_matched(partBindx).confj]); 
+       confjmnts = ([BEH_matched(partBindx).confj]); 
         
         % take zscore to compare across participants.
         zconfj = zscore(confjmnts);
         
-        
+        %avoid trials in which there was a change of mind (negative
+        %confidence value).
+        % ?       
         %% now we can reduce the size of our beh and EEG, to only relevant trials, and sort
         %by terciles
         
@@ -72,6 +74,7 @@ for ippant=1:length(pfols)
 %         %highest
 %         t3 = find(zconfj>=quants(2));
 %         end
+
         %store for easy access.
         terclists(1).list = t1;
         terclists(2).list = t2;

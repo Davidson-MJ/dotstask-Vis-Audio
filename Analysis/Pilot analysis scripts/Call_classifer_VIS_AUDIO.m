@@ -10,6 +10,12 @@ GFX_decoding= zeros(length(pfols), 2, 2,281);
 
 [nppants, trainedon, correctErr, npnts]= size(GFX_decoding);
 
+% new: include nIterations, which repeats (and averages), the classifier
+% to use more trials. (cycles through matched sizes of Errors and Correct
+% trials).
+
+nIter = 50; % n iterations, final output is the average spatial discrimination vector.
+
 for ippant =1:length(pfols)
     
 pcounter=1;
@@ -43,7 +49,9 @@ dec_params.LOO = 1; % perform Leave one out sanity check.
 dec_params.matchCE= 1; % match size of correct and errors.
 dec_params.filtlo= 0; % filter lo/ hi
 dec_params.filthi= 0;
-dec_params.showchannel= 32; % display ERP at channel
+dec_params.showchannel= 32; % display ERP at channel, if printing
+dec_params.dispprogress=0; % 1 for figure output.
+
 
 % analysis parameters:
 dec_params.window_frames_ms = [plotXtimes(1) plotXtimes(end)];  %needs to be shorter than actual epoch, or will error.
@@ -66,6 +74,7 @@ vec(corAindx)=1;
 corr_index=  vec;
 dec_params.correct_index= corr_index; % in binary.
 
+dec_params.nIter = nIter;
 % 
 % % %>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 % % %call classifier based on above:
@@ -79,27 +88,29 @@ save('Classifier_objectivelyCorrect', 'DEC_Pe_window','DEC_Pe_windowparams');
 
 
 %% Now also create classifer for part B.
-
-%create data for classifier:
-
-dec_params.data = allD;
-
-%save correct trial assignment (correct and errors).vec(errAindx)=1;
-vec = zeros(1,size(allD,3));
-vec(errBindx)=1;
-error_index=  vec;
-dec_params.error_index= error_index; % in binary.
-vec(corBindx)=1;
-corr_index=  vec;
-dec_params.correct_index= corr_index; % in binary.
-
-
-
-DECout = my_Classifier_VISAUD(dec_params);
-
-DEC_Pe_B_window = DECout;
-DEC_Pe_B_windowparams = dec_params;
-save('Classifier_objectivelyCorrect', 'DEC_Pe_B_window','DEC_Pe_B_windowparams','-append');
+% 
+% %create data for classifier:
+% 
+% dec_params.data = allD;
+% 
+% %save correct trial assignment (correct and errors).vec(errAindx)=1;
+% vec = zeros(1,size(allD,3));
+% vec(errBindx)=1;
+% error_index=  vec;
+% dec_params.error_index= error_index; % in binary.
+% 
+% vec = zeros(1,size(allD,3));
+% vec(corBindx)=1;
+% corr_index=  vec;
+% dec_params.correct_index= corr_index; % in binary.
+% 
+% 
+% 
+% DECout = my_Classifier_VISAUD(dec_params);
+% 
+% DEC_Pe_B_window = DECout;
+% DEC_Pe_B_windowparams = dec_params;
+% save('Classifier_objectivelyCorrect', 'DEC_Pe_B_window','DEC_Pe_B_windowparams','-append');
 
 
 end

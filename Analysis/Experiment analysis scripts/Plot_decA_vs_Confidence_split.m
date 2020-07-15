@@ -38,8 +38,7 @@ for ippant = 1:length(pfols)
     load('Epoch information.mat');
     %%
     %
-%     partBindx = contains({alltrials_matched.ExpType}, 'B');  % includes
-%     practice trials.
+
     partBindx = sort([corBindx]);
     
     partBdata = resplockedEEG(:,:,partBindx);
@@ -66,6 +65,7 @@ for ippant = 1:length(pfols)
     
     %%
     % collect confj for this dataset
+    %confidence is from sure incorrect (neg) to sure correct (pos).
     zconfj= zscore([alltrials_matched(partBindx).confj]);
     
     %before continuing, we want to apply the spatial discrim to each trial.

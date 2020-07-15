@@ -45,8 +45,9 @@ for ippant = 1:length(pfols)
     load('Epoch information.mat');
     %%
     %
-%     partBindx = contains({alltrials_matched.ExpType}, 'B');  % includes
-%     practice trials.
+%how many iterations were used in classifier training?
+
+    nIter = size(DEC_Pe_window.scalpproj,1);
     partBindx = [corBindx]; % correct only.
     
     partBdata = resplockedEEG(:,:,partBindx);
@@ -79,7 +80,8 @@ for ippant = 1:length(pfols)
     % collect relevant behavioural data per ppant.
     switch iSLIDE
         case 1
-    allBEH= zscore(abs([alltrials_matched(partBindx).confj]));
+            %note that confjmnts are from sure error - to sure correct.
+    allBEH= zscore(([alltrials_matched(partBindx).confj]));
     ytitle = 'Confidence - correct only';
         case 2
     allBEH= zscore([alltrials_matched(partBindx).rt]);
@@ -88,7 +90,10 @@ for ippant = 1:length(pfols)
     
     %before continuing, we want to apply the spatial discrim to each trial.
     %% we are using the decoder from part A (correct vs Errors)
-    v = DEC_Pe_window.discrimvector;
+    
+    
+    %note, use the average discrim vector!
+    v = mean(DEC_Pe_window.discrimvector,1)';
     
     %we want to take the probability, when this decoder is applied to a
     %sliding window across part B epochs.
@@ -123,8 +128,8 @@ for ippant = 1:length(pfols)
         
         %get mean decoder prob in this window, all trials.
         datawin = mean(ytest_trials(indx,:));
-        %correlate with confidence (all trials)
         
+        %correlate with confidence (all trials)        
         [R,p] = corrcoef(datawin, allBEH);
         
         %store sliding probability :
@@ -149,8 +154,8 @@ hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
 set(gca, 'fontsize', 15)
 
 subplot(2,3,3*iSLIDE)
- topoplot(DEC_Pe_window.scalpproj, biosemi64);
- title(['Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']'])
+ topoplot(mean(DEC_Pe_window.scalpproj,1), biosemi64);
+ title([num2str(nIter) 'x Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']'])
  set(gca, 'fontsize', 15)
     
  %% %% store output participants:
@@ -162,13 +167,13 @@ subplot(2,3,3*iSLIDE)
  
     end % iSLIDE
     
-  GFX_DecA_ScalpProj(ippant,:) = DEC_Pe_window.scalpproj;
+  GFX_DecA_ScalpProj(ippant,:) = mean(DEC_Pe_window.scalpproj,1);
 
 cd(basedir);
 cd ../../Figures/
 cd('Classifier Results')
 cd('PFX_Trained on Correct part A, conf x sliding window part B');
-printname = ['Participant ' num2str(ippant) ' Dec A sliding window confidence correlaiton' ExpOrder{1} '- ' ExpOrder{2} ' corronly'];
+printname = ['Participant ' num2str(ippant) ' Dec A sliding window confidence correlaiton' ExpOrder{1} '- ' ExpOrder{2} ' corronly, nreps ' num2str(nIter)];
 print('-dpng', printname)
 
 
@@ -272,7 +277,7 @@ cd(basedir);
 cd ../../Figures/
 cd('Classifier Results')
 cd('PFX_Trained on Correct part A, conf x sliding window part B');
-printname = ['GFX Dec A sliding window confidence correlaiton, for ' ordert ' corr only'];
+printname = ['GFX Dec A sliding window confidence correlaiton, for ' ordert ' corr only, nreps ' num2str(nIter)];
 print('-dpng', printname)
 end
 end
