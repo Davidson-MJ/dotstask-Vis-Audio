@@ -24,7 +24,8 @@ job1.plotGFX=1;
 normON = 0; % normalize EEG data.
 
 
-
+TESTondatatypes = {'resplocked', 'stimlocked', 'resplocked-stimbase'};
+for usetype = 2%1:3; of the above ^
 
 
 %%
@@ -50,8 +51,16 @@ for ippant = 1:length(pfols)
     nIter = size(DEC_Pe_window.scalpproj,1);
     partBindx = [corBindx]; % correct only.
     
+    switch usetype
+        case 1
     partBdata = resplockedEEG(:,:,partBindx);
-%     partBdata = stimlockedEEG(:,:,partBindx);
+        case 2
+    partBdata = stimlockedEEG(:,:,partBindx);
+        case 3
+            partBdata = resplockedEEG_stimbaserem(:,:,partBindx);
+    end
+    dataprint = TESTondatatypes{usetype};
+
     [nchans, nsamps, ntrials] =size(partBdata);
     
     
@@ -140,13 +149,13 @@ for ippant = 1:length(pfols)
     winmid=winstart+round(Nwin/2);
     t=winmid/Fs;
     %%
-    set(gcf, 'units', 'normalized', 'position', [0    1    0.5000    0.6], 'color', 'w');
+    set(gcf, 'units', 'normalized', 'position', [0    1    0.5000    0.8], 'color', 'w');
 %     clf
 plotloc = [1:2] +(iSLIDE-1)*3;    
 subplot(2,3,plotloc)
     plot(plotXtimes(winmid),outgoing, 'color', 'k', 'linew', 3);
     title({['P' num2str(ippant) ', Classifier trained on ERP A (C vs E) x ERP B'];[ExpOrder{1} '- ' ExpOrder{2} ]});
-xlabel(['Time [ms] after response in part B']);
+xlabel(['Time [ms] after ' dataprint ' in part B']);
 ylabel({['DECODE x ' ytitle ];['[r]']})
 ylim([-.2 .2])
 hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
@@ -173,7 +182,7 @@ cd(basedir);
 cd ../../Figures/
 cd('Classifier Results')
 cd('PFX_Trained on Correct part A, conf x sliding window part B');
-printname = ['Participant ' num2str(ippant) ' Dec A sliding window confidence correlaiton' ExpOrder{1} '- ' ExpOrder{2} ' corronly, nreps ' num2str(nIter)];
+printname = ['Participant ' num2str(ippant) ' Dec A sliding window confidence correlaiton' ExpOrder{1} '- ' ExpOrder{2} ' corronly, nreps ' num2str(nIter) ', ' dataprint ];
 print('-dpng', printname)
 
 
@@ -231,25 +240,27 @@ load('GFX_DecA_slidingwindow_predictsConfidence');
             %place patches (as background) first:
             ytx= get(gca, 'ylim');
             hold on
-            %plot topo patches.
+            %plot topo patches (if not stimlocked EEG), to show the
+            %training window used for the classifier.
+            if usetype~=2
             ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
             ph.FaceAlpha=.4;
             ph.LineStyle= 'none';
-            
+            end
             hold on
             shadedErrorBar(plotXtimes(winmid), mean(dataIN,1), Ste, [usecol],1);
             shg
             
             
-            xlabel(['Time [ms] after response in part B']);
+            xlabel(['Time [ms] after ' dataprint ' in part B']);
             ylabel(ylabis)
             
             
             hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
             hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
             set(gca, 'fontsize', 25)
-            title({['Classifier trained on ERP A (C vs E) x ERP B'];[ordert ', n=' num2str(length(useppants))]}, 'fontsize', 20)
-            title ''
+            title({['Classifier trained on ERP A (C vs E) x ERP B, ' dataprint];[ordert ', n=' num2str(length(useppants))]}, 'fontsize', 20)
+
             box on
             % add sig tests:
             %ttests
@@ -277,8 +288,9 @@ cd(basedir);
 cd ../../Figures/
 cd('Classifier Results')
 cd('PFX_Trained on Correct part A, conf x sliding window part B');
-printname = ['GFX Dec A sliding window confidence correlaiton, for ' ordert ' corr only, nreps ' num2str(nIter)];
+printname = ['GFX Dec A sliding window confidence correlaiton, for ' ordert ' corr only, nreps ' num2str(nIter) ', test on ' dataprint];
 print('-dpng', printname)
 end
 end
 %%
+end

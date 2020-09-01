@@ -14,7 +14,7 @@ GFX_decoding= zeros(length(pfols), 2, 2,281);
 % to use more trials. (cycles through matched sizes of Errors and Correct
 % trials).
 
-nIter = 50; % n iterations, final output is the average spatial discrimination vector.
+nIter = 10; % n iterations, final output is the average spatial discrimination vector.
 
 for ippant =1:length(pfols)
     
