@@ -1,7 +1,11 @@
 % Plot_AccuracybyExpType
 
 %called from JOBS_BehaviouralAnalysis.
-%plot bar data (visual vs auditory RTs).
+%plots raincloud distributions of accuracy.
+% Plots:
+%    PFX    
+%    Grand total (all conditions combined).
+%    Split by order (V-A, A-V). 
 
 cd(behdatadir)
 
@@ -26,6 +30,9 @@ for ippant = 1:length(pfols)
     lfile = dir([pwd filesep '*final' '*']);
     
     load(lfile.name);
+    
+    %use file name for debugging plots
+    pname = ['p_' subject.id];
     
     clf;
     set(gcf, 'units', 'normalized', 'position', [0 0 .25 .5], 'color', 'w')
@@ -69,7 +76,7 @@ for ippant = 1:length(pfols)
     text(1.9, Bacc+.05, ['Nerr = ' num2str(errorsB)])
     set(gca, 'xticklabel', {['part A (' ExpOrder{1} ')'], ['part B, (' ExpOrder{2} ')']})
     ylabel('Accuracy');
-    title(['Partcipant ' num2str(ippant) ' total accuracy'])
+    title(['Partcipant ' pname ' total accuracy'], 'Interpreter', 'none')
     ylim([0 1])
     %%
     set(gcf, 'color', 'w');
@@ -77,7 +84,7 @@ for ippant = 1:length(pfols)
     cd(figdir)
     cd('Accuracy plots')
     %%
-    print('-dpng', ['Participant ' num2str(ippant) ', accuracy summary'])
+    print('-dpng', ['Participant ' pname ', accuracy summary'])
     %% store for  across participant averaging:
     Accuracy_byAorB(ippant, :) = [Aacc,Bacc];
     %just look by exp type, sort next into modality.
@@ -90,18 +97,25 @@ end
 
 
 figure(1); clf;
-set(gcf, 'units', 'normalized', 'position', [0 0 .3 .5], 'color', 'w')
+set(gcf, 'units', 'normalized', 'position', [0 0 .4 .5], 'color', 'w')
 
 % sort into modality * by section
 partA = Accuracy_byAorB(:,1);
 partB = Accuracy_byAorB(:,2);
 
 % first plot all A vs B:
-Xdata=[partA,partB];
-[a,b]=CousineauSEM(Xdata);
+% this adjust within subject error bars. but need to plot the original
+% data.
 
-dataX{1} = b(:,1);
-dataX{2} = b(:,2);
+% Xdata=[partA,partB];
+% [a,b]=CousineauSEM(Xdata);
+
+% dataX{1} = b(:,1);
+% dataX{2} = b(:,2);
+
+dataX{1} = partA;
+dataX{2} = partB;
+
 bh =rm_raincloud(dataX', [cmap(2,:)]);
 
 hold on;
@@ -109,12 +123,12 @@ hold on;
 set(gca, 'yticklabel', {['all part B '], ['all part A']})
 title(['Grand average total accuracy'])
 xlim([.4 1])
-hold on; plot([.5 .5], ylim, 'k:', 'linew', 3)
+hold on; plot([.5 .5], ylim, 'k:', 'linew', 1)
 %
 ytsare = get(gca, 'ytick');
 
-text(.45, ytsare(1), ['\it M=\rm' sprintf('%.2f',mean(partB))], 'fontsize', fontsizeX)
-text(.45, ytsare(2), ['\it M=\rm' sprintf('%.2f',mean(partA))], 'fontsize', fontsizeX)
+% text(.45, ytsare(1), ['\it M=\rm' sprintf('%.2f',mean(partB))], 'fontsize', fontsizeX)
+% text(.45, ytsare(2), ['\it M=\rm' sprintf('%.2f',mean(partA))], 'fontsize', fontsizeX)
 set(gcf, 'color', 'w');
 set(gca, 'fontsize', fontsizeX)
 
@@ -132,7 +146,7 @@ partB_vis = partB(aud_first,:);
 partB_aud = partB(vis_first,:);
 %%
 clf;
-set(gcf, 'units', 'normalized', 'position', [0 0 .6 .5], 'color', 'w')
+set(gcf, 'units', 'normalized', 'position', [0 0 .8 .5], 'color', 'w')
 
 for iorder = 1:2
     if iorder==1
@@ -152,8 +166,8 @@ for iorder = 1:2
     bh =rm_raincloud(dataX', [cmap(2,:)]);
     
     %add plot specs
-    set(gca, 'yticklabel', {['Part B ' expo{2}], ['Part A ' expo{1}]})
-    title(['Accuracy when ' expo{1} '-' expo{2}])
+    set(gca, 'yticklabel', {[expo{2}], [ expo{1}]})
+    title([ expo{1} '-' expo{2} ', n' num2str(length(b)) ])
     xlim([.4 1])
     hold on; plot([.5 .5], ylim, 'k:', 'linew', 3)
     %

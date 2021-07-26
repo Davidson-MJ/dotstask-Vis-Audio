@@ -26,11 +26,11 @@ ConfData.INDEX_Error= ERRid;
 
 %% now plot! 
 figure(1); clf;
-set(gcf, 'units', 'normalized', 'position', [0 2 .4 .25])
+set(gcf, 'units', 'normalized', 'position', [0 0 .5 .6])
 %%
-
+%set colour
 if strcmpi((cfg.stimTypes{2}),'visual')
-    colnow = viscolour; else; colnow = audcolour;
+    colnow = viscolour; else colnow = audcolour;
 end
 %show  confidence by correct and error.
 dataX=[];
@@ -39,7 +39,7 @@ dataX{1} = (ConfData.confj(ConfData.INDEX_Correct));%+45;
 dataX{2} = (ConfData.confj(ConfData.INDEX_Error));%+45;
 elseif Expver==1
     dataX{1} = abs(ConfData.confj(ConfData.INDEX_Correct))+45;
-dataX{2} = abs(ConfData.confj(ConfData.INDEX_Error))+45;
+    dataX{2} = abs(ConfData.confj(ConfData.INDEX_Error))+45;
 end
 
 
@@ -66,9 +66,14 @@ elseif  Expver==1
 end
 %%
 
-title(['Participant ' num2str(ippant) ' Confidence in ' cfg.stimTypes{2} ' trials ']);
+title(['Participant ' pname ' Confidence in partB ' ExpOrder{2} ' trials '], 'Interpreter', 'none');
 hold on;
 set(gcf, 'color', 'w')
+
+% %% print output.
+cd(figdir)
+cd('Confidence plots')
+print('-dpng', ['Participant ' pname ', confidence in partB ' ExpOrder{2} ]) 
 
 %% can also plot the results of Info seeking behaviour, if it occurred.
 % 
@@ -123,14 +128,3 @@ set(gcf, 'color', 'w')
 % set(gcf, 'color', 'w')
 % shg
 % % save('Confidence output summary', 'ConfData');
-
-% %% print output.
-cd(homedir)
-cd('Figures')
-cd('Confidence plots')
-print('-dpng', ['Participant ' num2str(ippant) ', confidence in ' cfg.stimTypes{2} ', ver ' num2str(Expver)]) 
-% %%
-% %% store for  across participant averaging:
-% Confidence_byChoice(ippant, 1) = squeeze(mean(dataX{1}));
-% Confidence_byChoice(ippant, 2) = squeeze(mean(dataX{2}));
-% Confidence_byChoice(ippant, 3) = squeeze(mean(dataX{3}));

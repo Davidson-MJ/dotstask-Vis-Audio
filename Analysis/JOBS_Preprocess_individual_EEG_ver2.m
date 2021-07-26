@@ -1,15 +1,18 @@
 %Preprocess pilot data from visual and auditory confidence experiments.
+
+%This ver2, does not perform any Beh-EEG index matching at the end.
+%This is instead accomplished in next scripts.
 clear variables
 close all
 
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/EEG/ver2';
+basedir= '/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/EEG/ver2';
 cd(basedir);
 pfols = dir([pwd filesep 'p_*']);
-
+%%
 %preprocessing pipeline
 job.loadraw_chandata_reref = 1;
 job.filter_epoch_saveinfo  = 1 ;
-job.epochrejbyinspectino_saverejidx = 1;
+job.epochrejbyinspectino_saverejidx = 0;
 
 % run ICA after epoch rejection:
 
@@ -21,7 +24,7 @@ job.rejICA_comps  =0;
 % BEGIN participant loop
 % >>>>>>>>>>>>>>>>>>>>>>>>>
 
-for ippant=1
+for ippant=14:18
     
     cd(basedir)
     cd(pfols(ippant).name);
@@ -56,7 +59,7 @@ for ippant=1
         
         %check for channels:
         EEG=pop_chanedit(EEG, 'lookup',...
-            '/Users/mdavidson/Documents/MATLAB/Matlab toolboxes/eeglab13_5_4b/plugins/dipfit2.3/standard_BESA/standard-10-5-cap385.elp',...
+            '/Users/matthewdavidson/Documents/MATLAB/Matlab toolboxes/eeglab13_5_4b/plugins/dipfit2.3/standard_BESA/standard-10-5-cap385.elp',...
             'changefield',{65 'labels' 'EOG_H1'},...
             'changefield',{66 'labels' 'EOG_H2'},...
             'changefield',{67 'labels' 'EOG_V1'},...
@@ -133,7 +136,7 @@ for ippant=1
         save('Epoch information', 'allTriggerEvents_stim', 'allTriggerEvents_resp')
         
         %clean up
-        clearvars -except sstr job basedir
+        clearvars -except sstr job basedir pfols
     end
     
     
@@ -185,7 +188,7 @@ for ippant=1
                     save('Epoch information', 'rejected_trials_resp', '-append');
                 end
                 
-                clearvars -except sstr job itype
+                clearvars -except sstr job itype pfols
                 
             catch
                 error('epoch rejection not YET saved, load  ...resampled reref filt epochs TYPE .set in eeglab. Perform epoch rejection, then continue ')

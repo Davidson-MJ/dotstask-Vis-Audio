@@ -1,8 +1,11 @@
 % JOBS_ERPsortandaverage
+
+% NB: The script matchBEH2EEG must be run before this one.
+
+
 clear variables
 close all
 addpath('/Users/mdavidson/Documents/MATLAB/dotstask-Vis-Audio/Analysis')
-
 behdatadir = '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/Exp_output/DotsandAudio_behaviour/ver2';
 
 basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/EEG/ver2';
