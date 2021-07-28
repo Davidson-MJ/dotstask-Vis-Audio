@@ -10,8 +10,8 @@ cd(basedir);
 pfols = dir([pwd filesep 'p_*']);
 %%
 %preprocessing pipeline
-job.loadraw_chandata_reref = 1;
-job.filter_epoch_saveinfo  = 1 ;
+job.loadraw_chandata_reref = 0;
+job.filter_epoch_saveinfo  = 0 ;
 job.epochrejbyinspectino_saverejidx = 0;
 
 % run ICA after epoch rejection:
@@ -19,12 +19,12 @@ job.epochrejbyinspectino_saverejidx = 0;
 job.runICA  =0;
 job.rejICA_comps  =0;
 
-
+tic
 %% >>>>>>>>>>>>>>>>>>>>>>>>>
 % BEGIN participant loop
 % >>>>>>>>>>>>>>>>>>>>>>>>>
 
-for ippant=14:18
+for ippant=13:18
     
     cd(basedir)
     cd(pfols(ippant).name);
@@ -187,7 +187,7 @@ for ippant=14:18
                     rejected_trials_resp = rejected_trials;
                     save('Epoch information', 'rejected_trials_resp', '-append');
                 end
-                
+                %%
                 clearvars -except sstr job itype pfols
                 
             catch
@@ -218,7 +218,7 @@ for ippant=14:18
             
             %% reject epochs, run ICA, reject components in GUI.
             
-            EEG = pop_runica(EEG, 'extended',1,'interupt','on');
+            EEG = pop_runica(EEG, 'extended',0,'interupt','on'); %extd=0, pps 13:20
             EEG = eeg_checkset( EEG );
             %save as we go.
             %%
@@ -285,7 +285,7 @@ for ippant=14:18
   
 end
 
-
+toc
 % idset=1;
 
 
