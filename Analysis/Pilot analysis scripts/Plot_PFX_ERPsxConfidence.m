@@ -1,15 +1,15 @@
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/EEG/ver2';
 
-getelocs;
 cmap = cbrewer('qual', 'Set1', 3);
 % usechan = 31;
+
+elocs = readlocs('BioSemi64.loc'); %%
 
 meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57];
 smoothON=0;
 %%
-for ippant=1%:length(pfols)
-    cd(basedir)
-   clf
+for ippant=1:length(pfols)
+    cd(eegdatadir)
+    clf
     cd(pfols(ippant).name);
     
     %real ppant number:
@@ -21,7 +21,7 @@ for ippant=1%:length(pfols)
     load('part B ERPs by confidence')    
     %%
     figure(2);  clf;
-    set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .4]);
+    set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
     
     for idtype = 1:2
         switch idtype
@@ -74,15 +74,12 @@ for ippant=1%:length(pfols)
     title(['Participant ' num2str(ippant) ' ' dtype ', (' ExpOrder{2} ')' ]);    
     end
     %%   
-    cd(basedir);
-    cd ../../
-    %%
-    cd('Figures')
+    cd(figdir)
     cd('Confidence x ERPs')
     
     set(gcf, 'color', 'w')
     %%
-    printname = ['participant ' num2str(ippant) ' respERPs x Conf terc'];
+    printname = ['participant ' num2str(ippant) ' respERPs x Conf terc (new)'];
     print('-dpng', printname)
     
     

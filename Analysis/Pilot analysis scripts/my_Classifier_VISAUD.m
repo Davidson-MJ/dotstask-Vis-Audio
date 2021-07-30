@@ -1,8 +1,8 @@
 function  DECODERout=my_Classifier_VISAUD(dec_params)
 %from within:
-getelocs;
+% getelocs;
 DECODERout=[]; % for output.
-
+elocs = readlocs('BioSemi64.loc');
 %
 %% set basic parameters based on dec_params input:
 %size of window to view:
@@ -126,7 +126,7 @@ for nIteration = 1:dec_params.nIter
         xlabel('Time from response [ms]');
         set(gca, 'YDir', 'reverse'); legend('corrects', 'errors');
         
-        title({['Raw ERP at ' biosemi64(dec_params.showchannel).labels ','];['ntrials (matched) = ' num2str(C)]});
+        title({['Raw ERP at ' elocs(dec_params.showchannel).labels ','];['ntrials (matched) = ' num2str(C)]});
         
         %% now plot the topography, of the difference, in our window of interest.
         tempC =  squeeze(nanmean(corrects_test(:, :,:),3));
@@ -137,7 +137,7 @@ for nIteration = 1:dec_params.nIter
         
         %plot
         subplot(2,4,4);
-        topoplot(mean(tempDiff(:,[tmpt(1):tmpt(2)]),2), biosemi64);
+        topoplot(mean(tempDiff(:,[tmpt(1):tmpt(2)]),2), elocs);
         title('Raw Data, difference error-corr'); %colorbar
         %%
     end
@@ -300,7 +300,7 @@ for nIteration = 1:dec_params.nIter
     %ROC stats of sample window.
     [Az,Ry,Rx] = rocarea(bp,truth);
     
-    fprintf('Window Onset: %d; Length: %d;  Az: %6.2f\n',trainingwindowoffset(i),pts,Az);
+%     fprintf('Window Onset: %d; Length: %d;  Az: %6.2f\n',trainingwindowoffset(i),pts,Az);
         subplot(2,4,6);
         rocarea(trial_bp,truth2);
         title('ROC by trial average (training C+E)');
@@ -331,7 +331,7 @@ for nIteration = 1:dec_params.nIter
         
         
         subplot(248);
-        topoplot(sp, biosemi64);
+        topoplot(sp, elocs);
         title('scalp projection');
     end
     %%

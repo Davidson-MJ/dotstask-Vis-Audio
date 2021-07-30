@@ -21,7 +21,7 @@ for ippant =1:length(pfols)
 pcounter=1;
 
 
-cd(basedir)
+cd(eegdatadir)
 cd(pfols(ippant).name);
 
 %real ppant number:
@@ -34,7 +34,7 @@ load('Epoch information.mat');
 
 %for this participant, specify the classifier parameters we want:
 dec_params.type = 'lr'; 
-dec_params.ppant = ippant;
+dec_params.ppant = lis;
 
 
 % dec_params.dtype = 0;    % if using EEGlab data structure
@@ -50,7 +50,7 @@ dec_params.matchCE= 1; % match size of correct and errors.
 dec_params.filtlo= 0; % filter lo/ hi
 dec_params.filthi= 0;
 dec_params.showchannel= 32; % display ERP at channel, if printing
-dec_params.dispprogress=0; % 1 for figure output.
+dec_params.dispprogress=1; % 1 for figure output.
 
 
 % analysis parameters:

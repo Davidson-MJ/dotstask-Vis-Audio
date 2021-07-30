@@ -1,33 +1,32 @@
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/EEG/ver2';
 
-getelocs;
+
+
 cmap = cbrewer('qual', 'Set1', 3);
 
 meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57]; %response locked. channels.
 meanoverChans_VIS = [20:31, 57:64];
 meanoverChans_AUD = [4:15,39:52];
 
-
+elocs= readlocs('BioSemi64.loc');
 smoothON=0;
 plottopos_sep = 1; % create a separate figure for the topoplots over defined window.
 alltopos=[]; topocounter=1;% store topos for plotting a difference topo at end.
 %% PLOT Group level ERPs.
-cd(basedir)
-
+cd(eegdatadir)
 cd('GFX')
 %%
 load('GFX_averageERPsxConf.mat');
 %%
-
-set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .6]);
+figure(1); clf;
+set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
 %%
 
 
 %plot types separately. visual - audio, then audio - visual
 confis = {'low', 'high'};
-for iorder=1%:2 % third case is all together.
+for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
     
-    figure(1);  clf;
+    figure(1); clf;
     alltopos=[]; 
     switch iorder
         case 1
@@ -121,7 +120,7 @@ for iorder=1%:2 % third case is all together.
             if plottopos_sep ==1
                 figure(10);
                 subplot(2,4,tcount);
-                set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .4]);
+                set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
                 %average over window:
                 winav = dsearchn(plotXtimes', [200 350]');
                 
@@ -133,7 +132,7 @@ for iorder=1%:2 % third case is all together.
                 pmasks(keepchans)=1;
                 
                  
-                 topoplot(plotme, biosemi64);%,  'pmask', pmasks);%, 'emarker2', {pmasks, '*', 'w', 10,3});               
+                 topoplot(plotme, elocs);%,  'pmask', pmasks);%, 'emarker2', {pmasks, '*', 'w', 10,3});               
                 c=colorbar;
 %                 caxis([-2 2])
                 ylabel(c, 'uV');
@@ -146,7 +145,7 @@ for iorder=1%:2 % third case is all together.
             if mod(tcount,2)==0
                 subplot(2,2,(tcount/2)+2);
                 diffT = alltopos(tcount,:)-alltopos(tcount-1,:); % high -low conf.
-                topoplot(diffT, biosemi64);
+                topoplot(diffT, elocs);
                 c=colorbar;                
                 ylabel(c, 'uV');
                 title({['high - low'];['200-350ms']});
@@ -160,24 +159,22 @@ for iorder=1%:2 % third case is all together.
     end
     end
     %% add label above all subplots.
-    sgtitle(orderi, 'fontsize', 20)
+    st=suptitle(orderi);
+    st.FontSize=20;
     %%
     set(gcf, 'color', 'w')
-    cd(basedir);
-    cd ../../
-    
-    cd('Figures')
+    cd(figdir)
     cd('Confidence x ERPs')
     
     %%
     figure(1);
     set(gcf, 'color', 'w')
-    printname = ['GFX partB ERPs x Conf terc for ' orderi ', POchans'];
+    printname = ['GFX partB ERPs x Conf terc for ' orderi ' (NEW)'];
     print('-dpng', printname)
     try
     figure(10);
     set(gcf, 'color', 'w')
-    printname = ['GFX partB ERPs x Conf terc for ' orderi ' topoplots POchans'];
+    printname = ['GFX partB ERPs x Conf terc for ' orderi ' topoplots (NEW)'];
       print('-dpng', printname)
     catch 
     end

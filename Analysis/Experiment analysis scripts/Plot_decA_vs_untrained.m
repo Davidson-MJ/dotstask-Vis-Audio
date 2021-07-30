@@ -1,9 +1,11 @@
 
+elocs= readlocs('BioSemi64.loc');
+
     %% called from JOBS_ERPdecoder.m
     for ippant = 1:length(pfols)
         
         PFX_classifierA_onERP =[]; % note that there will be an extra dimension, for each iteration.
-        cd(basedir)
+        cd(eegdatadir)
         cd(pfols(ippant).name);
         %% load the Classifer and behavioural data:
         load('Classifier_objectivelyCorrect');
@@ -80,7 +82,7 @@
         %% > plot PFX
           %%
         figure(1); clf;
-        set(gcf, 'units', 'normalized', 'Position', [0 1 .6 .35]); shg
+        set(gcf, 'units', 'normalized', 'Position', [0 0 1 1]); shg
         leg=[];        
         Xtimes = DEC_Pe_windowparams.wholeepoch_timevec;
         
@@ -115,18 +117,17 @@
         %%
         
         subplot(133);
-        topoplot(mean(DEC_Pe_window.scalpproj,1), biosemi64);
+        topoplot(mean(DEC_Pe_window.scalpproj,1), elocs);
         title(['Participant ' num2str(ippant) ', mean spatial projection'])
         set(gca, 'fontsize', 15)
         %% print results
-        cd(basedir);
-        cd ../../
+       cd(figdir)
         %%
-        cd(['Figures' filesep 'Classifier Results' filesep 'PFX_Trained on Correct part A']);
+        cd(['Classifier Results' filesep 'PFX_Trained on Correct part A']);
         
         %%
         set(gcf, 'color', 'w')
-        print('-dpng', ['Participant ' num2str(ippant) ', w-' num2str(nIter) 'reps']);
+        print('-dpng', ['Participant ' num2str(ippant) ', w-' num2str(nIter) 'reps (new)']);
         
         
         

@@ -14,11 +14,6 @@ cd(behdatadir);
 pfols = dir([pwd filesep '*_p*']);
 
 %%
-% Quick ref:
-% Which participants had visual stim first? Needs to be updated.
-%     vis_first = [2,3,6:18,20];
-%     aud_first = [1,4,5];
-
 
 % % Plot_Accuracy_perExpOrder
  job.PlotAccuracy_perExpOrder =0;

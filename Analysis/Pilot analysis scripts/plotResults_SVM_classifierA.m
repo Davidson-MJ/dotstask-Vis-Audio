@@ -1,8 +1,8 @@
 
 % first calculate (concatenate, accuracy), across participants. then plot.
 
-job.plotPFX=1;
-job.plotGFX=0;
+job.plotPFX=0;
+job.plotGFX=1;
 
 
 plottype = 2; % 1 for A (CvsE), 2 for A (trained C vs E), test on B.
@@ -10,7 +10,7 @@ for ippant = 1:length(pfols)
 
 % prep output:
   
-        cd(basedir)
+        cd(eegdatadir)
         
         cd(pfols(ippant).name);
         %% load the Classifer and behavioural data:
@@ -75,6 +75,8 @@ if job.plotPFX==1
     
 end
 
+vis_first=[2,3,6:18];
+aud_first = [1,4,5];
 
 if job.plotGFX==1
     %%   

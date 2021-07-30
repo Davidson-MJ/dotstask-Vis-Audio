@@ -14,6 +14,6 @@ GFX_decoding= zeros(length(pfols), 2, 2,281);
 [nppants, trainedon, correctErr, npnts]= size(GFX_decoding);
 
 
-my_SVM_ECOC_ERP_Decoding_crossmodal(pfols);  
+my_SVM_ECOC_ERP_Decoding_crossmodal(pfols, eegdatadir);  
 
 

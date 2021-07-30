@@ -3,18 +3,19 @@
 % for part B data, stratifies ERP responses by confidence. Then
 % concatenates across subjects.
 
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP/EEG/ver2';
 
 % called from Plot_dataforERPs_EEGtrigbased
 normON=0;
 
 %%
 for ippant=1:length(pfols)
-    cd(basedir)
+    cd(eegdatadir)
     
     cd(pfols(ippant).name);    
     
-    load('participant TRIG extracted ERPs');
+    load('participant TRIG extracted ERPs', ...
+        'resplockedEEG', 'stimlockedEEG', 'resplockedEEG_stimbaserem', ...
+        'plotXtimes', 'ExpOrder', 'BEH_matched');
        
     % for each participant, we also require the behavioural data, should
     % already be stored, if not see Plot_PFX_Classifier results, job1.
@@ -23,7 +24,7 @@ for ippant=1:length(pfols)
     
     
     %so we have both stimlocked and resplocked. just need to use the
-    %correct indexing, based on the alltrials_matched information.
+    %correct indexing, based on the BEH_Matched information.
     
     % for resp in part B, split by confidence.        
         %pre allocate data (response locked and stim locked)                          
@@ -32,7 +33,7 @@ for ippant=1:length(pfols)
         %changed to corrects only:
         partBindx = corBindx;
                 
-        %Using both correct  trials, collect confj
+        %Using  correct  trials, collect confj
        confjmnts = ([BEH_matched(partBindx).confj]); 
         
         % take zscore to compare across participants.
@@ -104,7 +105,7 @@ for ippant=1:length(pfols)
 % plot(plotXtimes, squeeze(conf_x_rlEEG(31,:,:))); 
 % set(gca, 'ydir' , 'reverse')%     
 %%
-disp(['saving conf x ERP for ppant ' num2str(ippant)]);
+disp(['saving conf x ERP for ppant ' pfols(ippant).name]);
 
     save('part B ERPs by confidence', ...
         'conf_x_rlEEG', 'terclists',...
@@ -117,7 +118,7 @@ end
 [GFX_conf_x_rlEEG,GFX_conf_x_slEEG] =  deal(nan(length(pfols), 64, length(plotXtimes),3));
 %%
 for ippant=1:length(pfols) % 1,3,4
-    cd(basedir)    
+    cd(eegdatadir)    
     cd(pfols(ippant).name);
     load('part B ERPs by confidence');
       
@@ -127,7 +128,7 @@ for ippant=1:length(pfols) % 1,3,4
 end
 
 %% % save Group FX
-cd(basedir)  
+cd(eegdatadir)  
 cd('GFX')
 %%
     save('GFX_averageERPsxConf',...

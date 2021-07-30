@@ -9,14 +9,14 @@
 
 %Original Author: Gi-Yeul Bae (Arizona State University)
 
-function my_SVM_ECOC_ERP_Decoding_crossmodal(pfols)
+function my_SVM_ECOC_ERP_Decoding_crossmodal(pfols,eegdatadir)
 
 % Parallelization: This script utilizes Matlab parallelization ...
 % if parallelization is not possible, change "parfor" to "for-loop"
 % delete(gcp)
 % parpool
 dbstop if error
-basedir = pwd;
+% basedir = pwd;
 
 %% Subject List:
 if nargin ==0
@@ -92,7 +92,7 @@ nSamps = length(svmECOC.time);
 %% Step 9: Loop through participants
 for s = 1:nSubs %decoding is performed within each subject independently
     
-    cd(basedir)
+    cd(eegdatadir)
     sn = pfols(s).name;
     %progress output to command window
     disp(['Subject ' sn])    

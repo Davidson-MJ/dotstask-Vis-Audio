@@ -2,15 +2,21 @@
     smoothON=0;  % smooth the output by sliding 50ms window?
     %first plot the stimulus locked ERPs.
     
-    meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57];
     
-    job1.plotStimlocked=0;
-    job1.plotResplocked=0;
+    meanoverChans_RESP = [11,12,19,47,46,48,49,32,56,20,31,57];
+    meanoverChans_VIS = [20:31, 57:64];
+    meanoverChans_AUD = [4:15,39:52];
+
+    
+    elocs = readlocs('BioSemi64.loc');  
+    
+    job1.plotStimlocked=1;
+    job1.plotResplocked=1;
     
 for ippant=1:length(pfols)
   
     
-    cd(basedir)
+    cd(eegdatadir)
     
    
     cd(pfols(ippant).name);
@@ -23,23 +29,22 @@ for ippant=1:length(pfols)
     %%
     if job1.plotStimlocked==1
     figure(2);  clf;
-    set(gcf, 'units', 'normalized', 'position', [0 .35 .7 .6]);
-    %
-    getelocs;
-    
+    set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
   
     
     for ixmod = 1:2
         
-        if strcmp(ExpOrder{ixmod}, 'auditory')                        
+        if strcmpi(ExpOrder{ixmod}, 'audio')                        
             datac = nanmean(stimlockedEEG(:,:,audStimindx),3);            
             showt = [200,400]; %ms;            
-            plottones=1;            
+            plottones=1;         
+            meanoverChans= meanoverChans_AUD;
         else            
             datac=nanmean(stimlockedEEG(:,:,visStimindx),3);
             showt = [100,350]; %ms;
             
             plottones=0;
+            meanoverChans= meanoverChans_VIS;
         end
         
         %apply smoothing to dataset?:
@@ -57,7 +62,7 @@ for ippant=1:length(pfols)
             
             datac=tmpout;
         else
-            printname=['Participant' num2str(ippant) ' target locked ERP '];
+            printname=['Participant' num2str(ippant) ' target locked ERP (NEW)'];
         end
         %full screen
         
@@ -65,19 +70,19 @@ for ippant=1:length(pfols)
         
         topoX=dsearchn(plotXtimes', showt');
         %
-        %%
+        %% show topo plots at times of interest.
         for plotts = 1:2
             plotspot = plotts + 2*(ixmod-1);
             
             subplot(3,4,plotspot);
-            topoplot(mean(datac(:,topoX(plotts),:),3), biosemi64, 'emarker2', {[meanoverChans], 's' 'w'} );
+            topoplot(mean(datac(:,topoX(plotts),:),3), elocs, 'emarker2', {[meanoverChans], 's' 'w'} );
             c=colorbar;
             ylabel(c, 'uV')
             caxis([-10 10])
             title([num2str(showt(plotts)) 'ms'])
             set(gca, 'fontsize', 15);
         end
-        %%
+        %% now plot ERP.
         plotspot = [5:6,9:10] + 2*(ixmod-1);
         
         subplot(3,4,plotspot);
@@ -112,10 +117,7 @@ for ippant=1:length(pfols)
     end
     colormap('viridis')
     %%    
-    %%
-    cd(basedir);         
-    cd ../../
-    cd('Figures')
+    cd(figdir)
     cd('Stimulus locked ERPs')
     set(gcf, 'color', 'w')
     %%
@@ -129,10 +131,9 @@ for ippant=1:length(pfols)
     if job1.plotResplocked==1
     
     figure(1);  clf;
-    set(gcf, 'units', 'normalized', 'position', [0 .35 .7 .6]);
+    set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
     %
-    getelocs;
-    
+    meanoverChans=meanoverChans_RESP;
     
     
     for ixmod = 1:2
@@ -148,7 +149,7 @@ for ippant=1:length(pfols)
             dataErr = nanmean(resplockedEEG(:,:,errBindx),3);
         end
         
-        if strcmp(ExpOrder{ixmod}, 'auditory')
+        if strcmpi(ExpOrder{ixmod}, 'audio')
             titleis = 'Auditory stimulus';
             
         else
@@ -170,7 +171,7 @@ for ippant=1:length(pfols)
             dataErr=tmpout2;
            printname = ['Participant' num2str(ippant) ' response locked ERP smoothed'];
         else
-            printname = ['Participant' num2str(ippant) ' response locked ERP'];
+            printname = ['Participant' num2str(ippant) ' response locked ERP (NEW)'];
         end
         
         
@@ -194,7 +195,7 @@ for ippant=1:length(pfols)
     
     plotspot = plotts + 2*(ixmod-1);        
     subplot(3,4,plotspot);
-    topoplot(mean(datac(:,[topot(1):topot(2)]),2), biosemi64, 'emarker2', {[meanoverChans], 's' 'w'} );
+    topoplot(mean(datac(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans], 's' 'w'} );
     c=colorbar;        
         title([num2str(realt(1)) '-' num2str(realt(2)) 'ms'])        
         set(gca, 'fontsize', 15)
@@ -253,10 +254,7 @@ ph.FaceAlpha=.2;
     set(gcf, 'color', 'w')
     %%
  
-    cd(basedir);
-    cd ../../
-    %%
-    cd('Figures')
+    cd(figdir)
     cd('Response locked ERPs')
  
     print('-dpng', [printname])

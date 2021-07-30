@@ -4,19 +4,13 @@
 job1.plotStimlocked =0;
 job1.plotResplocked =1;
 
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
-cd(basedir)
-cd('EEG')
-%
-cd('ver2')
+cd(eegdatadir)
 cd('GFX')
 load('GFX_averageERPs TRIG based.mat')
 smoothON=0;
 %%
 figure(1);  clf;
-set(gcf, 'units', 'normalized', 'position', [0 .35 .7 .6]);
-%
-getelocs;
+set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
 
 exppart = {'1st half', '2nd half'};
 
@@ -24,7 +18,9 @@ meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57];
 meanoverChans_VIS = [20:31, 57:64];
 meanoverChans_AUD = [4:15,39:52];
     
-%%
+
+elocs = readlocs('BioSemi64.loc'); %%
+
 if job1.plotStimlocked ==1
 clf
 for ixmod = 1:2
@@ -63,7 +59,7 @@ for ixmod = 1:2
         end
         datac=tmpout;
     else
-        printname=['GFX stimulus locked ERP topography no detrend'];
+        printname=['GFX stimulus locked ERP topography no detrend (NEW)'];
     end
     
     
@@ -90,7 +86,7 @@ for ixmod = 1:2
   
     gfx = squeeze(mean(datac,1));
     
-    topoplot(mean(gfx(:,[topot(1):topot(2)]),2), biosemi64, 'emarker2', {[meanoverChans_tmp], 's' 'w'} );
+    topoplot(mean(gfx(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans_tmp], 's' 'w'} );
     c=colorbar;        
         title([num2str(realt(1)) '-' num2str(realt(2)) 'ms'])        
         set(gca, 'fontsize', 15)
@@ -150,11 +146,7 @@ hold on
      legend(pch, 'stimulus', 'location', 'SouthWest')
 end
 colormap('magma')
-%%
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
-cd(basedir);
-
-cd('Figures')
+cd(figdir)
 cd('Stimulus locked ERPs')
 set(gcf, 'color', 'w')
  
@@ -169,11 +161,11 @@ if job1.plotResplocked ==1
 %% >>>>>>>>>>>>>>>>> now response locked.
 
 figure(1);  clf;
-set(gcf, 'units', 'normalized', 'position', [0 .35 .7 .6], 'color', 'w');
+set(gcf, 'units', 'normalized', 'position', [0 0 1 1], 'color', 'w');
 %
-getelocs;
+
 %
-for iorder=3%1:2 3 = all.
+for iorder=3%,2% 3 = all.
    
     switch iorder
         case 1
@@ -187,11 +179,12 @@ for iorder=3%1:2 3 = all.
             orderw = 'All resp';
     end
         
-for ixmod = 1:2 % which order to use?
+for ixmod = 1:2
     
     if ixmod==1
-     g1=GFX_visrespCOR(useppants,:,:);
+        g1=GFX_visrespCOR(useppants,:,:);
         g2=GFX_visrespERR(useppants,:,:);
+        
         if iorder==1
         titleis = 'Visual response Part A';
         elseif iorder==2
@@ -203,7 +196,7 @@ for ixmod = 1:2 % which order to use?
         %         dataCOR = squeeze(nanmean(GFX_visrespCOR,1));
         %         dataErr = squeeze(nanmean(GFX_visrespERR,1));        
            g1=GFX_audrespCOR(useppants,:,:);
-        g2=GFX_audrespERR(useppants,:,:);
+           g2=GFX_audrespERR(useppants,:,:);
         if iorder==1
             titleis = 'Auditory response Part B';
         elseif iorder==2
@@ -237,7 +230,7 @@ for ixmod = 1:2 % which order to use?
         
         g1=tmpout1; g2=tmpout2;
     else
-        printname =['GFX response locked compare ERP'] ;
+        printname =['GFX response locked compare ERP (NEW)'] ;
     end
     
     %difference:
@@ -264,7 +257,7 @@ for ixmod = 1:2 % which order to use?
     
     plotspot = plotts + 2*(ixmod-1);        
     subplot(3,4,plotspot);
-    topoplot(mean(datac(:,[topot(1):topot(2)]),2), biosemi64, 'emarker2', {[meanoverChans], 's' 'w'} );
+    topoplot(mean(datac(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans], 's' 'w'} );
     c=colorbar;        
         title([num2str(realt(1)) '-' num2str(realt(2)) 'ms'])        
         set(gca, 'fontsize', 15)
@@ -332,9 +325,7 @@ end
 colormap('magma')
 set(gcf, 'color', 'w')
 %
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
-cd(basedir);
-cd('Figures')
+cd(figdir)
 cd('Response locked ERPs')
 set(gcf, 'color', 'w')
 %%

@@ -25,7 +25,7 @@ if job1.calcindividual == 1
     for ippant=1:length(pfols)
         
         %load eeg folder
-        cd(basedir)
+        cd(eegdatadir)
         cd(pfols(ippant).name);
         pdir = pwd;
         
@@ -34,7 +34,7 @@ if job1.calcindividual == 1
         
         
         %%%%%% Here some extra preprocessing as required
-        %stimulus locked, response locked, and response locked- pre stimulus
+        %stimulus locked, response locked, and response locked- with a pre-stimulus
         %baseline.
         for itype = 1:3
             
@@ -76,6 +76,7 @@ if job1.calcindividual == 1
                 if itype <3
                     baselinewith = EEG_tmpsub1;
                 else
+                    % use stim locked baseline for resp locked data.
                     baselinewith = EEG_tmpsub2;
                 end
                 
@@ -112,7 +113,7 @@ if job1.calcindividual == 1
             'resplockedEEG',...
             'resplockedEEG_stimbaserem','-append');
         
-        disp(['SAVING: >>> pp' num2str(ippant)])
+        disp(['SAVING: >>> pp' pfols(ippant).name])
         
         
         
@@ -126,9 +127,11 @@ if job1.concat_GFX == 1
     [GFX_visstimERP, GFX_audstimERP, GFX_visrespCOR, GFX_audrespCOR,...
         GFX_visrespERR, GFX_audrespERR] =  deal(nan(length(pfols), 64, size(stimlockedEEG,2)));
     %%
-    cd(basedir)
+    [vis_first, aud_first] = deal([]);
+    cd(eegdatadir)
+    %%
     for ippant=1:length(pfols)
-        cd(basedir)
+        cd(eegdatadir)
         cd(pfols(ippant).name);
         load('participant TRIG extracted ERPs');
         load('Epoch information');
@@ -142,7 +145,7 @@ if job1.concat_GFX == 1
             corr_Aud = squeeze(mean(resplockedEEG(:,:,corBindx),3));
             err_Aud  = squeeze(mean(resplockedEEG(:,:,errBindx),3));
             %
-            
+            vis_first= [vis_first, ippant];
             
         else
             corr_Vis  = squeeze(mean(resplockedEEG(:,:,corBindx),3));
@@ -150,6 +153,7 @@ if job1.concat_GFX == 1
             corr_Aud = squeeze(mean(resplockedEEG(:,:,corAindx),3));
             err_Aud  = squeeze(mean(resplockedEEG(:,:,errAindx),3));
             
+            aud_first= [aud_first, ippant];
             
         end
         
@@ -169,10 +173,11 @@ if job1.concat_GFX == 1
     end
     %%
     % %% % save Group FX
-    cd(basedir)
+    cd(eegdatadir)
     cd('GFX')
     % %%
     disp(['saving GFX - stim and resp locked ERPs']);
     save('GFX_averageERPs TRIG based', 'GFX_audrespCOR', 'GFX_audrespERR', ...
-        'GFX_audstimERP', 'GFX_visrespCOR', 'GFX_visrespERR', 'GFX_visstimERP', 'plotXtimes');
+        'GFX_audstimERP', 'GFX_visrespCOR', 'GFX_visrespERR', 'GFX_visstimERP', 'plotXtimes',...
+        'vis_first', 'aud_first');
 end

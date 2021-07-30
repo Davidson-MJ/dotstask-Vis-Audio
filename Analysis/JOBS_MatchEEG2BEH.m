@@ -23,7 +23,7 @@ cd(behdatadir)
 allppbeh =dir([pwd filesep '*_p*']);
 %%
 
-for ippant = 17:length(pfols)
+for ippant = 1:length(pfols)
     cd(eegdatadir)
     cd(pfols(ippant).name);
     
@@ -465,26 +465,26 @@ for ippant = 17:length(pfols)
     %% collect indexes for comparisons of interest and save per ppant.
     
     %% Correct in part A
-    corAindx = intersect(find([BEH_matched.cor]), find(ismember([BEH_matched.ExpType], 'A')));
+    corAindx = intersect(find([BEH_matched.cor]), find(ismember({BEH_matched.ExpType}, 'A')));
     corAindx = intersect(corAindx, notprac);
     
     %% Correct in part B
-    corBindx = intersect(find([BEH_matched.cor]), find(ismember([BEH_matched.ExpType], 'B')));
+    corBindx = intersect(find([BEH_matched.cor]), find(ismember({BEH_matched.ExpType}, 'B')));
     corBindx = intersect(corBindx, notprac);
     %% Error in part A
-    errAindx = intersect(find([BEH_matched.cor]==0), find(ismember([BEH_matched.ExpType], 'A')));
+    errAindx = intersect(find([BEH_matched.cor]==0), find(ismember({BEH_matched.ExpType}, 'A')));
     errAindx = intersect(errAindx, notprac);
     
     %% Error in part B
-    errBindx = intersect(find([BEH_matched.cor]==0), find(ismember([BEH_matched.ExpType], 'B')));
+    errBindx = intersect(find([BEH_matched.cor]==0), find(ismember({BEH_matched.ExpType}, 'B')));
     errBindx = intersect(errBindx, notprac);
     
     %% Vis stim
-    visStimindx = find(ismember(lower([BEH_matched.stimtype]), 'visual'));
+    visStimindx = find(ismember(lower({BEH_matched.stimtype}), 'visual'));
     visStimindx = intersect(visStimindx, notprac);
     
     %% Audio stim
-    audStimindx = find(ismember(lower([BEH_matched.stimtype]), 'audio'));
+    audStimindx = find(ismember(lower({BEH_matched.stimtype}), 'audio'));
     audStimindx = intersect(audStimindx, notprac);
     
     
