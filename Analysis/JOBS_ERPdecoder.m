@@ -19,7 +19,7 @@ job.plot_A_vs_Untrainedtrials_GFX        = 0;    %  GFX_ of above
 
 job.plot_A_vs_RTsinA                    =0; % won't work unless difference in C and E RTs!
 
-job.plot_A_vs_SLIDINGwindow_corr_in_B   =0;  % using the A vector, multiple part B ERP, and see check performance correlation with confidence (or RT) over time..
+job.plot_A_vs_SLIDINGwindow_corr_in_B   =1;  % using the A vector, multiple part B ERP, and see check performance correlation with confidence (or RT) over time..
 job.plot_A_vs_Confidence_split          =0;  % using the A vector, multiple part B ERP, and see if we see quantile definition in confidence.
 
 %plot results from classifier trained on part B of exp, on predicting
@@ -31,9 +31,9 @@ job.plot_B_vs_Confidence                =0; % uses the amplitude of discriminato
 
 %alternate method, using SVM
 %>>
-job.trainclassifierpartA_CvsE_useSVM     = 1;
-job.traincrossmodalAvsB_useSVM          = 1;
-job.plot_A_classifier_SVMresults        =1;
+job.trainclassifierpartA_CvsE_useSVM     = 0;
+job.traincrossmodalAvsB_useSVM          = 0;
+job.plot_A_classifier_SVMresults        =0;
 %%
 
  cmap = flip(cbrewer('div', 'Spectral', 4));
@@ -49,7 +49,14 @@ if job.plot_A_vs_Untrainedtrials==1
     %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.    
   Plot_decA_vs_untrained;
 end
+%%%%%%%%%%%%%%%%%%%%%
+if job.plot_A_vs_Untrainedtrials==1
+    % As above, but uses cross validation to estimate classifier accuracy
+    % (rather than single shot per iteration).
+  Plot_decA_vs_untrained_pooledClassifier;
+end
 
+%% 
 if job.plot_A_vs_Untrainedtrials_GFX==1   
     Plot_decA_vs_untrained_GFX;
 end
@@ -79,7 +86,7 @@ if job.plot_B_vs_Confidence ==1
 end
 
 
-%%
+%% SVM methods:
 %%% >>>>>>>>>>>>>
 if job.trainclassifierpartA_CvsE_useSVM==1
     Call_classifer_partA_useSVM;

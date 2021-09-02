@@ -66,65 +66,13 @@ elseif  Expver==1
 end
 %%
 
-title(['Participant ' pname ' Confidence in partB ' ExpOrder{2} ' trials '], 'Interpreter', 'none');
+title(['Participant ' num2str(ippant) ' ' pname ' Confidence in partB ' ExpOrder{2} ' trials '], 'Interpreter', 'none');
 hold on;
 set(gcf, 'color', 'w')
 
 % %% print output.
 cd(figdir)
 cd('Confidence plots')
-print('-dpng', ['Participant ' pname ', confidence in partB ' ExpOrder{2} ]) 
+print('-dpng', ['Participant ' num2str(ippant) ' ' pname ', confidence in partB ' ExpOrder{2} ]) 
 
-%% can also plot the results of Info seeking behaviour, if it occurred.
-% 
-% %trials where no choice was given:
-% ForcedOpt = find([alltrials(startB:endB).InfoOption] ==0); 
-% Choiceavail = find([alltrials(startB:endB).InfoOption] ==1); 
-% 
-% %choice on all trials:
-% ChoiceOpt= [alltrials(startB:endB).ISeek];
-% 
-% ReviewOpt = find(ChoiceOpt ==1);
-% 
-% %we need the unique characters choose 0 and no option, to give us the
-% %'chosen respond now' option.
-% RespondOpt = find(ChoiceOpt ==0);
-% 
-% %We already have the forced choice, so now find choosing to respond.
-% ChosenRespOpt = intersect(Choiceavail, RespondOpt);
-% 
-% % Choose review, choose respond, forced respond)
-% ConfData.INDEX_Correct= CORid;
-% ConfData.INDEX_Error= ERRid;
-% ConfData.INDEX_ReviewbyChoice = ReviewOpt;
-% ConfData.distrib_ReviewbyChoice = ConfData.confj(ReviewOpt);
-% 
-% ConfData.INDEX_RespondbyChoice = ChosenRespOpt;
-% ConfData.distrib_RespondbyChoice = ConfData.confj(ChosenRespOpt);
-% 
-% ConfData.INDEX_ForcedChoice =ForcedOpt;
-% ConfData.distrib_ForcedChoice = ConfData.confj(ForcedOpt);
-% 
-% 
-% 
-% 
-% % also show by choice:
-% 
-% subplot(2,1,2)
-% dataX=[];
-% dataX{1} = abs(ConfData.confj(ConfData.INDEX_RespondbyChoice))+45;
-% dataX{2} = abs(ConfData.confj(ConfData.INDEX_ReviewbyChoice))+45;
-% dataX{3} = abs(ConfData.confj(ConfData.INDEX_ForcedChoice))+45;
-% 
-% 
-% 
-% h=rm_raincloud(dataX', cmap([18],:), 1, 'ks', 2);
-% xlabel('Confidence judgement')
-% ylabel('Response')
-% set(gca, 'yticklabels', {['Forced response'] , ['Review by choice'], ['Respond by choice']}, 'fontsize', 16)
-% %  xlim([0 100]) 
-% title(['Confidence in ' cfg.stimTypes{2} ' trials ']);
-% hold on;
-% set(gcf, 'color', 'w')
-% shg
-% % save('Confidence output summary', 'ConfData');
+%

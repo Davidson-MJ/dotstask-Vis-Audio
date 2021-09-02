@@ -1,7 +1,7 @@
 
 %PLOT GFX, stim and response locked ERPs
 
-job1.plotStimlocked =0;
+job1.plotStimlocked =1;
 job1.plotResplocked =1;
 
 cd(eegdatadir)
@@ -165,7 +165,7 @@ set(gcf, 'units', 'normalized', 'position', [0 0 1 1], 'color', 'w');
 %
 
 %
-for iorder=3%,2% 3 = all.
+for iorder=1%,2% 3 = all.
    
     switch iorder
         case 1

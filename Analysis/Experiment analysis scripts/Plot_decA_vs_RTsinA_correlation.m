@@ -8,7 +8,7 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 elocs = readlocs('BioSemi64.loc');
 
 
-job1.calcandconcat_PFX =0; % using correlation
+job1.calcandconcat_PFX =1; % using correlation
 job1.plotPFX=1;
 job1.plotGFX=1;
 
@@ -16,7 +16,7 @@ job1.plotGFX=1;
 
 
 
-normON = 0; % normalize EEG data.
+normON = 0; % normalize EEG data (as per classifier call).
 
 RTbugfix = 0; % when collecting RTs, restrict to a longer window (>330ms),
 %to avoid the bug.
@@ -44,9 +44,11 @@ if job1.calcandconcat_PFX ==1
         partAindx = sort([corAindx]);
         
         partAdata = resplockedEEG(:,:,partAindx);
+        
+        
         [nchans, nsamps, ntrials] =size(partAdata);
         
-        
+        % normalize by rescaling.
         if normON==1
             data_norm = zeros(size(partAdata));
             for ichan = 1:nchans
@@ -67,7 +69,6 @@ if job1.calcandconcat_PFX ==1
         %%
         % collect RTs for this dataset. Adjust based on modality.
         
-        
         allRTs= [BEH_matched(partAindx).rt];
         
         %note that we need to adjust RTs, as we did in the behavioural
@@ -79,7 +80,7 @@ if job1.calcandconcat_PFX ==1
         %adjust auditory RTs
         if strcmpi(ExpOrder{1}, 'audio') % part A auditory RTs.
             
-            %remove implausible values, RTs recorded before second tone begins.
+            %remove implausible values, any RTs recorded before second tone begins.
             keepvec2 = allRTs >.6;
             
             %which trials to save overall?

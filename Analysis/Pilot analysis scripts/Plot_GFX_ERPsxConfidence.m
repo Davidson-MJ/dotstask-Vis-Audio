@@ -16,6 +16,7 @@ cd(eegdatadir)
 cd('GFX')
 %%
 load('GFX_averageERPsxConf.mat');
+load('GFX_averageERPs TRIG based.mat', 'vis_first', 'aud_first');
 %%
 figure(1); clf;
 set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
@@ -124,9 +125,9 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
                 %average over window:
                 winav = dsearchn(plotXtimes', [200 350]');
                 
-                tdata = squeeze(mean(datac(:,:, winav(1):winav(2), iterc),3));
+                tdata = squeeze(nanmean(datac(:,:, winav(1):winav(2), iterc),3));
                 
-                plotme =squeeze(mean(tdata,1));
+                plotme =squeeze(nanmean(tdata,1));
                 keepchans = [20:32, 57:64];
                 pmasks = zeros(1,64);
                 pmasks(keepchans)=1;

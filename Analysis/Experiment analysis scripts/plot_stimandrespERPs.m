@@ -50,7 +50,7 @@ for ippant=1:length(pfols)
         %apply smoothing to dataset?:
         %50 ms window.
         if smoothON==1
-            printname = ['Participant' num2str(ippant) ' target locked ERP smoothed'];
+            printname = [pfols(ippant).name  ' target locked ERP smoothed'];
             winsize =  ceil(256/20); % 50 ms
             tmpout = zeros(size(datac));
             for ichan=1:size(datac,1)
@@ -62,7 +62,7 @@ for ippant=1:length(pfols)
             
             datac=tmpout;
         else
-            printname=['Participant' num2str(ippant) ' target locked ERP (NEW)'];
+            printname=[pfols(ippant).name ' target locked ERP (NEW)'];
         end
         %full screen
         
@@ -144,9 +144,14 @@ for ippant=1:length(pfols)
             dataCOR =  nanmean(resplockedEEG(:,:,corAindx),3); 
             dataErr = nanmean(resplockedEEG(:,:,errAindx),3);
             
+            nCor= length(corAindx);
+            nErr= length(errAindx);
         else
             dataCOR =  nanmean(resplockedEEG(:,:,corBindx),3); 
             dataErr = nanmean(resplockedEEG(:,:,errBindx),3);
+            
+            nCor= length(corBindx);
+            nErr= length(errBindx);
         end
         
         if strcmpi(ExpOrder{ixmod}, 'audio')
@@ -169,9 +174,9 @@ for ippant=1:length(pfols)
             end
             dataCOR = tmpout1;
             dataErr=tmpout2;
-           printname = ['Participant' num2str(ippant) ' response locked ERP smoothed'];
+           printname = [pfols(ippant).name ' response locked ERP smoothed'];
         else
-            printname = ['Participant' num2str(ippant) ' response locked ERP (NEW)'];
+            printname = [pfols(ippant).name ' response locked ERP'];
         end
         
         
@@ -246,7 +251,7 @@ ph.FaceAlpha=.2;
         plot([0 0], ylim, ['k-'])
         plot([xlim], [0 0], ['k-'])
         
-        legend('Correct', 'Error', 'Err-Corr')
+        legend(['Correct (n' num2str(nCor) ')'], ['Error (n' num2str(nErr) ')'], 'Err-Corr')
         xlim([- 200 600]);
     end
     %%

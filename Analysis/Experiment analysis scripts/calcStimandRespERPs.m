@@ -4,7 +4,7 @@
 % called from JOBS_ERPsortandaverage
 
 
-
+dbstop if error
 %% updated 23-06-20, to also calculate response locked ERPs, with prestim baseline.
 
 %extra preprocessing before plotting:
@@ -13,7 +13,7 @@ rmbase = 1;
 
 % job list:
 job1.calcindividual = 1;
-job1.concat_GFX = 1;
+job1.concat_GFX = 0;
 %
 %data types to analyze.
 idatatypes = {'STIM', 'RESP', 'RESP-stimbase'};
@@ -32,7 +32,8 @@ if job1.calcindividual == 1
         %load raw EEG, matched for trial index with behaviour.
         load('participant TRIG extracted ERPs.mat');
         
-        
+        clc;
+        disp([' loading ppant ' num2str(ippant) ]);
         %%%%%% Here some extra preprocessing as required
         %stimulus locked, response locked, and response locked- with a pre-stimulus
         %baseline.
@@ -70,8 +71,8 @@ if job1.calcindividual == 1
             if rmbase==1
                 %% remove baseleine, 
                 EEGrmb = zeros(size(EEG_tmpsub1));
-                zerostart = dsearchn(plotXtimes', [-250 -50]');
-                
+%                 zerostart = dsearchn(plotXtimes', [-250 -50]');
+                zerostart = dsearchn(plotXtimes', [-150 -50]');
                 %% which data to use for baseline subtraction?
                 if itype <3
                     baselinewith = EEG_tmpsub1;
@@ -125,7 +126,7 @@ if job1.concat_GFX == 1
     %after completing across participants, store GFX.
     %%     %%
     [GFX_visstimERP, GFX_audstimERP, GFX_visrespCOR, GFX_audrespCOR,...
-        GFX_visrespERR, GFX_audrespERR] =  deal(nan(length(pfols), 64, size(stimlockedEEG,2)));
+        GFX_visrespERR, GFX_audrespERR] =  deal(nan(length(pfols), 64, size(EEGstim_matched,2)));
     %%
     [vis_first, aud_first] = deal([]);
     cd(eegdatadir)

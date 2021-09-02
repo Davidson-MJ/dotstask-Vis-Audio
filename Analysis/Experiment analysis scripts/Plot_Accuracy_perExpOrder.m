@@ -84,7 +84,7 @@ for ippant = 1:length(pfols)
     cd(figdir)
     cd('Accuracy plots')
     %%
-    print('-dpng', ['Participant ' pname ', accuracy summary'])
+    print('-dpng', ['Participant ' num2str(ippant) ', accuracy summary'])
     %% store for  across participant averaging:
     Accuracy_byAorB(ippant, :) = [Aacc,Bacc];
     %just look by exp type, sort next into modality.

@@ -23,16 +23,19 @@ normON = 0; % normalize EEG data.
 
 
 TESTondatatypes = {'resplocked', 'stimlocked', 'resplocked-stimbase'};
+%%
 for usetype = 1%1:3; of the above ^
     
     
     %%
     if job1.calcandconcat_PFX ==1
         
-        [GFX_DECA_Conf_corr_slid ,GFX_DECA_RT_corr_slid ]=deal(nan(length(pfols), 28));
-        
+%         [GFX_DECA_Conf_corr_slid ,GFX_DECA_RT_corr_slid ]=deal(nan(length(pfols), 28));
+
+        [GFX_DECA_Conf_corr_slid ,GFX_DECA_RT_corr_slid ]=deal([]);
         GFX_DecA_ScalpProj=nan(length(pfols), 64);
         GFX_ExpOrders=[];
+        
         for ippant = 1:length(pfols)
             cd(eegdatadir)
             cd(pfols(ippant).name);
@@ -45,7 +48,8 @@ for usetype = 1%1:3; of the above ^
             %how many iterations were used in classifier training?
             
             nIter = size(DEC_Pe_window.scalpproj,1);
-            partBindx = corBindx; % correct only.
+%             partBindx = sort([errBindx,corBindx]); % correct only.
+            partBindx = sort(corBindx);
             
             switch usetype
                 case 1
@@ -79,14 +83,14 @@ for usetype = 1%1:3; of the above ^
             
             
             
-            for iSLIDE = 1:2 % compare classifier output based on RT and confidence.
+            for iSLIDE = 1%:2 % compare classifier output based on RT and confidence.
                 
                 % collect relevant behavioural data per ppant.
                 switch iSLIDE
                     case 1
                         %note that confjmnts are from sure error - to sure correct.
-                        allBEH= zscore(([BEH_matched(partBindx).confj]));
-                        
+
+                        allBEH= zscore(abs([BEH_matched(partBindx).confj]));
                     case 2
                         %these RTs are incorrect (need to be adjusted, as
                         %in prev script).
@@ -98,25 +102,45 @@ for usetype = 1%1:3; of the above ^
                 %% we are using the decoder from part A (correct vs Errors)
                 %note, use the average discrim vector!
                 v = mean(DEC_Pe_window.discrimvector,1)';
+                
+
 %                 v = DEC_Pe_window.discrimvector(1,:)'
                 %we want to take the probability, when this decoder is applied to a
                 %sliding window across part B epochs.
                 testdata = reshape(partBdata, nchans, nsamps* ntrials)';%
                 %% multiply data by classifier:
-                
-                ytest_tmp = testdata* v(1:end-1) + v(end);
-                
-                
+                %if using vector 
+                ytest_tmp = testdata* v(1:end-1) + v(end);                                
                 %take the prob
-                ytest_tmp= bernoull(1,ytest_tmp);
-                
+                ytest_bp= bernoull(1,ytest_tmp);                
                 % reshape for single trial decoding
-                ytest_trials = reshape(ytest_tmp,nsamps,ntrials);
+                ytest_trials = reshape(ytest_bp,nsamps,ntrials);
+                
+%                 
+                %% if using scalp proj.
+%                 sc_v= mean(DEC_Pe_window.scalpproj,1);
+%                 ytest_sc = testdata * sc_v';
+%                 ytest_bp_sc= bernoull(1,ytest_sc); 
+%                 ytest_trials = reshape(ytest_bp_sc,nsamps,ntrials);
+                %% debugging,
+                %% plot results using discrim vector and scalp proj.
+%                 figure(1); clf;
+%                 subplot(221)
+%                 plot(plotXtimes, mean(ytest_trials,2)); title('mean using discrim (v)');
+%                 subplot(222);
+%                 plot(plotXtimes, mean(ytest_trials_sc,2)); title('mean using scalp proj.');
+%                 subplot(223);
+%                 topoplot(v(1:64), elocs); title('mean vector,'); colorbar;
+%                 subplot(224);
+%                 sc_v= mean(DEC_Pe_window.scalpproj,1);
+%                 topoplot(sc_v, elocs); title('meanproj'); colorbar
+%                 
+                
                 
                 %% now take correlation with confidence, in a sliding window:
                 
-                % set up the sliding window.
-                movingwin = [.1, .05];
+                % set up the sliding window. 100ms window, 50 ms steps.
+                movingwin = [.1, .01];
                 Fs = 256;
                 Nwin=round(Fs*movingwin(1)); % number of samples in window
                 Nstep=round(movingwin(2)*Fs); % number of samples to step through
@@ -131,18 +155,28 @@ for usetype = 1%1:3; of the above ^
                     indx=winstart(n):winstart(n)+Nwin-1;
                     
                     %get mean decoder prob in this window, all trials.
-%                     datawin = mean(ytest_trials(indx,:));
+
                     datawin = mean(ytest_trials(indx,:),1);
                     
                     %correlate with confidence (all trials)
-%                     [R,p] = corrcoef(datawin, allBEH);
-                    [R,p] = corr([datawin',allBEH'],'type', 'Spearman');
-                    
+                    [R,p] = corrcoef(datawin, allBEH);
+%                     [R,p] = corr([datawin',allBEH'],'type', 'Spearman');
+%                     
                     %store sliding probability :
                     outgoing(n)= R(1,2);
                     
                 end
                 
+                 winmid=winstart+round(Nwin/2);
+                 
+                 
+%                  %% DEBUG plots
+%                  figure(2);
+%                  subplot(121); 
+%                  plot(plotXtimes(winmid), outgoing); title('corr. using scalp');
+%                  %%
+%                  subplot(122); 
+%                  plot(plotXtimes(winmid), outgoing); title('corr. using sp');
                 %% %% store output participants:
                 if iSLIDE==1
                     GFX_DECA_Conf_corr_slid(ippant,:) = outgoing;
@@ -160,11 +194,11 @@ for usetype = 1%1:3; of the above ^
         %save GFX level data
         cd(eegdatadir)
         cd('GFX')
-        
-       % save both.
+% %         
+%        % save both.
         save('GFX_DecA_slidingwindow_predictsB_Behav', ...
             'GFX_DECA_Conf_corr_slid',...
-            'GFX_DECA_RT_corr_slid', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders','winmid', 'plotXtimes');
+            'GFX_DECA_RT_corr_slid', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders', 'winmid', 'plotXtimes');
        
         
             
@@ -172,14 +206,14 @@ for usetype = 1%1:3; of the above ^
     %%
     
     if job1.plotPFX==1
-        %load if needed
+       % load if needed
         if ~exist('GFX_DECA_Conf_corr_slid','var')
             cd(eegdatadir);
             cd('GFX')
             load('GFX_DecA_slidingwindow_predictsB_Behav');
         end
         
-        %plot elements
+        %plot elements 
         t=winmid/256; %Fs
         
         %output to figdir.
@@ -191,11 +225,11 @@ for usetype = 1%1:3; of the above ^
         
         
         % conf or RTs?
-%         dataIN= GFX_DECA_Conf_corr_slid;
-%         ytitle = 'Confidence- correct only';
+        dataIN= GFX_DECA_Conf_corr_slid;
+        ytitle = 'Confidence- correct only';
         
-        dataIN= GFX_DECA_RT_corr_slid;
-        ytitle = 'RT- correct only';
+%         dataIN= GFX_DECA_RT_corr_slid;
+%         ytitle = 'RT- correct only';
         for ippant=1:length(pfols);
             
             % load ppant data
@@ -203,11 +237,11 @@ for usetype = 1%1:3; of the above ^
             plotscalp = GFX_DecA_ScalpProj(ippant,:);
             ExpOrder= GFX_ExpOrders(ippant).d;
             %%
-            set(gcf, 'units', 'normalized', 'position', [0    1    1 1], 'color', 'w');
-            %     clf
+            set(gcf, 'units', 'normalized', 'position', [0    1    1 1], 'color', 'w', 'visible', 'off');
+            clf
             subplot(1,3,1:2)
             plot(plotXtimes(winmid),plotme, 'color', 'k', 'linew', 3);
-            title({['P' num2str(ippant) ', Classifier trained on ERP A (C vs E) x ERP B'];[ExpOrder{1} '- ' ExpOrder{2} ]});
+%             title({['P' num2str(ippant) ', Classifier trained on ERP A (C vs E) x ERP B'];[ExpOrder{1} '- ' ExpOrder{2} ]});
             xlabel(['Time [ms] after ' dataprint ' in part B']);
             ylabel({['DECODE x ' ytitle ];['[r]']})
             ylim([-.2 .2])
@@ -220,19 +254,20 @@ for usetype = 1%1:3; of the above ^
             %             title([num2str(nIter) 'x Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']'])
             set(gca, 'fontsize', 15)
             
-            shg
+%             
             printname = ['Participant ' num2str(ippant) ' Dec A sliding confidence corr',...
                 ExpOrder{1} '- ' ExpOrder{2} ', ' dataprint  '(new)'];
             
-            %             print('-dpng', printname)
+                        print('-dpng', printname)
             
         end
     end
     
-    %%%%%%%
-    vis_first=[2,3,6:12];%18];
+    %% %%%%%
+    vis_first=[2,3,6:23];
     aud_first = [1,4,5];
     dataprint = TESTondatatypes{usetype};
+    
     if job1.plotGFX==1
         
         %load if needed

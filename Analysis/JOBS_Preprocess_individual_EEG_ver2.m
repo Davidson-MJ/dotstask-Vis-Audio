@@ -16,7 +16,7 @@ job.epochrejbyinspectino_saverejidx = 0;
 
 % run ICA after epoch rejection:
 
-job.runICA  =0;
+job.runICA  =1;
 job.rejICA_comps  =0;
 
 tic
@@ -24,7 +24,7 @@ tic
 % BEGIN participant loop
 % >>>>>>>>>>>>>>>>>>>>>>>>>
 
-for ippant=13:18
+for ippant=21:23
     
     cd(basedir)
     cd(pfols(ippant).name);

@@ -37,7 +37,7 @@ for ippant=1:length(pfols)
        confjmnts = ([BEH_matched(partBindx).confj]); 
         
         % take zscore to compare across participants.
-        zconfj = zscore(confjmnts);
+        zconfj = zscore((confjmnts)); %% not abs(conjmnts)
         
         %avoid trials in which there was a change of mind (negative
         %confidence value).

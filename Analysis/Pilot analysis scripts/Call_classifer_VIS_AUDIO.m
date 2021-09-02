@@ -14,7 +14,7 @@ GFX_decoding= zeros(length(pfols), 2, 2,281);
 % to use more trials. (cycles through matched sizes of Errors and Correct
 % trials).
 
-nIter = 10; % n iterations, final output is the average spatial discrimination vector.
+nIter = 10; % 10; % n iterations, final output is the average spatial discrimination vector.
 
 for ippant =1:length(pfols)
     
@@ -56,8 +56,8 @@ dec_params.dispprogress=1; % 1 for figure output.
 % analysis parameters:
 dec_params.window_frames_ms = [plotXtimes(1) plotXtimes(end)];  %needs to be shorter than actual epoch, or will error.
 dec_params.baseline_ms = [-250 -50];
-% dec_params.training_window_ms= [05 100]; % ERN
-dec_params.training_window_ms= [200 350]; % Pe
+dec_params.training_window_ms= [05 100]; % ERN
+% dec_params.training_window_ms= [200 350]; % Pe
 
 %create data for classifier:
 allD = resplockedEEG;
@@ -74,7 +74,7 @@ vec(corAindx)=1;
 corr_index=  vec;
 dec_params.correct_index= corr_index; % in binary.
 
-dec_params.nIter = nIter;
+dec_params.nIter = nIter; %% how many times to train?
 % 
 % % %>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 % % %call classifier based on above:
@@ -82,9 +82,12 @@ DECout = my_Classifier_VISAUD(dec_params);
 
 %% now we have the classifer performance on all trials.
 
-DEC_Pe_window = DECout;
-DEC_Pe_windowparams = dec_params;
-save('Classifier_objectivelyCorrect', 'DEC_Pe_window','DEC_Pe_windowparams');
+% DEC_Pe_window = DECout;
+% DEC_Pe_windowparams = dec_params;
+DEC_ERN_window = DECout;
+DEC_ERN_windowparams = dec_params;
+% save('Classifier_objectivelyCorrect', 'DEC_Pe_window','DEC_Pe_windowparams');
+save('Classifier_objectivelyCorrect','DEC_ERN_window', 'DEC_ERN_windowparams','-append');
 
 
 %% Now also create classifer for part B.

@@ -150,7 +150,7 @@ for ippant = 1:length(pfols)
     cd('RTs per participant, by stim type')
     set(gcf, 'color', 'w')
     %print
-    print('-dpng', ['participant ' pname ' correct and error RT distributions'])
+    print('-dpng', ['participant ' num2str(ippant) ' ' pname ' correct and error RT distributions'])
 
 clear usetrials*
 
@@ -210,7 +210,7 @@ set(gcf, 'units', 'normalized', 'position', [0 0 .75 .75], 'color', 'w')
 vis_first = find(ExperimentOrder==1);
 aud_first = find(ExperimentOrder==2);
 
-vis_first= [13:18]; % this is the RT fixed subset.
+% vis_first= [13:18]; % this is the RT fixed subset.
 
 
 % partA_vis = partA(vis_first,:);
@@ -266,6 +266,8 @@ elseif p1<.01
     psig= '**';
 elseif p1<.05
     psig ='*';
+else 
+    psig= 'ns';
 end
     
     text(1, (max(mBar(1,:)) +.1), psig, 'fontsize', 25)

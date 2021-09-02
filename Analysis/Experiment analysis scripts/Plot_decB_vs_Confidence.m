@@ -8,7 +8,7 @@
     [cjmean, cjse, cjdistr]=deal([]);
     
     
-    for ippant = 1:length(pfols)
+    for ippant = 1%:length(pfols)
     cd(basedir)
     cd(pfols(ippant).name);
     %% load the Classifer and behavioural data:
@@ -17,7 +17,8 @@
     load('Epoch information.mat');
    %% 
     %
-    partBindx = contains({alltrials_matched.ExpType}, 'B');
+%     partBindx = contains({alltrials_matched.ExpType}, 'B');
+    partBindx = find(ismember({alltrials_matched.ExpType}, 'B'));
     partBdata = resplockedEEG(:,:,partBindx);
     
     % collect confj for this dataset

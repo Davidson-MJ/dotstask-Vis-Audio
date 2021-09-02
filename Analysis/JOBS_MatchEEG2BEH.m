@@ -335,30 +335,37 @@ for ippant = 1:length(pfols)
     allrespTrials_inEEG_BEHindx=allTriggerEvents_resp_gd.epoch;
     
     
-%          %% Next sanity check. Quickly compare all the recorded response triggers,
-%     % with the order of those in the behavioural data file. Any differences need to be
-%     %flagged.   
-%     %Note that this on the pre-rejection indices.
-%     if ippant ~=2 %(missing data)
-%         allresps_id = find(ismember(allTriggerEvents_resp.type, [10,11,20,21,110,111,120,121]));
-%         allresps = allTriggerEvents_resp.type(allresps_id);
-%         allresps_evs = allTriggerEvents_resp.urevent(allresps_id);
-%         allBehresps = ([alltrials.resp1_loc] .*10) + ([alltrials.cor]);
-%         %increment all second half by 100, to match EEG triggers.
-%         secondHalf = ismember([alltrials.ExpType],'B');
-%         allBehresps(secondHalf) = allBehresps(secondHalf)+100;
-%         compareOrder = [allresps_evs(1:870),allresps(1:870), allBehresps'];
-%         triggdiff = compareOrder(:,1) - compareOrder(:,2);
-%         
-%         %% should be zero!
-%         disp(['max difference between order of Behavioural responses, '...
-%             'and recorded triggered responses: ' num2str(max(triggdiff))]);
-%         
-%         if triggdiff
-%             error('incorrect response triggers recorded');
-%         end
-%     end
-  
+    %% stock take: compare the order of events (correct and error), in both behaviour
+    % and EEG response triggers, to make sure they are align before
+    % continuing.
+    %to match the trigger codes, first half trials 
+    % 1,2 for left/right response= 1,0 for correct incorrect, resulting in
+    % (10,11,20,21).
+    
+    %match behavioural data to trigger codes:
+    allBehresps = ([alltrials.resp1_loc] .*10) + ([alltrials.cor]);
+    %         %increment all second half by 100, to match EEG triggers.
+    secondHalf = ismember([alltrials.ExpType],'B');
+    allBehresps(secondHalf) = allBehresps(secondHalf)+100;
+    
+    %now compare order of recorded and retained trigger codes in EEG, with
+    %the BEH data.
+    allBeh_trigs= allBehresps(allrespTrials_inEEG_BEHindx);
+    allEEG_trigs= allTriggerEvents_resp_gd.type;
+    
+    %should be no difference between the 2!
+             triggdiff = allBeh_trigs - allEEG_trigs';
+    clf; 
+    xvec= 1:length(allBeh_trigs);
+    subplot(211);
+    plot(xvec, allBeh_trigs, 'b'); hold on;
+    plot(xvec, allEEG_trigs, 'r'); legend('beh', 'eeg');
+    title({['Participant id ' num2str(ippant) ];[' EEG triggers and BEH triggers, overlapped']});
+    subplot(212);
+    plot(xvec, triggdiff);
+    title('difference between triggers: should be zero');
+    shg
+    
     %% load the processed EEG data
     used = {'STIM', 'RESP'};
     %load each EEG type, preprocessed.
@@ -389,7 +396,7 @@ for ippant = 1:length(pfols)
     end
     
     %% Sanity check, does EEG trial count (just loaded), match the trial
-    % count we have information for (i.e. trial counts match?)
+    % count we have information for after rejection/alignment above
     NstimEEGtrials=size(remainingSTIM_EEGdata,3) ;
     NrespEEGtrials=size(remainingRESP_EEGdata,3) ;
     
@@ -402,20 +409,37 @@ for ippant = 1:length(pfols)
     
     
     % Now, make sure that both STIM and RESP have the same trials in both.
+    % This is necessary to make sure we  can match stimulus and response
+    % data on the same trial.
+    
     % Shrink the larger dataset to match the smaller:
     
+    disp([num2str(NstimEEGtrials) ' trials in STIMeeg, ' num2str(NrespEEGtrials) ' in RESPeeg'])
+    
     if NstimEEGtrials>= NrespEEGtrials;
-        keeptS = ismember(allstimTrials_inEEG_BEHindx,allrespTrials_inEEG_BEHindx);
-        %keeptS now indexes all the shared trials, that are in stim, but also in RESP
+    
+        disp('Shrinking Stim to match Resp');
+    
+        
+        %keeptS  indexes all the shared trials, that are in stim, but also in RESP
         %( A that is in B.(logical id))
         
-        %so shrink STIM EEG
+        keeptS = ismember(allstimTrials_inEEG_BEHindx,allrespTrials_inEEG_BEHindx);
+        
+        
+        %Since more STIM than RESP, remove those in STIM without a partner.
         matchedS_indx = allstimTrials_inEEG_BEHindx(keeptS);
         EEGstim_matched = remainingSTIM_EEGdata(:,:,keeptS);
+        disp(['////////////////////////////'])
+        disp(['Removing ' num2str(NstimEEGtrials - length(find(keeptS))) ' Stim trials']);
+        pause(1);
         
         %also remove the trials from R, that were not in S (rejected from S)
-        %easiest to just keep the matched indx.
+        %easiest to just compare to the matched indx.
         keeptR = ismember(allrespTrials_inEEG_BEHindx, matchedS_indx);
+        
+        disp(['Removing ' num2str(NrespEEGtrials - length(find(keeptR))) ' Resp trials']);
+        pause(1);
         
         %logical vector containing those that are in S&R
         matchedR_indx = allrespTrials_inEEG_BEHindx(keeptR);
@@ -424,21 +448,31 @@ for ippant = 1:length(pfols)
         
         
     elseif NrespEEGtrials> NstimEEGtrials % more resp than stim.
+        disp('Shrinking Resp to match Stim');
         
         keeptR = ismember(allrespTrials_inEEG_BEHindx,allstimTrials_inEEG_BEHindx);
         
         matchedR_indx = allrespTrials_inEEG_BEHindx(keeptR);
         EEGresp_matched = remainingRESP_EEGdata(:,:,keeptR);
         
+        disp(['////////////////////////////'])
+        
+        disp(['Removing ' num2str(NrespEEGtrials - length(find(keeptR))) ' Resp trials']);
+        pause(1)
+        
         keeptS = ismember(allstimTrials_inEEG_BEHindx, matchedR_indx);
         
         %logical vector containing those that are in R, but should not be.
         matchedS_indx = allstimTrials_inEEG_BEHindx(keeptS);
         EEGstim_matched = remainingSTIM_EEGdata(:,:,keeptS);
-        
+        disp(['Removing ' num2str(NstimEEGtrials - length(find(keeptS))) ' Stim trials']);
+        pause(1);
     end
     
     %% retain the final, combined trial ID, to match with beh.
+    disp(['Matched size is S(' num2str(length(matchedS_indx)) ')'])
+    disp(['Matched size is R(' num2str(length(matchedR_indx)) ')'])
+    
     alltrials_INDX = unique([matchedS_indx, matchedR_indx]);
     
     %%

@@ -265,8 +265,12 @@ for nIteration = 1:dec_params.nIter
     %size is trainingwindow*ntrials.
     bp = bernoull(1,y);
     
-    a = y \ x;
-    sp=a'; %scalp projection
+    a = y \ x; 
+    
+%     !!!
+    sp=a'; %scalp projection.
+    
+%     !!!!
     
     %>>>>>>>>>>>>>>>>>>
     DECODERout.scalpproj(nIteration,:) = sp;
@@ -354,6 +358,7 @@ for nIteration = 1:dec_params.nIter
     ytest_trials = reshape(ytest,nsamps,ntrials);
     
     %this output will leave the function (all trials).
+    % (contains both correct and error trials).
     
     testedvector = [DECODERout.Correctindices_usedintraining(nIteration,:), find(dec_params.error_index)];
     
