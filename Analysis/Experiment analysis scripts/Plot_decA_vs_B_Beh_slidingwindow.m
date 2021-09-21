@@ -12,7 +12,7 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 
 
 job1.calcandconcat_PFX =1;
-job1.plotPFX=0;
+job1.plotPFX=1;
 job1.plotGFX=1;
 
 
@@ -83,7 +83,7 @@ for usetype = 1%1:3; of the above ^
             
             
             
-            for iSLIDE = 1%:2 % compare classifier output based on RT and confidence.
+            for iSLIDE = 1:2 % compare classifier output based on RT and confidence.
                 
                 % collect relevant behavioural data per ppant.
                 switch iSLIDE
@@ -264,7 +264,7 @@ for usetype = 1%1:3; of the above ^
     end
     
     %% %%%%%
-    vis_first=[2,3,6:23];
+    vis_first=[2,3,6:25];
     aud_first = [1,4,5];
     dataprint = TESTondatatypes{usetype};
     

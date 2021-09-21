@@ -3,7 +3,7 @@
 
 
 
-jobs.concat_GFX=0;
+jobs.concat_GFX=1;
 jobs.plot_GFX=1;
 
 %plotType

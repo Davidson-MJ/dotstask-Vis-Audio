@@ -13,7 +13,7 @@
     job1.plotStimlocked=1;
     job1.plotResplocked=1;
     
-for ippant=1:length(pfols)
+for ippant=24:25
   
     
     cd(eegdatadir)

@@ -9,7 +9,7 @@ elocs = readlocs('BioSemi64.loc');
 
 
 job1.calcandconcat_PFX =1; % using correlation
-job1.plotPFX=1;
+job1.plotPFX=0;
 job1.plotGFX=1;
 
 
@@ -153,7 +153,7 @@ if job1.calcandconcat_PFX ==1
         end
         %%
         
-        
+         winmid=winstart+round(Nwin/2);
         %% store output participants:
         GFX_DECA_RTs_slid(ippant,:) = outgoing;
         GFX_DecA_ScalpProj(ippant,:) = squeeze(mean(DEC_Pe_window.scalpproj,1));
@@ -162,7 +162,7 @@ if job1.calcandconcat_PFX ==1
     end
     cd(eegdatadir)
     cd('GFX')
-    save('GFX_DecA_slidingwindow_predictsRTs', 'GFX_DECA_RTs_slid', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders', 'winmid', 'plotXtimes');
+    save('GFX_DecA_slidingwindow_predictsRTs', 'GFX_DECA_RTs_slid', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders', 'plotXtimes');
     
 end
 %%
@@ -183,7 +183,7 @@ if job1.plotPFX==1
 %     winstart=1:Nstep:nsamps-Nwin+1;
 %     nw=length(winstart);
     
-    for ippant = 1:length(pfols)
+    for ippant = 24:25
         
         %% load the Classifer and behavioural data:
         clf
@@ -222,7 +222,7 @@ if job1.plotPFX==1
 end % job printing.
 
 %%
-vis_first=[2,3,6:18];
+vis_first=[2,3,6:25];
 aud_first = [1,4,5];
 
 if job1.plotGFX==1

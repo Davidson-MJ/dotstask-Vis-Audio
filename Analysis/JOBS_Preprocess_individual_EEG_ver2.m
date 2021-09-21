@@ -24,7 +24,7 @@ tic
 % BEGIN participant loop
 % >>>>>>>>>>>>>>>>>>>>>>>>>
 
-for ippant=21:23
+for ippant=24:25
     
     cd(basedir)
     cd(pfols(ippant).name);
@@ -165,13 +165,20 @@ for ippant=21:23
             try
                 %%
                 EEGh= EEG.history;
-                findme ='pop_rejepoch( EEG, [';
+                findme ='pop_rejepoch( EEG, [';                
                 rejl = strfind(EEGh, findme);
+                endsearchat = ']';
+                if isempty(rejl);
+                    findme ='pop_rejepoch( EEG, '; % single epoch rejected.
+                    rejl = strfind(EEGh, findme);
+                    endsearchat = ',0';
+                end
+                    
                 %numbers start at the end of this index.
                 % find the next closed bracket.
                 startat = rejl+length(findme);
                 EEGh2 = EEGh(startat:end);
-                rejEp_end = strfind(EEGh2, ']');
+                rejEp_end = strfind(EEGh2, endsearchat);
                 %now we can extract the string of rejected epoch indices.
                 rejind = EEGh(1,startat-1:rejEp_end+startat);
                 %extract only numbers:
@@ -286,6 +293,7 @@ for ippant=21:23
 end
 
 toc
-% idset=1;
+%% 
+
 
 

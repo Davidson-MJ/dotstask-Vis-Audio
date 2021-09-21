@@ -23,7 +23,7 @@ cd(behdatadir)
 allppbeh =dir([pwd filesep '*_p*']);
 %%
 
-for ippant = 1:length(pfols)
+for ippant = 24:25
     cd(eegdatadir)
     cd(pfols(ippant).name);
     

@@ -5,7 +5,7 @@ jobs.useERNorPe =2; % 1 or 2.
 jobs.calculate_perppant =1;
 jobs.plot_perppant=1;
     %% called from JOBS_ERPdecoder.m
-    for ippant = 1:length(pfols)
+    for ippant = 24:25
         
       
         PFX_classifierA_onERP =[]; % note that there will be an extra dimension, for each iteration.
