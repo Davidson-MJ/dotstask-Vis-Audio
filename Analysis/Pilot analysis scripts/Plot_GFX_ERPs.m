@@ -2,7 +2,7 @@
 %PLOT GFX, stim and response locked ERPs
 
 job1.plotStimlocked =1;
-job1.plotResplocked =1;
+job1.plotResplocked =0;
 
 cd(eegdatadir)
 cd('GFX')
@@ -20,28 +20,37 @@ meanoverChans_AUD = [4:15,39:52];
     
 
 elocs = readlocs('BioSemi64.loc'); %%
-
-if job1.plotStimlocked ==1
+%%
+if job1.plotStimlocked ==1 % updated to plot split by Corr and Error
 clf
 for ixmod = 1:2
     
     switch ixmod
         case 1
-            datac= GFX_visstimERP(vis_first, :,:);
+%             datac= GFX_visstimERP(vis_first, :,:);
+            datac= GFX_visstimCOR(vis_first, :,:);
+            datae= GFX_visstimERR(vis_first, :,:);
+            
             showt1 = [345,445]; %ms;
             showt2=[500,600];
             titleis=  'Part A (visual)';
          meanoverChans_tmp= meanoverChans_VIS;
          stimbar = [0 300];
+         use_xvec = ([1:size(datac,3)] ./ 256 - 0.5 ) * 1000;
          
         case 2
             
-               datac = GFX_audstimERP(vis_first,:,:);
+%                datac = GFX_audstimERP(vis_first,:,:);
+            datac= GFX_audstimCOR(vis_first, :,:);
+            datae= GFX_audstimERR(vis_first, :,:);
+            
               showt1 = [280,380]; %ms;
             showt2=[600,700];
             titleis=  'Part B (auditory)';
             meanoverChans_tmp= meanoverChans_AUD;
             stimbar = [180 280];
+%             use_xvec = plotXtimes;
+            use_xvec = ([1:size(datac,3)] ./ 256 - 0.5 ) * 1000;
     end
     
     
@@ -50,16 +59,18 @@ for ixmod = 1:2
     if smoothON==1
         printname = ['GFX stimulus locked ERP topography smoothed'];
         winsize =  ceil(256/20); % 50 ms
-        tmpout = zeros(size(datac));
+        [tmpoutc, tmpoute] = deal(zeros(size(datac)));
         for ippant=1:size(datac,1)
             for ichan= 1:size(datac,2)
                 
-                tmpout(ippant,ichan,:) = smooth(squeeze(datac(ippant,ichan,:)), winsize);
+                tmpoutc(ippant,ichan,:) = smooth(squeeze(datac(ippant,ichan,:)), winsize);
+                tmpoute(ippant,ichan,:) = smooth(squeeze(datae(ippant,ichan,:)), winsize);
             end
         end
-        datac=tmpout;
+        datac=tmpoutc;
+        datae=tmpoute;
     else
-        printname=['GFX stimulus locked ERP topography no detrend (NEW)'];
+        printname=['GFX stimulus locked ERP topography no detrend (long)'];
     end
     
     
@@ -67,8 +78,8 @@ for ixmod = 1:2
     %%
      %times for topography
   
-    topoX1=dsearchn(plotXtimes', showt1');    
-    topoX2=dsearchn(plotXtimes', showt2');
+    topoX1=dsearchn(use_xvec', showt1');    
+    topoX2=dsearchn(use_xvec', showt2');
     
     for plotts=1:2
         if plotts ==1
@@ -83,14 +94,20 @@ for ixmod = 1:2
     plotspot = plotts + 2*(ixmod-1);        
 
     subplot(3,4,plotspot);     
-  
+    
+    
     gfx = squeeze(mean(datac,1));
     
     topoplot(mean(gfx(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans_tmp], 's' 'w'} );
     c=colorbar;        
-        title([num2str(realt(1)) '-' num2str(realt(2)) 'ms'])        
+        title([num2str(realt(1)) '-' num2str(realt(2)) 'ms (corr)'])        
         set(gca, 'fontsize', 15)
         ylabel(c, 'uV')
+        
+        % add corr and err separately.
+        
+        
+        
     end
     %%
 %     
@@ -101,7 +118,7 @@ for ixmod = 1:2
     subplot(3,4,plotspot);
     
     %place patches first (as background)   
-    ylim([-12 5])
+    ylim([-7 5])
     
 %place patches (as background) first:
     ytx= get(gca, 'ylim');    
@@ -116,20 +133,47 @@ ph.LineStyle= 'none';
     
 hold on
     
-    plotme = squeeze(nanmean(datac(:,meanoverChans_tmp,:),2));
+%% difference waveform:
+    dataplot = datae-datac; % diff waveform. (error - correct).
+    plotme = squeeze(nanmean(dataplot(:,meanoverChans_tmp,:),2));
         
     stERP = CousineauSEM(plotme);
-    sh=shadedErrorBar(plotXtimes, mean(plotme,1), stERP, 'k', 1);
+    sh=shadedErrorBar(use_xvec, mean(plotme,1), stERP, 'k', 1);
     
-%     plot(plotXtimes, plotm, 'k', 'linew', 3)
+    
+    %% now C and E separate:
+    %%
+    d1 = squeeze(nanmean(datac(:,meanoverChans,:),2));
+    d2 = squeeze(nanmean(datae(:,meanoverChans,:),2));
+    
+    stE1 = CousineauSEM(d1);
+    stE2 = CousineauSEM(d2);
+    %%
+    p1= plot(use_xvec, squeeze(nanmean(d1,1)), [':b'], 'linew', 2); hold on
+    p2= plot(use_xvec, squeeze(nanmean(d2,1)), [':r'], 'linew', 2);
+    
+    
+    set(gca, 'ydir', 'reverse')
+    
+    hold on;
+    
+    
     
     set(gca, 'ydir', 'reverse')
     hold on;
     set(gca, 'fontsize', 25);
-    ylim([-12 5])
+    
     title([titleis])
     plot([0 0], ylim, ['k-'])
-     xlim([- 200 1000]);
+   
+    
+    if ixmod ==1
+        xlim([- 200 1000]);
+    else
+        xlim([- 200 2000]);
+    end
+    
+        
     
     
     xlabel(['Time from stimulus onset [ms]'])
@@ -143,7 +187,8 @@ hold on
      if ixmod==2 % add second tone.
      patch(xvs+600, yvs,['k'])
      end
-     legend(pch, 'stimulus', 'location', 'SouthWest')
+     
+     legend([p1, p2, sh.mainLine, pch], {'cor', 'err', 'diff','stimulus'}, 'location', 'NorthEast')
 end
 colormap('magma')
 cd(figdir)

@@ -6,7 +6,7 @@
 % note that preprocessing has to already be completed, as we use the epochs
 % rejected previously to save time.
 
-% ICA rejection needs to be performed anew however.
+% ICA rejection needs to be performed a-new however.
 
 clear variables
 close all
@@ -21,12 +21,15 @@ pfols = dir([pwd filesep 'p_*']);
 % 3) reject previously identified trials.
 % 4) perform ICA.
 
+% 5) Manually - reject ICA comps.
+% 6) Manually - interp bad electrodes (save as *interpd.mat)
+
 tic
 %% >>>>>>>>>>>>>>>>>>>>>>>>>
 % BEGIN participant loop
 % >>>>>>>>>>>>>>>>>>>>>>>>>
 
-for ippant=2:length(pfols);
+for ippant=1:length(pfols);
     
     cd(basedir)
     cd(pfols(ippant).name);
@@ -149,62 +152,52 @@ for ippant=2:length(pfols);
     
 end % ppant loop.
 toc
-%     %%
-%     if job.rejICA_comps  ==1
-%         %% plot comps for rejection, use SASICA
-%
-%         used = {'stim', 'resp'};
-%         for idset =1:2
-%             eeglab
-% %                        EEG= pop_loadset('filename', ...
-% %                 ['p_' sstr ' resampled reref filt epochs ' used{idset} ' wICA.set'],...
-% %                 'filepath', [basedir  filesep pfols(ippant).name]);
-% %             EEG=eeg_checkset(EEG);
-% %             pop_selectcomps(EEG, [1:35]);
-% % %             %show EEG for rejection.
-%             %%
-%             rejected_components=[];
-%             while isempty(rejected_components)
-%
-%                 beep
-%                 error(['component rejection not YET saved, load  ... ' used{idset} ' wICA .set in eeglab. Perform ICA rejection, then continue '])
-%                 %%
-%                 EEGh= EEG.history;
-%                 findme ='pop_subcomp( EEG, [';
-%                 rejl = strfind(EEGh, findme);
-%                 %numbers start at the end of this index.
-%                 % find the next closed bracket.
-%                 startat = rejl+length(findme);
-%                 EEGh2 = EEGh(startat:end);
-%                 rejEp_end = strfind(EEGh2, ']');
-%                 %now we can extract the string of rejected epoch indices.
-%                 rejind = EEGh(1,startat-1:rejEp_end+startat);
-%                 %extract only numbers:
-%                 rejected_components= str2num(rejind);
-%                 %%
-%                 %save
-%                  if idset==1
-%                     rejected_comps_stim = rejected_components;
-%                     save('Epoch information', 'rejected_comps_stim', '-append');
-%                 else
-%                     rejected_comps_resp = rejected_components;
-%                     save('Epoch information', 'rejected_comps_resp', '-append');
-%                  end
-%                  %save pruned version.
-%                 EEG.setname=['p_' sstr ' resampled reref filt epochs ' upper(used{idset})  ' pruned with ICA'];
-%                  EEG = eeg_checkset( EEG );
-%                  EEG=pop_saveset(EEG, 'filename', EEG.setname);
-%     %%
-%             end
-%
-%                 %%
-%                 eeglab
-%             end
-%
-%     end
-%
-%
-% toc
-% % idset=1;
+%%
+if job.rejICA_comps  ==1
+    %% plot comps for rejection, use SASICA
+    
+    used = {'stim LONG', 'resp'};
+    idset =1;%:2
+%     eeglab
+    %
+    % %             %show EEG for rejection.
+    %%
+    rejected_components=[];
+    while isempty(rejected_components)
+        
+        beep
+        error(['component rejection not YET saved, load  ... ' used{idset} ' wICA .set in eeglab. Perform ICA rejection, then continue '])
+        %%
+        EEGh= EEG.history;
+        findme ='pop_subcomp( EEG, [';
+        rejl = strfind(EEGh, findme);
+        %numbers start at the end of this index.
+        % find the next closed bracket.
+        startat = rejl+length(findme);
+        EEGh2 = EEGh(startat:end);
+        rejEp_end = strfind(EEGh2, ']');
+        %now we can extract the string of rejected epoch indices.
+        rejind = EEGh(1,startat-1:rejEp_end+startat);
+        %extract only numbers:
+        rejected_components= str2num(rejind);
+        %
+        %save
+       
+            rejected_comps_stimLONG = rejected_components;
+            save('Epoch information', 'rejected_comps_stimLONG', '-append');
+       
+        
+      
+        %%
+    end
+    
+    %%
+%     eeglab
+end
+
+
+
+toc
+% idset=1;
 
 

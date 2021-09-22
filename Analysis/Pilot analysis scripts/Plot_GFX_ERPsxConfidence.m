@@ -1,7 +1,7 @@
 
 
 
-cmap = cbrewer('qual', 'Set1', 3);
+cmap = cbrewer('seq', 'Reds', 4);
 
 meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57]; %response locked. channels.
 meanoverChans_VIS = [20:31, 57:64];
@@ -24,7 +24,7 @@ set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
 
 
 %plot types separately. visual - audio, then audio - visual
-confis = {'low', 'high'};
+confis = {'lowest', '-', '-', 'highest'};
 for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
     
     figure(1); clf;
@@ -52,11 +52,15 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
                 elseif iorder==2                   
                     usechans= meanoverChans_VIS;
                 end
+                
+                use_xvec = ([1:size(conf_x_slEEG,2)]./ 256 - 0.5 ) *1000 ;
                     
             case 2
                 datacIN = GFX_conf_x_rlEEG; % response locked
                 dtype = 'response locked';
                 usechans = meanoverChans;
+                
+                use_xvec = plotXtimes;
         end
         
         datac = squeeze(datacIN(useppants,:,:,:));
@@ -69,7 +73,7 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
             continue  % skip to resp locked.
             
         end
-        for iterc =1:2
+        for iterc =1:4
             %%
             figure(1); 
           
@@ -78,7 +82,7 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
             datatoplot = squeeze(nanmean(datac(:,usechans,:,iterc),2));
             
             if smoothON==1
-                smwin = diff(dsearchn(plotXtimes', [0 50]'));
+                smwin = diff(dsearchn(use_xvec', [0 50]'));
                 for ip = 1:size(datatoplot,1)
                     datatoplot(ip,:) = smooth(datatoplot(ip,:), smwin);
                 end
@@ -89,7 +93,7 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
             %plot
             subplot(3,2,[idtype+2, idtype+4])
             hold on
-            sh = shadedErrorBar(plotXtimes, squeeze(nanmean(datatoplot,1)), stE, [],1);
+            sh = shadedErrorBar(use_xvec , squeeze(nanmean(datatoplot,1)), stE, [],1);
             sh.mainLine.Color = cmap(iterc,:);
             sh.mainLine.LineWidth = 4;
             sh.patch.FaceColor=  cmap(iterc,:);
@@ -101,7 +105,11 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
             set(gca, 'ydir', 'reverse')
             hold on;
             
+            if idtype==1
+            xlim([-500 2000]); % stim locked.
+            else
             xlim([- 500 1000])
+            end
             xlabel(['Time from ' dtype ' [ms]'])
             ylabel(['uV']);
             set(gca, 'fontsize', 25);
@@ -109,21 +117,23 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
             plot([0 0], ylim, ['k-'])
             plot(xlim, [0,0], ['k-'])
             
-            if iterc==2 && idtype==2
-                legend([lg(1) lg(2)], {'lowest confidence', 'highest confidence'}, 'location', 'NorthEast', 'fontsize', 20) ;
+            if iterc==4 
+%                 legend([lg(1) lg(2)], {'lowest confidence', 'highest confidence'}, 'location', 'NorthEast', 'fontsize', 20) ;
+                legend([lg], confis, 'location', 'NorthEast', 'fontsize', 20) ;
                 title(['GFX ' dtype ' ' orderi ', (n=' num2str(length(useppants)) ')']);% biosemi64(usechan).labels ]);
                 
             end
-            title( dtype)
-             xlim([-200 1000]) 
-             ylim([-12 6])
-             box on
+            title([dtype ' x conf']) 
+            ylim([-12 6])
+            
+            box on
+            
             if plottopos_sep ==1
                 figure(10);
                 subplot(2,4,tcount);
                 set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
                 %average over window:
-                winav = dsearchn(plotXtimes', [200 350]');
+                winav = dsearchn(use_xvec', [200 350]');
                 
                 tdata = squeeze(nanmean(datac(:,:, winav(1):winav(2), iterc),3));
                 
@@ -142,19 +152,20 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
                     tcount=tcount+1;
 
                 alltopos(tcount,:) = plotme;
+                
 %add difference topo
-            if mod(tcount,2)==0
-                subplot(2,2,(tcount/2)+2);
-                diffT = alltopos(tcount,:)-alltopos(tcount-1,:); % high -low conf.
-                topoplot(diffT, elocs);
-                c=colorbar;                
-                ylabel(c, 'uV');
-                title({['high - low'];['200-350ms']});
-                set(gca, 'fontsize', 15);                
-            end
+%             if mod(tcount,2)==0
+%                 subplot(2,2,(tcount/2)+2);
+%                 diffT = alltopos(tcount,:)-alltopos(tcount-1,:); % high -low conf.
+%                 topoplot(diffT, elocs);
+%                 c=colorbar;                
+%                 ylabel(c, 'uV');
+%                 title({['high - low'];['200-350ms']});
+%                 set(gca, 'fontsize', 15);                
+%             end
             %%
         end
-        %     legend(lg, {'lowest confidence', 'medium confidence', 'highest confidence'}, 'location', 'SouthEast', 'fontsize', 15) ;
+        
         
       
     end
@@ -170,12 +181,12 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
     %%
     figure(1);
     set(gcf, 'color', 'w')
-    printname = ['GFX partB ERPs x Conf terc for ' orderi ' (NEW)'];
+    printname = ['GFX partB ERPs x Conf terc for ' orderi ' (long)'];
     print('-dpng', printname)
     try
     figure(10);
     set(gcf, 'color', 'w')
-    printname = ['GFX partB ERPs x Conf terc for ' orderi ' topoplots (NEW)'];
+    printname = ['GFX partB ERPs x Conf terc for ' orderi ' topoplots (long)'];
       print('-dpng', printname)
     catch 
     end

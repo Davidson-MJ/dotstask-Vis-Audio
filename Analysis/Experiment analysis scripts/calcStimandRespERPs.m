@@ -5,15 +5,17 @@
 
 
 dbstop if error
+
+%% Note the change to stimLong below! (longer epochs for stim locked triggers).
 %% updated 23-06-20, to also calculate response locked ERPs, with prestim baseline.
 
 %extra preprocessing before plotting:
-lindetrend = 0;
+lindetrend = 1; %% now detrending with longer epochs.
 rmbase = 1;
 
 % job list:
 job1.calcindividual = 1;
-job1.concat_GFX = 0;
+job1.concat_GFX = 1;
 %
 %data types to analyze.
 idatatypes = {'STIM', 'RESP', 'RESP-stimbase'};
@@ -22,7 +24,7 @@ idatatypes = {'STIM', 'RESP', 'RESP-stimbase'};
 %important step!
 if job1.calcindividual == 1
     
-    for ippant=24:25
+    for ippant=1:length(pfols)
         
         %load eeg folder
         cd(eegdatadir)
@@ -31,7 +33,7 @@ if job1.calcindividual == 1
         
         %load raw EEG, matched for trial index with behaviour.
         load('participant TRIG extracted ERPs.mat');
-        
+        load('Epoch information.mat'); 
         clc;
         disp([' loading ppant ' num2str(ippant) ]);
         %%%%%% Here some extra preprocessing as required
@@ -42,7 +44,8 @@ if job1.calcindividual == 1
             %which data type to load?
             switch itype
                 case 1
-                    EEG_tmpsub1 = EEGstim_matched;
+                    EEG_tmpsub1 = EEGstimLong_matched;
+%                     EEG_tmpsub1 = EEGstim_matched;
                 case 2
                     EEG_tmpsub1 = EEGresp_matched;
                     
@@ -109,10 +112,39 @@ if job1.calcindividual == 1
         end
         
         
+        %% perform some further splits, makes plotting easier later:
+        if strcmp(ExpOrder{1}, 'visual') % visual in first half of exp:
+            %
+            corr_Vis_rl  = squeeze(mean(resplockedEEG(:,:,corAindx),3));
+            err_Vis_rl  = squeeze(mean(resplockedEEG(:,:,errAindx),3));
+            corr_Aud_rl = squeeze(mean(resplockedEEG(:,:,corBindx),3));
+            err_Aud_rl  = squeeze(mean(resplockedEEG(:,:,errBindx),3));
+            
+            corr_Vis_sl  = squeeze(mean(stimlockedEEG(:,:,corAindx),3));
+            err_Vis_sl  = squeeze(mean(stimlockedEEG(:,:,errAindx),3));
+            corr_Aud_sl = squeeze(mean(stimlockedEEG(:,:,corBindx),3));
+            err_Aud_sl  = squeeze(mean(stimlockedEEG(:,:,errBindx),3));
+            
+        else
+            corr_Vis_rl  = squeeze(mean(resplockedEEG(:,:,corBindx),3));
+            err_Vis_rl  = squeeze(mean(resplockedEEG(:,:,errBindx),3));
+            corr_Aud_rl = squeeze(mean(resplockedEEG(:,:,corAindx),3));
+            err_Aud_rl  = squeeze(mean(resplockedEEG(:,:,errAindx),3));
+                        
+            corr_Vis_sl  = squeeze(mean(stimlockedEEG(:,:,corBindx),3));
+            err_Vis_sl  = squeeze(mean(stimlockedEEG(:,:,errBindx),3));
+            corr_Aud_sl = squeeze(mean(stimlockedEEG(:,:,corAindx),3));
+            err_Aud_sl  = squeeze(mean(stimlockedEEG(:,:,errAindx),3));           
+            
+        end
         save('participant TRIG extracted ERPs', ...
             'stimlockedEEG',...
             'resplockedEEG',...
-            'resplockedEEG_stimbaserem','-append');
+            'resplockedEEG_stimbaserem',...
+            'corr_Vis_rl','err_Vis_rl',...
+            'corr_Aud_rl','err_Aud_rl',...                        
+            'corr_Vis_sl', 'err_Vis_sl',...
+            'corr_Aud_sl', 'err_Aud_sl', '-append');
         
         disp(['SAVING: >>> pp' pfols(ippant).name])
         
@@ -125,8 +157,12 @@ end
 if job1.concat_GFX == 1
     %after completing across participants, store GFX.
     %%     %%
-    [GFX_visstimERP, GFX_audstimERP, GFX_visrespCOR, GFX_audrespCOR,...
-        GFX_visrespERR, GFX_audrespERR] =  deal(nan(length(pfols), 64, size(EEGstim_matched,2)));
+    [GFX_visrespCOR, GFX_audrespCOR,...
+        GFX_visrespERR, GFX_audrespERR] =  deal(nan(length(pfols), 64, size(resplockedEEG,2)));
+    
+    [GFX_visstimERP, GFX_audstimERP,GFX_visstimCOR, GFX_audstimCOR,...
+        GFX_visstimERR, GFX_audstimERR ] = deal(nan(length(pfols), 64, size(stimlockedEEG,2)));
+    
     %%
     [vis_first, aud_first] = deal([]);
     cd(eegdatadir)
@@ -139,21 +175,12 @@ if job1.concat_GFX == 1
         %
         %
         %     %sort by modality.
-        if strcmp(ExpOrder{1}, 'visual')
-            %
-            corr_Vis  = squeeze(mean(resplockedEEG(:,:,corAindx),3));
-            err_Vis  = squeeze(mean(resplockedEEG(:,:,errAindx),3));
-            corr_Aud = squeeze(mean(resplockedEEG(:,:,corBindx),3));
-            err_Aud  = squeeze(mean(resplockedEEG(:,:,errBindx),3));
-            %
+        if strcmp(ExpOrder{1}, 'visual') % visual in first half of exp:
+           
             vis_first= [vis_first, ippant];
             
         else
-            corr_Vis  = squeeze(mean(resplockedEEG(:,:,corBindx),3));
-            err_Vis  = squeeze(mean(resplockedEEG(:,:,errBindx),3));
-            corr_Aud = squeeze(mean(resplockedEEG(:,:,corAindx),3));
-            err_Aud  = squeeze(mean(resplockedEEG(:,:,errAindx),3));
-            
+          
             aud_first= [aud_first, ippant];
             
         end
@@ -165,11 +192,18 @@ if job1.concat_GFX == 1
         GFX_visstimERP(ippant,:,:)= EEG_visstim;
         GFX_audstimERP(ippant,:,:)= EEG_audstim;
         
-        GFX_visrespCOR(ippant,:,:) = corr_Vis;
-        GFX_visrespERR(ippant,:,:) = err_Vis;
+        GFX_visrespCOR(ippant,:,:) = corr_Vis_rl;
+        GFX_visrespERR(ippant,:,:) = err_Vis_rl;
         
-        GFX_audrespCOR(ippant,:,:) = corr_Aud;
-        GFX_audrespERR(ippant,:,:) = err_Aud;
+        GFX_audrespCOR(ippant,:,:) = corr_Aud_rl;
+        GFX_audrespERR(ippant,:,:) = err_Aud_rl;
+        
+        GFX_visstimCOR(ippant,:,:) = corr_Vis_sl;
+        GFX_visstimERR(ippant,:,:) = err_Vis_sl;
+        
+        GFX_audstimCOR(ippant,:,:) = corr_Aud_sl;
+        GFX_audstimERR(ippant,:,:) = err_Aud_sl;
+        
         
     end
     %%
@@ -177,8 +211,13 @@ if job1.concat_GFX == 1
     cd(eegdatadir)
     cd('GFX')
     % %%
+    
     disp(['saving GFX - stim and resp locked ERPs']);
     save('GFX_averageERPs TRIG based', 'GFX_audrespCOR', 'GFX_audrespERR', ...
-        'GFX_audstimERP', 'GFX_visrespCOR', 'GFX_visrespERR', 'GFX_visstimERP', 'plotXtimes',...
+        'GFX_visrespCOR', 'GFX_visrespERR', ...
+        'GFX_visstimCOR', 'GFX_visstimERR', ...
+        'GFX_audstimCOR', 'GFX_audstimERR', ...
+        'GFX_visstimERP', 'GFX_audstimERP',... 
+        'plotXtimes',...
         'vis_first', 'aud_first');
 end

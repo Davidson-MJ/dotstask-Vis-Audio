@@ -23,7 +23,7 @@ cd(behdatadir)
 allppbeh =dir([pwd filesep '*_p*']);
 %%
 
-for ippant = 24:25
+for ippant = 6:length(pfols)
     cd(eegdatadir)
     cd(pfols(ippant).name);
     
@@ -367,11 +367,12 @@ for ippant = 24:25
     shg
     
     %% load the processed EEG data
-    used = {'STIM', 'RESP'};
+    used = {'LONG', 'RESP'}; % changed from 'STIM' -> 'LONG'
     %load each EEG type, preprocessed.
     for idset =1:2
         loadt = used{idset};
-        dload = dir([ pwd filesep '*' loadt ' interpd.set']);
+        
+        dload = dir([ pwd filesep '*' loadt '* interpd.set']);
         %load EEG
         ALLEEG= pop_loadset('filename', [dload(1).name]);
         EEGtmp = eeg_checkset( ALLEEG );
@@ -528,11 +529,13 @@ for ippant = 24:25
         'corAindx', 'corBindx', 'errAindx', 'errBindx', 'visStimindx',...
         'audStimindx', '-append');
     
+    %% new longer epochs have been preprocessed.
+    EEGstimLong_matched = EEGstim_matched; 
     
     save('participant TRIG extracted ERPs', ...
-        'EEGstim_matched',...
+        'EEGstimLong_matched',...
         'EEGresp_matched',...
-        'plotXtimes','BEH_matched', 'ExpOrder');%, '-append');
+        'plotXtimes','BEH_matched', 'ExpOrder', '-append');%, '-append');
     
 end % ppant loop
 

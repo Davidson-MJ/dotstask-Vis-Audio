@@ -1,5 +1,5 @@
 
-cmap = cbrewer('qual', 'Set1', 3);
+cmap = cbrewer('seq', 'Reds', 4);
 % usechan = 31;
 
 elocs = readlocs('BioSemi64.loc'); %%
@@ -28,35 +28,45 @@ for ippant=1:length(pfols)
             case 1
                 datac = conf_x_slEEG;
                 dtype = 'stimulus onset';
+                use_xvec = ([1:size(conf_x_slEEG,2)]./ 256 - 0.5 ) *1000 ;
             case 2
                 datac = conf_x_rlEEG; % response locked
                 dtype = 'response onset';
+                use_xvec = plotXtimes;
         end
         
   
     subplot(1,2,idtype)
     
     showt = [50, 300]; % times for topoplots to be displayed.
+    %%
     lg=[];
-    for iterc =1:2%size(datac,3)
+    for iterc =1:size(datac,3)
         
         
-   
+        ntrials = length(terclists(iterc).list);
         datatoplot = squeeze(nanmean(datac(meanoverChans,:,iterc),1));
         
         if smoothON==1
-        winsizet = dsearchn(plotXtimes', [0 100]'); % 100ms smooth window.
+        winsizet = dsearchn(use_xvec', [0 100]'); % 100ms smooth window.
             winsize = diff(winsizet);
         datatoplot = smooth(datatoplot, winsize);
         end
         
-
-       lg(iterc)= plot(plotXtimes, datatoplot, 'color', cmap(iterc,:), 'linew', 3);
+        try
+            lg(iterc)= plot(use_xvec, datatoplot, 'color', cmap(iterc,:), 'linew', 3);
+        catch
+            lg(iterc) = plot(0,0,'k.');
+        end
         hold on;
 
          set(gca, 'ydir', 'reverse')
         hold on;
-        xlim([- 200 600])
+        if idtype==1
+         xlim([- 200 2000])
+        else
+        xlim([- 200 1000])
+        end
         xlabel(['Time from ' dtype ' [ms]'])
         ylabel(['uV']);
         
@@ -69,8 +79,12 @@ for ippant=1:length(pfols)
         %%       
     end
     %%
-%     legend(lg, {'lowest confidence', 'medium confidence', 'highest confidence'}, 'location', 'SouthEast', 'fontsize', 15)
-    legend(lg, {'lowest confidence', 'highest confidence'}, 'location', 'SouthEast', 'fontsize', 15)
+    legend(lg, {['lowest confidence n' num2str(length(terclists(1).list))], ...
+        ['n' num2str(length(terclists(2).list))],...
+        ['n' num2str(length(terclists(3).list))],...
+        ['highest confidence n ' num2str(length(terclists(1).list))]}, 'location', 'SouthEast', 'fontsize', 15)
+    
+%     legend(lg, {'lowest confidence', 'highest confidence'}, 'location', 'SouthEast', 'fontsize', 15)
     title(['Participant ' num2str(ippant) ' ' dtype ', (' ExpOrder{2} ')' ]);    
     end
     %%   
@@ -79,7 +93,7 @@ for ippant=1:length(pfols)
     
     set(gcf, 'color', 'w')
     %%
-    printname = ['participant ' num2str(ippant) ' respERPs x Conf terc (new)'];
+    printname = ['participant ' num2str(ippant) ' respERPs x Conf terc (long)'];
     print('-dpng', printname)
     
     

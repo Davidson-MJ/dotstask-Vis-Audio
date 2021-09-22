@@ -28,7 +28,8 @@ for ippant=1:length(pfols)
     
     % for resp in part B, split by confidence.        
         %pre allocate data (response locked and stim locked)                          
-        [conf_x_slEEG ,conf_x_rlEEG] = deal(zeros(size(resplockedEEG,1), size(resplockedEEG,2), 3));                            
+        [conf_x_rlEEG] = deal(zeros(size(resplockedEEG,1), size(resplockedEEG,2), 4));      
+        [conf_x_slEEG]  = deal(zeros(size(stimlockedEEG,1), size(stimlockedEEG,2), 4));      
         
         %changed to corrects only:
         partBindx = corBindx;
@@ -51,59 +52,68 @@ for ippant=1:length(pfols)
         
         %%
         %now take terciles, based on conf judgements:        
-        quants = quantile(zconfj, [.5]);
-         t1 = find(zconfj<quants(1));
-         t2 = find(zconfj>=quants(1));
+        quants = quantile(zconfj, [3]); %quartiles
+%          t1 = find(zconfj<quants(1));
+%          t2 = find(zconfj>=quants(1));
          
-%         if diff(quants)==0 % can't separate into terciles.
-%             %instead,  save as high/low.
-%               quants = quantile(zconfj, [.5]);
-%                t1 = find(zconfj<quants(1));
-%                t2 = nan;
-%                t3 = find(zconfj>=quants(1));
-%                
-%         else
-%             
-%         %now we have all the data, and confidence rows per quartile:
-%         %split EEEG into terciles:
-%         %lowest
-%         t1 = find(zconfj<quants(1));
-%         %middle
-%         t2a = find(zconfj>=quants(1));
-%         t2b = find(zconfj<quants(2));
-%         t2= intersect(t2a, t2b); 
-%         %highest
-%         t3 = find(zconfj>=quants(2));
-%         end
+        if diff(quants)==0 % can't separate into terciles.
+            %instead,  save as high/low after median split.
+              quants = quantile(zconfj, [.5]);
+               t1 = find(zconfj<quants(1));
+               t2 = nan;
+               t3= nan;
+               t4 = find(zconfj>=quants(1));
+            disp(['Warning: using median split for ppant ' num2str(ippant)]);   
+        else
+            
+        %now we have all the data, and confidence rows per quartile:
+        %split EEEG into terciles:
+        %lowest
+        t1 = find(zconfj<quants(1));
+        %middle
+        t2a = find(zconfj>=quants(1));
+        t2b = find(zconfj<quants(2));
+        t2= intersect(t2a, t2b); 
+        %next
+        t3a = find(zconfj>=quants(2));
+        t3b = find(zconfj<quants(3));
+        t3= intersect(t3a, t3b); 
+        
+        %highest
+        t4 = find(zconfj>=quants(3));
+        end
 
         %store for easy access.
         terclists(1).list = t1;
         terclists(2).list = t2;
-%         terclists(3).list = t3;
+        terclists(3).list = t3;
+        terclists(4).list = t4;
         
         %now for each tercile, take the mean EEG      
 %%
-        for iterc=1:2%3            
+        for iterc=1:4
            
-%             try
+            try
                 %take mean corr ERP for this tercile:
                 tempERP = squeeze(nanmean(respEEGd(:,:,terclists(iterc).list),3));
-                %% now store:
+                % now store:
                 conf_x_rlEEG(:,:,iterc) =tempERP;
                 
                 %now take mean for stimulus locked equivalent.
                 tempERP = squeeze(nanmean(stimEEGd(:,:,terclists(iterc).list),3));
                 conf_x_slEEG(:,:,iterc) =tempERP;
-%             catch
-%                 conf_x_rlEEG(:,:,iterc) =nan;
-%                 conf_x_slEEG(:,:,iterc) =nan;
-%             end
+            catch
+                conf_x_rlEEG(:,:,iterc) =nan;
+                conf_x_slEEG(:,:,iterc) =nan;
+            end
         end
       
-%%     %%
+% %%     %%
 % % sanity check    
-% plot(plotXtimes, squeeze(conf_x_rlEEG(31,:,:))); 
+% clf;
+% plot(plotXtimes, squeeze(conf_x_rlEEG(31,:,:))); title(['participant ' num2str(ippant)]);
 % set(gca, 'ydir' , 'reverse')%     
+% legend({['q1'], ['q2'], ['q3'], ['q4']})
 %%
 disp(['saving conf x ERP for ppant ' pfols(ippant).name]);
 
@@ -115,8 +125,9 @@ end
 
 %now concatenate and save across participants.
     %%
-[GFX_conf_x_rlEEG,GFX_conf_x_slEEG] =  deal(nan(length(pfols), 64, length(plotXtimes),3));
-%%
+[GFX_conf_x_rlEEG] =  deal(nan(length(pfols), 64, length(plotXtimes),4));
+[GFX_conf_x_slEEG] =  deal(nan(length(pfols), 64, size(stimlockedEEG,2),4));
+
 for ippant=1:length(pfols) % 1,3,4
     cd(eegdatadir)    
     cd(pfols(ippant).name);
