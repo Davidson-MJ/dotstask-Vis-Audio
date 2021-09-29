@@ -95,7 +95,7 @@ aud_first = find(ExperimentOrder==2);
 clf;
 set(gcf, 'units', 'normalized', 'position', [0 0 .8 1], 'color', 'w')
 
-for iorder = 1:2
+for iorder = 1%:2
     
  if iorder==1
      barDD = GFX_allConfD(vis_first,:);
@@ -145,99 +145,3 @@ print('-dpng', ['GFX zscored confidence by CE, split by order']);
     
     
     
-
-%     
-%     if plotInfoSeeking==1
-% % PLOTTING.
-% clf
-% %separate into Aud and Visual.
-% cmap = cbrewer('qual', 'Paired',12);
-% colormap(cmap)
-% 
-% 
-% % sort into modality * by section
-% 
-% vis_first = find(ExperimentOrder==1);
-% aud_first = find(ExperimentOrder==2);
-% 
-% partB_aud = Confidence_byChoice(vis_first,:);
-% partB_vis = Confidence_byChoice(aud_first,:);
-% 
-% for id=1:2
-%     switch id
-%         case 1
-%             datais = partB_aud;
-%             tis = 'auditory';
-%             cis=2;
-%         case 2
-%             datais = partB_vis;
-%             tis = 'visual';
-%             cis=10;
-%     end
-% subplot(2,1,id)
-% dataX=[];
-% dataX{1} = datais(:,1);
-% dataX{2} = datais(:,2);
-% dataX{3} = datais(:,3);
-% 
-% 
-% h=rm_raincloud(dataX', cmap([cis],:), 1, 'ks');
-% xlabel('Confidence judgement')
-% ylabel('Response')
-% set(gca, 'yticklabels', {['Forced response'] , ['Review by choice'], ['Respond by choice']}, 'fontsize', 16)
-% %  xlim([0 100]) 
-% title(['Confidence in ' tis ' trials ']);
-% hold on;
-% set(gcf, 'color', 'w')
-% shg
-% end
-% %%
-% print('-dpng', 'Group effects, confidence summary raincloud');
-% 
-% %%
-% figure(2); clf 
-% mBar = [mean(partB_vis,1); mean(partB_aud,1)];
-% %
-% %stack for comparison.
-% bh=bar(mBar); hold on
-% bh(1).FaceColor = cmap(3,:);
-% bh(2).FaceColor = cmap(9,:);
-% 
-% %can also compute stE for group of ppants.
-% stE_Bvis= std(partB_vis)/sqrt(size(partB_vis,1));
-% stE_Baud= std(partB_aud)/sqrt(size(partB_aud,1));
-% 
-% %arrange for fitting to plot
-% plotErr = [stE_Bvis; stE_Baud];
-% errorbar_groupedfit(mBar,plotErr);	
-% ylim([ 50 100])
-% 
-% ylabel('Confidence')
-% %
-% legend('Respond by choice', 'Review by choice', 'Forced response', 'Autoupdate', 'off')
-% %
-% set(gca, 'XTickLabel', {'visual', 'auditory'})
-% %
-% % ylim([.4 1])
-% % axis tight
-% 
-% set(gca, 'fontsize', 20)
-% % text(.8, .5, ['\itn \rm= ' num2str(length(vis_first))], 'fontsize', 15)
-% % text(2.1, .5, ['\itn \rm= ' num2str(length(vis_first))], 'fontsize', 15)
-% % 
-% % text(1.1, .5, ['\itn \rm= ' num2str(length(aud_first))], 'fontsize', 15)
-% % text(1.8, .5, ['\itn \rm= ' num2str(length(aud_first))], 'fontsize', 15)
-% 
-% % stE= CousineauSEM(ReactionTimesALL');
-% % stE=[stE(1:2);stE(3:4)];
-% % eH= errorbar_groupedfit(mBar,stE);
-% % set(gca, 'fontsize', 25);
-% % ylim([0 3])
-% 
-% set(gcf, 'color', 'w')
-% 
-% %%
-% print('-dpng', 'Group effects, confidence summary bar');
-% %%
-%     end
-

@@ -12,7 +12,7 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 
 
 job1.calcandconcat_PFX =1;
-job1.plotPFX=1;
+job1.plotPFX=0;
 job1.plotGFX=1;
 
 
@@ -118,12 +118,12 @@ for usetype = 1%1:3; of the above ^
                 
 %                 
                 %% if using scalp proj.
-%                 sc_v= mean(DEC_Pe_window.scalpproj,1);
-%                 ytest_sc = testdata * sc_v';
-%                 ytest_bp_sc= bernoull(1,ytest_sc); 
-%                 ytest_trials = reshape(ytest_bp_sc,nsamps,ntrials);
+                sc_v= mean(DEC_Pe_window.scalpproj,1);
+                ytest_sc = testdata * sc_v';
+                ytest_bp_sc= bernoull(1,ytest_sc); 
+                ytest_trials = reshape(ytest_bp_sc,nsamps,ntrials);
                 %% debugging,
-                %% plot results using discrim vector and scalp proj.
+%                 %% plot results using discrim vector and scalp proj.
 %                 figure(1); clf;
 %                 subplot(221)
 %                 plot(plotXtimes, mean(ytest_trials,2)); title('mean using discrim (v)');
@@ -139,7 +139,7 @@ for usetype = 1%1:3; of the above ^
                 
                 %% now take correlation with confidence, in a sliding window:
                 
-                % set up the sliding window. 100ms window, 50 ms steps.
+                % set up the sliding window. 100ms window, 10 ms steps.
                 movingwin = [.1, .01];
                 Fs = 256;
                 Nwin=round(Fs*movingwin(1)); % number of samples in window
@@ -166,7 +166,7 @@ for usetype = 1%1:3; of the above ^
                     outgoing(n)= R(1,2);
                     
                 end
-                
+                    % centre values:
                  winmid=winstart+round(Nwin/2);
                  
                  
@@ -174,7 +174,7 @@ for usetype = 1%1:3; of the above ^
 %                  figure(2);
 %                  subplot(121); 
 %                  plot(plotXtimes(winmid), outgoing); title('corr. using scalp');
-%                  %%
+                 %%
 %                  subplot(122); 
 %                  plot(plotXtimes(winmid), outgoing); title('corr. using sp');
                 %% %% store output participants:
@@ -195,10 +195,12 @@ for usetype = 1%1:3; of the above ^
         cd(eegdatadir)
         cd('GFX')
 % %         
+GFX_DECA_Conf_corr_slid_usescalp =GFX_DECA_Conf_corr_slid ;
+GFX_DECA_RT_corr_slid_usescalp =GFX_DECA_RT_corr_slid ;
 %        % save both.
         save('GFX_DecA_slidingwindow_predictsB_Behav', ...
-            'GFX_DECA_Conf_corr_slid',...
-            'GFX_DECA_RT_corr_slid', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders', 'winmid', 'plotXtimes');
+            'GFX_DECA_Conf_corr_slid_usescalp',...
+            'GFX_DECA_RT_corr_slid_usescalp', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders', 'winmid', 'plotXtimes', '-append');
        
         
             
@@ -282,8 +284,8 @@ for usetype = 1%1:3; of the above ^
         
         
         %plot Conf or RT correlation?
-         dataIN = GFX_DECA_Conf_corr_slid;
-%         dataIN = GFX_DECA_RT_corr_slid;
+%          dataIN = GFX_DECA_Conf_corr_slid_usescalp;
+        dataIN = GFX_DECA_RT_corr_slid;
         
         
         figure(1); clf; set(gcf, 'color', 'w', 'units', 'normalized', 'position', [0 0 1 1]);
@@ -306,7 +308,7 @@ for usetype = 1%1:3; of the above ^
             
             subplot(1,3,1:2)
             dataINt = squeeze(dataIN(useppants,:));
-            ylabis ={['DECODER and Conf'];['(correct only) [r]']};
+            ylabis ={['DECODER and RT'];['(correct only) [r]']};
             usecol = 'b';
             
             
@@ -337,7 +339,7 @@ for usetype = 1%1:3; of the above ^
             hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
             hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
             set(gca, 'fontsize', 25)
-            title({['Classifier trained on ERP A (C vs E) x ERP B, ' dataprint];[ordert ', n=' num2str(length(useppants))]}, 'fontsize', 20)
+            title({['Classifier trained on ERP A (C vs E) x ERP A, ' dataprint];[ordert ', n=' num2str(length(useppants))]}, 'fontsize', 20)
             
             box on
             % add sig tests:
@@ -371,3 +373,12 @@ for usetype = 1%1:3; of the above ^
     end
     %%
 end
+
+%% ID plot;
+clf;
+for ip=1:size(dataIN,1)
+    
+    plot(plotXtimes(winmid), dataIN(ip,:));
+    hold on;
+end
+    

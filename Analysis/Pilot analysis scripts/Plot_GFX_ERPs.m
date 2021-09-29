@@ -209,7 +209,7 @@ figure(1);  clf;
 set(gcf, 'units', 'normalized', 'position', [0 0 1 1], 'color', 'w');
 %
 
-%
+%% have now restricted to just the vis- audio order.
 for iorder=1%,2% 3 = all.
    
     switch iorder

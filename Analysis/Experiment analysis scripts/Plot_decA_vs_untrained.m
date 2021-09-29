@@ -2,13 +2,19 @@ dbstop if error
 elocs= readlocs('BioSemi64.loc');
 
 jobs.useERNorPe =2; % 1 or 2.
-jobs.calculate_perppant =1;
+jobs.calculate_perppant =0;
 jobs.plot_perppant=1;
+
+
+% for plots: use raw discrim vector or scalp projection:
+useVorScalpProjection= 1;
+
     %% called from JOBS_ERPdecoder.m
-    for ippant = 24:25
+    for ippant = 1:length(pfols)
         
       
-        PFX_classifierA_onERP =[]; % note that there will be an extra dimension, for each iteration.
+        [PFX_classifierA_onERP_fromscalp, PFX_classifierA_onERP] =deal([]); % note that there will be an extra dimension, for each iteration.
+        
         cd(eegdatadir)
         cd(pfols(ippant).name);
         sstr= pfols(ippant).name;
@@ -68,7 +74,7 @@ jobs.plot_perppant=1;
                     
                     %reshape for multiplication
                     testdata = reshape(useDATA, nchans, nsamps* ntrials)';%
-                    %%
+                    %% multiply by discrim vector:
                     
                     ytest = testdata * v(1:end-1) + v(end);
                     %% reshape for plotting.
@@ -82,16 +88,30 @@ jobs.plot_perppant=1;
                     % store for averaging over each iteration.
                     PFX_classifierA_onERP(itestdata,nIter,:) = mean(bptest,2);
                     
+                    
+                    %% debugging:
+                    % compare to using scalp proj.
+                sc_v= DEC_Pe_window.scalpproj(nIter,:);
+                ytest_sc = testdata * sc_v';
+                ytest_bp_sc= bernoull(1,ytest_sc); 
+                ytest_trials = reshape(ytest_bp_sc,nsamps,ntrials);
+                    PFX_classifierA_onERP_fromscalp(itestdata,nIter,:) = mean(ytest_trials,2);
+                    
                 end % test type (corA, corB etc).
             end % nIteration
             
             %% also save PFX for later concatenation and group effects.
             if jobs.useERNorPe==1;
                 PFX_classifierA_onERP_ERNtrained = PFX_classifierA_onERP;
-                save('Classifier_objectivelyCorrect', 'PFX_classifierA_onERP_ERNtrained', '-append')
+                PFX_classifierA_onERP_ERNtrained_fromscalp = PFX_classifierA_onERP_fromscalp;
+                save('Classifier_objectivelyCorrect', 'PFX_classifierA_onERP_ERNtrained', ...
+                    'PFX_classifierA_onERP_ERNtrained_fromscalp','-append')
             elseif jobs.useERNorPe==2;
+                
                 PFX_classifierA_onERP_PEtrained = PFX_classifierA_onERP;
-                save('Classifier_objectivelyCorrect', 'PFX_classifierA_onERP_PEtrained', '-append')
+                PFX_classifierA_onERP_PEtrained_fromscalp = PFX_classifierA_onERP_fromscalp;
+                save('Classifier_objectivelyCorrect', 'PFX_classifierA_onERP_PEtrained', ...
+                    'PFX_classifierA_onERP_PEtrained_fromscalp','-append')
             end
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -107,16 +127,31 @@ jobs.plot_perppant=1;
         subplot(1, 3, 1:2);
         ntrials=[];
         
-        % which data type to plot? classifer trained on ERN or Pe.
+        % which data type to plot? classifer trained on ERN or Pe, raw vector or scalp projection?
+        
         if jobs.useERNorPe==1;
             % data
+            if useVorScalpProjection== 1;
             PFX_toplot = PFX_classifierA_onERP_ERNtrained;
+            testComp='discrimV';
+            else
+                PFX_toplot = PFX_classifierA_onERP_ERNtrained_fromscalp;
+                testComp='scalpProj';
+            end
              % add training window
             windowvec = DEC_ERN_windowparams.training_window_ms;
             %topoplot
             mtopo = mean(DEC_ERN_window.scalpproj,1);
+            
         elseif jobs.useERNorPe==2;
+            if useVorScalpProjection==1
             PFX_toplot = PFX_classifierA_onERP_PEtrained;
+            testComp='discrimV';
+            else
+                PFX_toplot = PFX_classifierA_onERP_PEtrained_fromscalp;
+                testComp='scalpProj';
+            end
+                
             windowvec = DEC_Pe_windowparams.training_window_ms;
             mtopo = mean(DEC_Pe_window.scalpproj,1);
         end
@@ -156,7 +191,7 @@ jobs.plot_perppant=1;
         xlabel('Time since response (ms)')
         ylabel('A.U');
         %%
-        title({['Time-course of discriminating component, (trained Corr A vs Err A)'];[num2str(nIterations) ' iterations']}, 'fontsize', 25);
+        title({['Trained part A(error)' ];[num2str(nIterations) ' iterations, testing ' testComp]}, 'fontsize', 25);
         legend(leg, {['Corr A (' ExpOrder{1} ') n' num2str(ntrials(1))],...
             ['Corr B (' ExpOrder{2} ') n' num2str(ntrials(2))],...
             ['Err A, (' ExpOrder{1} ') trained n' num2str(ntrials(3))],...
@@ -176,7 +211,7 @@ jobs.plot_perppant=1;
         
         %%
         set(gcf, 'color', 'w')
-        print('-dpng', [sstr ', w-' num2str(nIter) 'reps (' winwas ')']);
+        print('-dpng', [sstr ', w-' num2str(nIter) 'reps (' winwas ')' testComp]);
         
         
         end % job: plot

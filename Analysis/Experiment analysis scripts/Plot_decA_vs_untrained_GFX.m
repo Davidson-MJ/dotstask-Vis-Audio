@@ -3,17 +3,23 @@
 
 
 
+
+
 jobs.concat_GFX=1;
 jobs.plot_GFX=1;
-
+%%
 %plotType
 job.plotERNorPe=2; % 1 or 2.
 
-%%% load and concat across subjects (if previous step was re-run).
+useVorScalpProjection= 2;
+
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+%% % load and concat across subjects (if previous step was re-run).
 if jobs.concat_GFX==1;
     
     [GFX_classifierA_topo_ERN,GFX_classifierA_onERP_ERN ]=deal([]);
     [GFX_classifierA_topo_Pe,GFX_classifierA_onERP_Pe ]=deal([]);
+    
     
     %first concatenate across subjects:
     [vis_first, aud_first] = deal([]);
@@ -26,13 +32,21 @@ if jobs.concat_GFX==1;
         load('Classifier_objectivelyCorrect');
         load('Epoch information', 'ExpOrder');
         
+        if useVorScalpProjection== 1; % use the raw discrim vector.
         %ERN
-        GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained,2));
-        GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
+%         GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained,2));
+%         GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
         %Pe
         GFX_classifierA_onERP_Pe(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_PEtrained,2));
         GFX_classifierA_topo_Pe(ippant,:) = squeeze(mean(DEC_Pe_window.scalpproj,1));
-        
+        else % use the scalp projection of the discrim vector:
+%             GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained_fromscalp,2));
+%         GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
+        %Pe
+        GFX_classifierA_onERP_Pe(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_PEtrained_fromscalp,2));
+        GFX_classifierA_topo_Pe(ippant,:) = squeeze(mean(DEC_Pe_window.scalpproj,1));
+        end
+            
         clear PFX_classifierA_onERP_ERNtrained PFX_classifierA_onERP_PEtrained;
         
         if strcmpi(ExpOrder{1}, 'visual')
@@ -47,11 +61,16 @@ if jobs.concat_GFX==1;
     cd('GFX')
     %other plot features:
     Xtimes = DEC_Pe_windowparams.wholeepoch_timevec;
-    save('GFX_DecA_predicts_untrainedtrials', ...
-        'GFX_classifierA_onERP_ERN','GFX_classifierA_onERP_Pe',...
-        'GFX_classifierA_topo_ERN', 'GFX_classifierA_topo_Pe', ...
-        'vis_first', 'aud_first', 'Xtimes');
     
+    GFX_classifierA_onERP_Pe_fromscalp = GFX_classifierA_onERP_Pe;
+    save('GFX_DecA_predicts_untrainedtrials', ...
+        'GFX_classifierA_onERP_Pe_fromscalp', '-append');
+        
+%     save('GFX_DecA_predicts_untrainedtrials', ...
+%         'GFX_classifierA_onERP_ERN','GFX_classifierA_onERP_Pe',...
+%         'GFX_classifierA_topo_ERN', 'GFX_classifierA_topo_Pe', ...
+%         'vis_first', 'aud_first', 'Xtimes');
+%     
     
 end % concat job
 
@@ -79,7 +98,9 @@ if jobs.plot_GFX==1;
         
         winwas= 'ERN';
     elseif job.plotERNorPe==2
-        GFX_classifierA_onERP =GFX_classifierA_onERP_Pe;
+        
+        
+        GFX_classifierA_onERP =GFX_classifierA_onERP_Pe_fromscalp;
         
         % add training window
         windowvec = DEC_Pe_windowparams.training_window_ms;
@@ -176,7 +197,7 @@ for iorder = 1%:3
     
     %%
     set(gcf, 'color', 'w')
-    printname = ['GFX classifier trained on Correct part A-' winwas ',' orderis ', w-' num2str(nIter) 'reps' ];
+    printname = ['GFX classifier trained on Correct part A-' winwas ',' orderis ', w-' num2str(nIter) 'reps (fromscalp)' ];
     
     if smoothON==1
         printname = [printname ', smoothed'];

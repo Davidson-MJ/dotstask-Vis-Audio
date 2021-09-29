@@ -17,11 +17,11 @@ pfols = dir([pwd filesep '*_p*']);
 %%
 
 % % Plot_Accuracy_perExpOrder
- job.PlotAccuracy_perExpOrder =0;
+ job.PlotAccuracy_perExpOrder =1;
 % Plot_RTsbytype ;
- job.PlotRTs_perExpOrder =0;
+ job.PlotRTs_perExpOrder =1;
 % Plot_Confidence distributions
- job.PlotConfdistributions=0;
+ job.PlotConfdistributions=1;
  
  job.Plottype2AUC=1;
 %% >........................................>.............................

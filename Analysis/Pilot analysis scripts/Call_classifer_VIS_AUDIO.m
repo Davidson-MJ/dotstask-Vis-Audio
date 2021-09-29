@@ -16,9 +16,9 @@ GFX_decoding= zeros(length(pfols), 2, 2,281);
 
 nIter = 10; % 10; % n iterations, final output is the average spatial discrimination vector.
 
-useERNorPE=1;
+useERNorPE=2;
 
-for ippant =24:25
+for ippant =1:length(pfols);
     
 pcounter=1;
 

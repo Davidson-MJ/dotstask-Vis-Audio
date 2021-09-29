@@ -13,7 +13,9 @@ pfols = dir([pwd filesep 'p_*']);
 job.trainclassifierpartA_CvsE            =0;
 
 job.plot_A_vs_Untrainedtrials            = 0;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
-job.plot_A_vs_Untrainedtrials_GFX        = 1;    %  GFX_ of above
+job.plot_A_vs_Untrainedtrials_pooled            = 0;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
+job.plot_A_vs_Untrainedtrials_GFX        = 0;    %  GFX_ of above
+job.plot_A_vs_untrainedtrials_GFX_AUCsplit =0;
 
 % job.plot_A_vs_RTtercile =0; % see if classifier accuracy in A, is affected by RT (implying capture of confidence).
 
@@ -50,7 +52,7 @@ if job.plot_A_vs_Untrainedtrials==1
   Plot_decA_vs_untrained;
 end
 %%%%%%%%%%%%%%%%%%%%%
-if job.plot_A_vs_Untrainedtrials==1
+if job.plot_A_vs_Untrainedtrials_pooled==1
     % As above, but uses cross validation to estimate classifier accuracy
     % (rather than single shot per iteration).
   Plot_decA_vs_untrained_pooledClassifier;
@@ -59,6 +61,10 @@ end
 %% 
 if job.plot_A_vs_Untrainedtrials_GFX==1   
     Plot_decA_vs_untrained_GFX;
+end
+
+if job.plot_A_vs_Untrainedtrials_GFX_AUCsplit==1   
+    Plot_decA_vs_untrained_GFX_AUCsplit;
 end
 
 % if job.plot_A_vs_RTtercile ==1 % using ROC to compare RT affect on classifier accuracy.    

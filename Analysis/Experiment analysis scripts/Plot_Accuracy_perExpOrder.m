@@ -148,7 +148,7 @@ partB_aud = partB(vis_first,:);
 clf;
 set(gcf, 'units', 'normalized', 'position', [0 0 .8 .5], 'color', 'w')
 
-for iorder = 1:2
+for iorder = 1%:2
     if iorder==1
         Xdata=[partA_vis,partB_aud];
         expo = {'visual','auditory'};
