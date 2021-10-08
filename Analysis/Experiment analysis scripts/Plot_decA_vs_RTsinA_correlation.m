@@ -8,15 +8,15 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 elocs = readlocs('BioSemi64.loc');
 
 
-job1.calcandconcat_PFX =1; % using correlation
+job1.calcandconcat_PFX =1; % using correlation (all trials or correct only) - check when saving!
 job1.plotPFX=0;
-job1.plotGFX=1;
+job1.plotGFX=0;
 
 
 
 
 
-normON = 0; % normalize EEG data (as per classifier call).
+normON = 1; % normalize EEG data (as per classifier call).
 
 RTbugfix = 0; % when collecting RTs, restrict to a longer window (>330ms),
 %to avoid the bug.
@@ -40,7 +40,8 @@ if job1.calcandconcat_PFX ==1
         load('Epoch information.mat');
         %%
         %
-        % correct only!
+        %try  correct only!
+%         partAindx = sort([corAindx, errAindx]);
         partAindx = sort([corAindx]);
         
         partAdata = resplockedEEG(:,:,partAindx);
@@ -160,9 +161,11 @@ if job1.calcandconcat_PFX ==1
         GFX_ExpOrders(ippant).d= ExpOrder;
         disp(['calculating sliding window corr for ppant.. ' num2str(ippant)])
     end
+    %%
+    GFX_DECA_RTs_slid_corrtrials= GFX_DECA_RTs_slid;
     cd(eegdatadir)
     cd('GFX')
-    save('GFX_DecA_slidingwindow_predictsRTs', 'GFX_DECA_RTs_slid', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders', 'plotXtimes');
+    save('GFX_DecA_slidingwindow_predictsRTs', 'GFX_DECA_RTs_slid_corrtrials', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders', 'plotXtimes', '-append');
     
 end
 %%
@@ -222,33 +225,21 @@ if job1.plotPFX==1
 end % job printing.
 
 %%
-vis_first=[2,3,6:25];
-aud_first = [1,4,5];
 
 if job1.plotGFX==1
     %% plot results across participants:
-    for iorder =1%:3
+   
         figure(1); clf
         set(gcf, 'units', 'normalized', 'position', [0    0    1    1], 'color', 'w');
-        switch iorder
-            case 1
-                useppants = vis_first;
-                ordert='visual-audio';
-            case 2
-                useppants = aud_first;
-                ordert= 'audio-visual';
-            case 3
-                useppants = 1:size(GFX_DECA_RTs_slid,1);
-                ordert= 'all combined';
-        end
+     
         
-        dataIN = squeeze(GFX_DECA_RTs_slid(useppants,:));
+        dataIN =GFX_DECA_RTs_slid;
         
         Ste = CousineauSEM(dataIN);
         
         subplot(1,3,1:2)
         set(gcf, 'color', 'w')
-        ylim([-.1 .075])
+        ylim([-.2 .2])
         %add patch as background first:
         %plot topo patches, showing the training window used.
         ytx= get(gca, 'ylim');
@@ -264,7 +255,7 @@ if job1.plotGFX==1
         
         
         xlabel(['Time [ms] after response in part A']);
-        ylabel('Part A (prob) and RTs [r]')
+        ylabel('Correlation between classifier score and RTs [r]')
         
         hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
         hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
@@ -279,13 +270,13 @@ if job1.plotGFX==1
             [~, pvals(itime)] = ttest(dataIN(:,itime));
             
             if pvals(itime)<.05
-                text(plotXtimes(winmid(itime)), [-0.1], '*', 'color', 'k','fontsize', 25);
+                text(plotXtimes(winmid(itime)), [-0.19], '*', 'color', 'k','fontsize', 25);
             end
         end
-        % add topoplot of discrim used to aid interpretation.
+        %% add topoplot of discrim used to aid interpretation.
         
         subplot(1,3,3)
-        topoplot(mean(GFX_DecA_ScalpProj(useppants,:)), elocs);
+        topoplot(mean(GFX_DecA_ScalpProj,1), elocs);
         title({['Part A classifier projection ']});%;[ num2str(DEC_Pe_windowparams.training_window_ms) ]});
         
         set(gca, 'fontsize', 20)
@@ -298,5 +289,5 @@ if job1.plotGFX==1
         printname = ['GFX Dec A sliding window RT A correlaiton, for ' ordert ', correct +error (new)'];
         print('-dpng', printname)
     end
-end
+
 %%

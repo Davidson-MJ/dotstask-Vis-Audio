@@ -11,7 +11,7 @@ framesouttmp = dsearchn(Xtimes', [dec_params.window_frames_ms(1), dec_params.win
 frames_out=framesouttmp(1):framesouttmp(2); % data runs from 0:500 (ms)
 
 basetmp = dsearchn(Xtimes', [dec_params.baseline_ms(1) dec_params.baseline_ms(2)]');
-baseline=basetmp(1):basetmp(2);  % this is -100ms to 0
+baseline=basetmp(1):basetmp(2);  % baseline in pnts
 
 times=Xtimes;
 
@@ -126,7 +126,7 @@ for nIteration = 1:dec_params.nIter
         xlabel('Time from response [ms]');
         set(gca, 'YDir', 'reverse'); legend('corrects', 'errors');
         
-        title({['Raw ERP at ' elocs(dec_params.showchannel).labels ','];['ntrials (matched) = ' num2str(C)]});
+        title({['Raw ERP at ' elocs(dec_params.showchannel).labels ','];['ntrials (matched) = ' num2str(Ctmp)]});
         
         %% now plot the topography, of the difference, in our window of interest.
         tempC =  squeeze(nanmean(corrects_test(:, :,:),3));
@@ -264,6 +264,8 @@ for nIteration = 1:dec_params.nIter
     y = x*v(1:end-1) + v(end);
     %size is trainingwindow*ntrials.
     bp = bernoull(1,y);
+    
+%     p = bernoull(1,[x 1]*v);
     
     a = y \ x; 
     

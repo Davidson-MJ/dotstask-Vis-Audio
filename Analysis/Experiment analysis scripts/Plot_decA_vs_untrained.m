@@ -2,10 +2,10 @@ dbstop if error
 elocs= readlocs('BioSemi64.loc');
 
 jobs.useERNorPe =2; % 1 or 2.
-jobs.calculate_perppant =0;
-jobs.plot_perppant=1;
+jobs.calculate_perppant =1;
+jobs.plot_perppant=0;
 
-
+normON=1;
 % for plots: use raw discrim vector or scalp projection:
 useVorScalpProjection= 1;
 
@@ -72,10 +72,33 @@ useVorScalpProjection= 1;
                     
                     [nchans, nsamps, ntrials] =size(useDATA);
                     
+                    
+                    %%
+                    
+                    % normalize by rescaling.
+                    if normON==1
+                        data_norm = zeros(size(useDATA));
+                        for ichan = 1:nchans
+                            for itrial=1:ntrials
+                                temp = useDATA(ichan,:,itrial);
+                                % rescale
+                                temp=temp-(0.5*(min(temp)+max(temp)));
+                                if(min(temp)~=max(temp))
+                                    temp=temp/max(temp);
+                                end
+                                
+                                data_norm(ichan,:,itrial) = temp;
+                            end
+                        end
+                        useDATA= data_norm;
+                    end
+                    
+                    
+                    
                     %reshape for multiplication
                     testdata = reshape(useDATA, nchans, nsamps* ntrials)';%
                     %% multiply by discrim vector:
-                    
+%                     p = bernoull(1,[x 1]*v);
                     ytest = testdata * v(1:end-1) + v(end);
                     %% reshape for plotting.
                     ytest_trials = reshape(ytest,nsamps,ntrials);

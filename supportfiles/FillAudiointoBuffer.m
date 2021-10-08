@@ -28,6 +28,7 @@ hightoneplay          = sin(2*pi*[0:1/cfg.audrate :cfg.auddur]*hightone);
 largerLoc = alltrials(t).whereTrue;
 %append tones, using a small gap between:
 gaptones = nan(1,cfg.audrate*cfg.tonegap);
+gaptones = zeros(1,cfg.audrate*cfg.tonegap);
 
 if largerLoc==1 %First tone larger
     

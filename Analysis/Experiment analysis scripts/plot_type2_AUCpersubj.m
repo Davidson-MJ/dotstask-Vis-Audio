@@ -104,8 +104,8 @@ if job.plotGFX
     %%
     cd([figdir filesep 'AUC results']);
     
-    figure(1); clf; set(gcf, 'units', 'normalized', 'position', [0 0 .5 .5], 'color', 'w');
-    
+    figure(1); clf; set(gcf, 'units', 'normalized', 'position', [0 0 1 .5], 'color', 'w');
+    subplot(121)
     plot(squeeze(storeAUC_ax(:,1,:))', squeeze(storeAUC_ax(:,2,:))');
     
     hold on
@@ -115,10 +115,32 @@ if job.plotGFX
     xlabel('P(conf|Err)')
     hold on;
     plot([0, 1], [0,1], 'k:')
-    box on; axis tight;
+    box on; axis tight; axis square
     xlim([0 1]), ylim([0 1]);
-    print('-dpng', 'AUC allppants overlayed');
+    set(gca, 'fontsize', 25)
     
+    
+    %%
+    subplot(122);
+    g1= find(storeAUC<median(storeAUC));
+    g2 = find(storeAUC>=median(storeAUC));
+    
+    plot(squeeze(storeAUC_ax(g1,1,:))', squeeze(storeAUC_ax(g1,2,:))', 'color', 'r');
+    hold on
+    p1=plot([0.01:.01:1], squeeze(mean(storeAUC_ax(g1,2,:),1)), 'linew', 4, 'color', 'r');
+    hold on
+    plot(squeeze(storeAUC_ax(g2,1,:))', squeeze(storeAUC_ax(g2,2,:))', 'color', 'b');
+    p2=plot([0.01:.01:1], squeeze(mean(storeAUC_ax(g2,2,:),1)), 'linew', 4, 'color', 'b');
+    plot([0, 1], [0,1], 'k:')
+    box on; axis tight;
+    box on; axis tight; axis square
+    xlim([0 1]), ylim([0 1]);
+    set(gca, 'fontsize', 25)
+    
+    ylabel('P(conf|Corr)')
+    xlabel('P(conf|Err)')
+    legend([p1, p2], {'low AUC','high AUC'}, 'location', 'SouthEast');
+    print('-dpng', 'AUC allppants overlayed');
 end
 
 %%

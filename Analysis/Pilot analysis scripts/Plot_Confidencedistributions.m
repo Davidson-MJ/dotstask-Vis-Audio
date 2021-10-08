@@ -93,7 +93,7 @@ aud_first = find(ExperimentOrder==2);
 
 %%
 clf;
-set(gcf, 'units', 'normalized', 'position', [0 0 .8 1], 'color', 'w')
+set(gcf, 'units', 'normalized', 'position', [0 0 .8 .8], 'color', 'w')
 
 for iorder = 1%:2
     
@@ -119,28 +119,78 @@ dataX{1} = b(:,1);
 dataX{2} = b(:,2);
 bh =rm_raincloud(dataX', colnow);
 
+%colour changes:
+ % change colours
+    %patches:
+    bh.p{1}.FaceColor = cmap(4,:); % green
+    bh.p{2}.FaceColor = cmap(6,:); % redish
+    %scatter:
+    bh.s{1}.MarkerFaceColor = cmap(4,:); % green
+    bh.s{2}.MarkerFaceColor = cmap(6,:); % redish
+    
+    
     
 hold on; 
 %add plot specs
 set(gca, 'yticklabel', {['Error'], ['Correct']})
-title({['Part B (' expo{2} '), n' num2str(length(b))]})
-% xlim([-1.5 1.5])
+title({['Part B: ' expo{2} ]})
 
-hold on; plot([0 0], ylim, 'k:', 'linew', 3)
-%
-set(gcf, 'color', 'w');
-set(gca, 'fontsize', fontsizeX)
+%5 add text
+ ytsare = get(gca, 'ytick');
+    
+    text(-2.8, ytsare(1), ['\it M=\rm' sprintf('%.2f',mean(Xdata(:,2)))], 'fontsize', fontsizeX)
+    text(-2.8, ytsare(2), ['\it M=\rm' sprintf('%.2f',mean(Xdata(:,1)))], 'fontsize', fontsizeX)
+    set(gcf, 'color', 'w');
+    set(gca, 'fontsize', fontsizeX)
+    set(gcf, 'color', 'w');
+    set(gca, 'fontsize', fontsizeX)
+    
+    
 if iorder==1
     sety = get(gca,'ylim');
+    xlim([-3 3])
     setx = get(gca,'xlim');
+    
 else
 %     ylim([sety(1) sety(2)]);
     xlim([setx(1) setx(2)]);
 end
 xlabel('z(Confidence)')
 
+ytsare = get(gca, 'ytick');
+
+% ttests
+[~, p1] = ttest(Xdata(:,1), Xdata(:,2));
+
+if p1<.001
+    psig= '***';
+elseif p1<.01
+    psig= '**';
+elseif p1<.05
+    psig ='*';
+else 
+    psig= 'ns';
 end
-print('-dpng', ['GFX zscored confidence by CE, split by order']);
+    
+%rain clouds have weird axes:
+yl= get(gca, 'ylim');
+mY= (mean(sety));
+
+
+sigheight = setx(2)*.9;
+
+
+    ts=text(sigheight, mY, psig, 'fontsize', 45);
+    ts.VerticalAlignment= 'middle';
+    ts.HorizontalAlignment= 'center';
+    hold on;
+%     plot(xlim, [yl(1), yl(2)], ['k:' ]);
+    plot([sigheight-.05, sigheight-.05], [ytsare(1), ytsare(2)], ['k-' ], 'linew', 2);
+    
+    
+    
+end
+% print('-dpng', ['GFX zscored confidence by CE, split by order']);
 %%
     
     

@@ -5,13 +5,13 @@
 
 
 
-jobs.concat_GFX=1;
+jobs.concat_GFX=0;
 jobs.plot_GFX=1;
 %%
 %plotType
 job.plotERNorPe=2; % 1 or 2.
 
-useVorScalpProjection= 2;
+useVorScalpProjection= 1;
 
 %>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 %% % load and concat across subjects (if previous step was re-run).
@@ -34,14 +34,14 @@ if jobs.concat_GFX==1;
         
         if useVorScalpProjection== 1; % use the raw discrim vector.
         %ERN
-%         GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained,2));
-%         GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
+        GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained,2));
+        GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
         %Pe
         GFX_classifierA_onERP_Pe(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_PEtrained,2));
         GFX_classifierA_topo_Pe(ippant,:) = squeeze(mean(DEC_Pe_window.scalpproj,1));
         else % use the scalp projection of the discrim vector:
-%             GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained_fromscalp,2));
-%         GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
+            GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained_fromscalp,2));
+        GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
         %Pe
         GFX_classifierA_onERP_Pe(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_PEtrained_fromscalp,2));
         GFX_classifierA_topo_Pe(ippant,:) = squeeze(mean(DEC_Pe_window.scalpproj,1));
@@ -54,6 +54,7 @@ if jobs.concat_GFX==1;
         else
             aud_first= [aud_first, ippant];
         end
+        disp(['Fin for ppant ' num2str(ippant)]);
     end
     
     % save!
@@ -62,21 +63,29 @@ if jobs.concat_GFX==1;
     %other plot features:
     Xtimes = DEC_Pe_windowparams.wholeepoch_timevec;
     
-    GFX_classifierA_onERP_Pe_fromscalp = GFX_classifierA_onERP_Pe;
-    save('GFX_DecA_predicts_untrainedtrials', ...
-        'GFX_classifierA_onERP_Pe_fromscalp', '-append');
-        
+%     GFX_classifierA_onERP_Pe_fromscalp = GFX_classifierA_onERP_Pe;
 %     save('GFX_DecA_predicts_untrainedtrials', ...
-%         'GFX_classifierA_onERP_ERN','GFX_classifierA_onERP_Pe',...
-%         'GFX_classifierA_topo_ERN', 'GFX_classifierA_topo_Pe', ...
-%         'vis_first', 'aud_first', 'Xtimes');
+%         'GFX_classifierA_onERP_Pe_fromscalp', '-append');
+        
+    save('GFX_DecA_predicts_untrainedtrials', ...
+        'GFX_classifierA_onERP_ERN','GFX_classifierA_onERP_Pe',...
+        'GFX_classifierA_topo_ERN', 'GFX_classifierA_topo_Pe', ...
+        'vis_first', 'aud_first', 'Xtimes', '-append');
 %     
     
 end % concat job
 
 %%%%%%%
-%now plot GFX
+%% now plot GFX
 if jobs.plot_GFX==1;
+    
+    %separate into Aud and Visual.
+cmap = cbrewer('qual', 'Paired',10);
+colormap(cmap)
+% viscolour = cmap(3,:);
+% audcolour=cmap(9,:);
+grCol=cmap(4,:); %greenish
+redCol =cmap(6,:); %reddish
     
     %load if necessary.
     cd([eegdatadir filesep 'GFX']);
@@ -100,7 +109,8 @@ if jobs.plot_GFX==1;
     elseif job.plotERNorPe==2
         
         
-        GFX_classifierA_onERP =GFX_classifierA_onERP_Pe_fromscalp;
+%         GFX_classifierA_onERP =GFX_classifierA_onERP_Pe_fromscalp;
+        GFX_classifierA_onERP =GFX_classifierA_onERP_Pe;
         
         % add training window
         windowvec = DEC_Pe_windowparams.training_window_ms;
@@ -125,10 +135,32 @@ for iorder = 1%:3
     figure(1); clf;
     set(gcf, 'units', 'normalized', 'Position', [0 0 1 1]); shg
     leg=[];
-    subplot(1, 3, 1:2);
+    
     for itestdata = 1:4
         
+        switch itestdata
+            case 1 % corr A
+            subplot(1, 2, 1);
+            
+            usecol = grCol;
+            case 2 % corr B
+                subplot(1, 2, 2);
+            usecol = grCol;
+            case 3
+                %errA
+                subplot(1, 2, 1);
+                usecol= redCol;
+                title('Part A: visual')
+            case 4 % err B
+                subplot(1, 2, 2);
+                title('Part B: auditory')
+                usecol= redCol;
+                
+        end
         plotdata = squeeze(GFX_classifierA_onERP(useppants,itestdata,:));
+        
+        % for plots, zero on y axis:
+        plotdata = plotdata-0.5; 
         
         if smoothON==1
             winsize = 256/20;
@@ -138,11 +170,9 @@ for iorder = 1%:3
         end
         stE = CousineauSEM(plotdata);
         
-        sh= shadedErrorBar(Xtimes, squeeze(nanmean(plotdata,1)), stE, [],1);
+        sh= shadedErrorBar(Xtimes, squeeze(nanmean(plotdata,1)), stE, {'color', usecol},1);
         
-        sh.mainLine.Color =  cmap(itestdata,:);
-        sh.patch.FaceColor =  cmap(itestdata,:);
-        sh.edge(1,2).Color=cmap(itestdata,:);
+        
         if itestdata<3
             sh.mainLine.LineWidth = 3;
             sh.mainLine.LineStyle= '-';
@@ -157,37 +187,48 @@ for iorder = 1%:3
         %ttests
         pvals= nan(1, length(Xtimes));
         for itime = 1:length(Xtimes)
-            [~, pvals(itime)] = ttest(plotdata(:,itime), 0.5);
+            [~, pvals(itime)] = ttest(plotdata(:,itime), 0);
             
             if pvals(itime)<.05
-                text(Xtimes(itime), [0.2+(0.01*itestdata)], '*', 'color', cmap(itestdata,:),'fontsize', 25);
+                text(Xtimes(itime), [-.15+(0.01*itestdata)], '*', 'color', usecol,'fontsize', 25);
             end
         end
         %    pvals(pvals>=.05) = nan;
         %    plot(Xtimes, pvals<.05, '*');
         % %plot sig points.
         % text(Xtimes(pvals<.05), [0.2], '*',  'color', cmap(itestdata,:), 'FontSize', 5)
-    end
     
-    ylim([.2 .75])
+    
+    ylim([-.15 .15])
     % add extra plot elements:
-    hold on; plot(xlim, [.5 .5], '--', 'color', [.3 .3 .3], 'linew', 3)
+    hold on; plot(xlim, [0 0], '--', 'color', [.3 .3 .3], 'linew', 3)
     hold on; plot([0 0 ], ylim, '--', 'color', [.3 .3 .3], 'linew', 3)
     
+    if itestdata==1;
     %add patch
     ylims = get(gca, 'ylim');
     pch = patch([windowvec(1) windowvec(1) windowvec(2) windowvec(2)], [ylims(1) ylims(2) ylims(2) ylims(1)], [.8 .8 .8]);
     pch.FaceAlpha= .1;
+    end
     xlabel('Time since response (ms)')
     ylabel('A.U');
+     set(gca, 'fontsize', 15)
+     set(gca,'ydir', 'reverse')
+     
+     if itestdata>2
+        % place legend. 
+        legend([leg(itestdata-2) leg(itestdata)] , {'correct', 'error'});
+        
+     end
+    end % itest data
     %%
-    title({['Order ' orderis ', nreps ' num2str(nIterations)];['Time-course of discriminating component, (trained Corr A vs Err A)']}, 'fontsize', 25);
+%     title({['Order ' orderis ', nreps ' num2str(nIterations)];['Time-course of discriminating component, (trained Corr A vs Err A)']}, 'fontsize', 25);
     %%
-    legend(leg, {['Corr A'],['Corr B '], ['Err A'], ['Err B']})
-    set(gca, 'fontsize', 15)
+%     legend(leg, {['Corr A'],['Corr B '], ['Err A'], ['Err B']})
+   
     
     
-    subplot(133);
+    figure(2);
     topoplot(nanmean(GFX_classifierA_topo,1), elocs);
     title(['GFX, spatial projection'])
     set(gca, 'fontsize', 15)

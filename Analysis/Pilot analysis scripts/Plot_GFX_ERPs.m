@@ -14,11 +14,19 @@ set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
 
 exppart = {'1st half', '2nd half'};
 
-meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57];
+% meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57]; % resp
+meanoverChans = [4,38,39,11,12,19,47,46,48,49,32,56,20,31,57];
 meanoverChans_VIS = [20:31, 57:64];
 meanoverChans_AUD = [4:15,39:52];
     
-
+%same colours as beh data?
+%separate into Aud and Visual.
+cmap = cbrewer('qual', 'Paired',10);
+% colormap(cmap)
+% viscolour = cmap(3,:);
+% audcolour=cmap(9,:);
+grCol=cmap(4,:); %greenish
+redCol =cmap(6,:); %reddish
 elocs = readlocs('BioSemi64.loc'); %%
 %%
 if job1.plotStimlocked ==1 % updated to plot split by Corr and Error
@@ -118,7 +126,7 @@ for ixmod = 1:2
     subplot(3,4,plotspot);
     
     %place patches first (as background)   
-    ylim([-7 5])
+    ylim([-8 5])
     
 %place patches (as background) first:
     ytx= get(gca, 'ylim');    
@@ -138,7 +146,7 @@ hold on
     plotme = squeeze(nanmean(dataplot(:,meanoverChans_tmp,:),2));
         
     stERP = CousineauSEM(plotme);
-    sh=shadedErrorBar(use_xvec, mean(plotme,1), stERP, 'k', 1);
+%     sh=shadedErrorBar(use_xvec, mean(plotme,1), stERP, 'k', 1);
     
     
     %% now C and E separate:
@@ -149,13 +157,19 @@ hold on
     stE1 = CousineauSEM(d1);
     stE2 = CousineauSEM(d2);
     %%
-    p1= plot(use_xvec, squeeze(nanmean(d1,1)), [':b'], 'linew', 2); hold on
-    p2= plot(use_xvec, squeeze(nanmean(d2,1)), [':r'], 'linew', 2);
+
+    sh=shadedErrorBar(use_xvec, squeeze(nanmean(d1,1)), stE1,{'color',grCol, 'linew', 2},1);
+    p1= sh.mainLine;
+    hold on;
+    sh=shadedErrorBar(use_xvec, squeeze(nanmean(d2,1)), stE1,{'color',redCol, 'linew', 2},1);
+    p2= sh.mainLine;
     
-    
+    diffplot= p2.YData - p1.YData;
+%     pd= plot(plotXtimes, diffplot, 'k', 'linew', 2);
     set(gca, 'ydir', 'reverse')
     
     hold on;
+    
     
     
     
@@ -188,9 +202,10 @@ hold on
      patch(xvs+600, yvs,['k'])
      end
      
-     legend([p1, p2, sh.mainLine, pch], {'cor', 'err', 'diff','stimulus'}, 'location', 'NorthEast')
+%      legend([p1, p2, sh.mainLine, pch], {'cor', 'err', 'diff','stimulus'}, 'location', 'NorthEast')
+     legend([p1, p2, pch], {'cor', 'err', 'stimulus'}, 'location', 'NorthEast')
 end
-colormap('magma')
+colormap('inferno')
 cd(figdir)
 cd('Stimulus locked ERPs')
 set(gcf, 'color', 'w')
@@ -302,6 +317,7 @@ for ixmod = 1:2
     
     plotspot = plotts + 2*(ixmod-1);        
     subplot(3,4,plotspot);
+%     topoplot(mean(datac(:,[topot(1):topot(2)]),2), elocs);
     topoplot(mean(datac(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans], 's' 'w'} );
     c=colorbar;        
         title([num2str(realt(1)) '-' num2str(realt(2)) 'ms'])        
@@ -337,11 +353,15 @@ ph.LineStyle= 'none';
     stE1 = CousineauSEM(d1);
     stE2 = CousineauSEM(d2);
     %%
-    p1= plot(plotXtimes, squeeze(nanmean(d1,1)), [':b'], 'linew', 2); hold on
-    p2= plot(plotXtimes, squeeze(nanmean(d2,1)), [':r'], 'linew', 2);
+
+    sh=shadedErrorBar(plotXtimes, squeeze(nanmean(d1,1)), stE1,{'color',grCol, 'linew', 2},1);
+    p1= sh.mainLine;
+    hold on;
+    sh=shadedErrorBar(plotXtimes, squeeze(nanmean(d2,1)), stE1,{'color',redCol, 'linew', 2},1);
+    p2= sh.mainLine;
     
     diffplot= p2.YData - p1.YData;
-    pd= plot(plotXtimes, diffplot, 'k', 'linew', 6);
+    pd= plot(plotXtimes, diffplot, 'k', 'linew', 2);
     set(gca, 'ydir', 'reverse')
     
     hold on;
@@ -364,10 +384,11 @@ ph.LineStyle= 'none';
     
     
     legend([p1 p2, pd], {'Correct', 'Error', 'Err-Corr'})
+%     legend([p1 p2], {'Correct', 'Error'})
     xlim([- 200 600]);
 %     ylim([-5 8])
 end
-colormap('magma')
+colormap('inferno')
 set(gcf, 'color', 'w')
 %
 cd(figdir)

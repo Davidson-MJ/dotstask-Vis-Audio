@@ -22,6 +22,8 @@ cmap = cbrewer('qual', 'Paired',10);
 colormap(cmap)
 viscolour = cmap(3,:);
 audcolour=cmap(9,:);
+% correct=cmap(4,:); %greenish
+% error =cmap(6,:); %reddish
 
 %%
 close all
@@ -34,13 +36,13 @@ for ippant = 1:length(pfols)
     cd(behdatadir);
     cd(pfols(ippant).name);
     
-    %use file name for debugging plots
-    pname = ['p_' subject.id];
+    
     
     lfile = dir([pwd filesep '*final' '*']);
     
     load(lfile.name);
-    
+    %use file name for debugging plots
+    pname = ['p_' subject.id];
     
     %we need to restrct the trials to only NON practice trials.
     usetrials=alltrials;
@@ -156,51 +158,6 @@ clear usetrials*
 
 end
 %% can also plot mean across participants.
-figure(2); clf;
-set(gcf, 'units', 'normalized', 'position', [0 0 .4 .75], 'color', 'w')
-tmp= [ReactionTimesALL.mean];
-tmpM= reshape(tmp, [4, length(pfols)]);
-mBar=nanmean([tmpM],2); % mean across ppants
-countsBar = nanmean(CorErrcountsALL,2);
-
-%show all A vs B.
-mBar = [mBar(1:2)';mBar(3:4)'];
-
-%stack for comparison.
-bh=bar(mBar); hold on
-bh(1).FaceColor = [0 .7 .4];
-bh(2).FaceColor = [.7 0 .4];
-hold on
-title(['n= ' num2str(length(tmpM)) ])
-
-legend('correct', 'incorrect', 'AutoUpdate', 'off')
-ylabel('Reaction Time (secs)');
-set(gca, 'xticklabels', {'Part A', 'Part B'})
-set(gca, 'fontsize', 15)
-%
-stE= CousineauSEM(tmpM'); % Px in first dim.
-stE=[stE(1:2);stE(3:4)];
-eH= errorbar_groupedfit(mBar,stE);
-set(gca, 'fontsize', 25);
-ylim([0 max(max(mBar))+.2])
-
-
-% text(.5, .1,'counts', 'color', 'k','fontsize', 14, 'fontweight', 'bold')
-% 
-% 
-% text(.75, .1, sprintf('%.01f', countsBar(1)), 'color', 'k','fontsize', 20, 'fontweight', 'bold')
-% text(1.05, .1, sprintf('%.01f', countsBar(2)), 'color', 'k','fontsize', 20, 'fontweight', 'bold')
-% 
-% text(1.75, .1, sprintf('%.01f', countsBar(3)), 'color', 'k','fontsize', 20, 'fontweight', 'bold')
-% text(2.05, .1, sprintf('%.01f', countsBar(4)), 'color', 'k', 'fontsize', 20, 'fontweight', 'bold');
-
-title(['Grand average reaction times, n=' num2str(length(tmpM))])
-%
-print('-dpng', 'Barchart summary, grand average RTs')
-
-%% now separate by modality:
-
-%% now separate by order
 
 %%
 clf;
@@ -318,3 +275,88 @@ end
 print('-dpng', ['summary RTs, Order ' expo{1} '-' expo{2} ', n' num2str(length(barDD))])
 
 shg
+
+
+%% raincloud option:
+
+clf;
+set(gcf, 'units', 'normalized', 'position', [0 0 .8 .8], 'color', 'w')
+
+for ipart= 1:2;
+    if ipart==1 % part A
+        Xdata=[[ReactionTimesALL(1,vis_first).mean]',[ReactionTimesALL(2,vis_first).mean]'];
+        expo = {'correct', 'error'};
+        tis = 'Part A: Visual';
+        xlimsr= [0 1];
+    else
+        Xdata=[[ReactionTimesALL(3,vis_first).mean]',[ReactionTimesALL(4,vis_first).mean]'];
+        expo = {'correct','error'};
+        tis = 'Part B: auditory';
+        xlimsr= [0 2];
+        
+    end
+    
+    subplot(1,2, ipart)
+    
+    [a,b]=CousineauSEM(Xdata);
+    
+    dataX{1} = b(:,1);
+    dataX{2} = b(:,2);
+    bh =rm_raincloud(dataX', [cmap(2,:)]);
+    % change colours
+    %patches:
+    bh.p{1}.FaceColor = cmap(4,:); % green
+    bh.p{2}.FaceColor = cmap(6,:); % redish
+    %scatter:
+    bh.s{1}.MarkerFaceColor = cmap(4,:); % green
+    bh.s{2}.MarkerFaceColor = cmap(6,:); % redish
+    
+    
+    %add plot specs
+    set(gca, 'yticklabel', {[expo{2}], [ expo{1}]})
+    title([tis])
+%     axis tight
+    xlim([xlimsr])
+    
+    
+    %
+    
+    ytsare = get(gca, 'ytick');
+    
+    text(0.1, ytsare(1), ['\it M=\rm' sprintf('%.2f',mean(Xdata(:,2)))], 'fontsize', fontsizeX)
+    text(0.1, ytsare(2), ['\it M=\rm' sprintf('%.2f',mean(Xdata(:,1)))], 'fontsize', fontsizeX)
+    set(gcf, 'color', 'w');
+    set(gca, 'fontsize', fontsizeX)
+    set(gcf, 'color', 'w');
+    set(gca, 'fontsize', fontsizeX)
+    
+    xlabel('RT (sec)')
+    
+%
+% ttests
+[~, p1] = ttest(Xdata(:,1), Xdata(:,2));
+
+if p1<.001
+    psig= '***';
+elseif p1<.01
+    psig= '**';
+elseif p1<.05
+    psig ='*';
+else 
+    psig= 'ns';
+end
+    
+%rain clouds have weird axes:
+yl= get(gca, 'ylim');
+mY= (mean(ytsare));
+sigheight= mean(Xdata(:)) +.4;
+sigheight = xlimsr(2)*.9;
+
+    ts=text(sigheight, mY, psig, 'fontsize', 45);
+    ts.VerticalAlignment= 'middle';
+    ts.HorizontalAlignment= 'center';
+    hold on;
+%     plot(xlim, [yl(1), yl(2)], ['k:' ]);
+    plot([sigheight-.05, sigheight-.05], [ytsare(1), ytsare(2)], ['k-' ], 'linew', 2);
+
+end

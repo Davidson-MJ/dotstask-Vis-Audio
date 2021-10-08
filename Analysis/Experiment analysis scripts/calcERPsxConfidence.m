@@ -5,7 +5,7 @@
 
 
 % called from Plot_dataforERPs_EEGtrigbased
-normON=0;
+normON=1;
 
 %%
 for ippant=1:length(pfols)

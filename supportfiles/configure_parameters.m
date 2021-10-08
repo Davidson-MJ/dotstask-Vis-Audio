@@ -40,7 +40,7 @@ cfg.dispFeedback_stats      =0;  % change to 1 to give audio feedback, and hard 
 cfg.giveAudioFeedback       =0;  %1 will provide trial level feedback during practice.
 
 cfg.auddur                  =0.1; 
-cfg.tonegap                 = 0.1; %seconds, gap between tones to be discriminated
+cfg.tonegap                 = 0.1; %seconds, gap between tones to be discriminated (was 0.5?)
 cfg.audrate                 = 44100;
 cfg.stim.beepvolume         = 1;                                          % error tone volume
 

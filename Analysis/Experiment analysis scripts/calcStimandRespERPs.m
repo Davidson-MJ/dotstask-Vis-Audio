@@ -153,7 +153,7 @@ if job1.calcindividual == 1
     end
 end
 
-
+%%
 if job1.concat_GFX == 1
     %after completing across participants, store GFX.
     %%     %%
@@ -195,7 +195,7 @@ if job1.concat_GFX == 1
         GFX_visrespCOR(ippant,:,:) = corr_Vis_rl;
         GFX_visrespERR(ippant,:,:) = err_Vis_rl;
         
-        GFX_audrespCOR(ippant,:,:) = corr_Aud_rl;
+        GFX_audrespCOR(ippant,:,:) = corr_Aud_rl;ac
         GFX_audrespERR(ippant,:,:) = err_Aud_rl;
         
         GFX_visstimCOR(ippant,:,:) = corr_Vis_sl;
