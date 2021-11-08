@@ -60,7 +60,7 @@ end
 
 %% 
 if job.plot_A_vs_Untrainedtrials_GFX==1   
-    Plot_decA_vs_untrained_GFX;
+    Plot_decA_vs_untrained_GFX; %concats then plots (PFX calcd above)
 end
 
 if job.plot_A_vs_Untrainedtrials_GFX_AUCsplit==1   
