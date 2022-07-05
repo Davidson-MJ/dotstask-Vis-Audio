@@ -1,6 +1,20 @@
-figure(1); 
-clf
+%called from Plot_Confidencedistributons
+
+% simply ourtsourcing a quick plot routine.
 dbstop if error
+
+%store the experiment order for later plots.
+ExpOrder = lower(cfg.stimTypes);
+if strcmp(ExpOrder{1}, 'visual')
+    ExperimentOrder(ippant) = 1;
+    xmodd = 'auditory'; % the modality conf jdgmnts were provided in
+else
+    ExperimentOrder(ippant) = 2;
+    xmodd = 'visual'; % the modality conf jdgmnts were provided in
+end
+
+
+
 % gather some useful experimental data information
 ConfData=[];
 ConfData.modality = xmodd;

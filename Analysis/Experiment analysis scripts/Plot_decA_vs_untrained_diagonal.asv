@@ -1,18 +1,23 @@
+%called from JOBS_ERPdecoder
+
+% this script is a close match to the prev, now saving the diagonal
+% train-test combination.
+
 dbstop if error
 elocs= readlocs('BioSemi64.loc');
 
-jobs.useERNorPe =2; % 1 or 2.
+
 
 jobs.calculate_perppant =1;
 
-jobs.plot_perppant=0;
+jobs.plot_perppant=1;
 
 normON=1;
 % for plots: use raw discrim vector or scalp projection:
 useVorScalpProjection= 1;
 
     %% called from JOBS_ERPdecoder.m
-    for ippant = 1:length(pfols)
+    for ippant = 1%:length(pfols)
         
       
         [PFX_classifierA_onERP_fromscalp, PFX_classifierA_onERP] =deal([]); % note that there will be an extra dimension, for each iteration.
@@ -21,23 +26,17 @@ useVorScalpProjection= 1;
         cd(pfols(ippant).name);
         sstr= pfols(ippant).name;
         %% load the Classifer and behavioural data:
-        load('Classifier_objectivelyCorrect');
-        load('Epoch information');
-        load('participant TRIG extracted ERPs.mat');
+        load('Classifier_objectivelyCorrect', 'DEC_diagonal_window');
+        load('Epoch information', 'corAindx', 'corBindx', 'errAindx', 'errBindx');
+        load('participant TRIG extracted ERPs.mat', 'resplockedEEG');
         
         %how many times was the classifier repeated?
-        nIterations = size(DEC_Pe_window.scalpproj,1);
+        nIterations = size(DEC_diagonal_window.scalpproj,1);
         %% %%%%%%%%%% Crunch per ppant.  
-        if jobs.calculate_perppant==1;
-            for nIter= 1:nIterations; % for each of the 10 reps,
-                
-                if jobs.useERNorPe ==1.
-                v= DEC_ERN_window.discrimvector(nIter,:)';
-                winwas= 'ERN';
-                elseif jobs.useERNorPe==2;
-                v= DEC_Pe_window.discrimvector(nIter,:)';
-                winwas= 'Pe';
-                end
+        if jobs.calculate_perppant==1
+            
+            for nIter= 1:nIterations % for each of the 10 reps,
+                               
                 %% use the vector and untrained trials:
                 for itestdata = 1:4
                     switch itestdata
@@ -60,7 +59,7 @@ useVorScalpProjection= 1;
                         %training trials *this* iteration
                         % (contains correct and errors -matched in size per
                         % iteration).
-                        trainedtrials = DEC_Pe_window.trainingtrials_vector(nIter,:);
+                        trainedtrials = DEC_diagonal_window.trainingtrials_vector(nIter,:);
                         
                         remtrials = ismember(tmptrials,trainedtrials);
                         
@@ -100,28 +99,26 @@ useVorScalpProjection= 1;
                     %reshape for multiplication
                     testdata = reshape(useDATA, nchans, nsamps* ntrials)';%
                     %% multiply by discrim vector:
-%                     p = bernoull(1,[x 1]*v);
+
+                       
+allvecs =      DEC_diagonanl_window.discrimvector;                  
+                for itime = 1:size(allvecs,2);
+                    %                     p = bernoull(1,[x 1]*v);
+                    v= DEC_diagonal_window.discrimvector(nIter,itime,:)';
+                    
                     ytest = testdata * v(1:end-1) + v(end);
                     %% reshape for plotting.
                     ytest_trials = reshape(ytest,nsamps,ntrials);
-                    
+
                     %% conver classifier projection to probability.
                     bptest = bernoull(1,ytest);
                     %reshape for plotting
                     bptest = reshape(bptest, nsamps, ntrials);
-                    
+
                     % store for averaging over each iteration.
                     PFX_classifierA_onERP(itestdata,nIter,:) = mean(bptest,2);
-                    
-                    
-                    %% debugging:
-                    % compare to using scalp proj.
-                sc_v= DEC_Pe_window.scalpproj(nIter,:);
-                ytest_sc = testdata * sc_v';
-                ytest_bp_sc= bernoull(1,ytest_sc); 
-                ytest_trials = reshape(ytest_bp_sc,nsamps,ntrials);
-                    PFX_classifierA_onERP_fromscalp(itestdata,nIter,:) = mean(ytest_trials,2);
-                    
+                end % itimes
+
                 end % test type (corA, corB etc).
             end % nIteration
             

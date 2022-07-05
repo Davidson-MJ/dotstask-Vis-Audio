@@ -35,7 +35,7 @@ audcolour=cmap(9,:);
 
 %plots individual participant level histograms of Conf, as well as Bar
 %%
-if jobs.concat_Conf==1 %prepare for plots.
+if jobs.concat_Conf==1; %prepare for plots.
     
     ExperimentOrder = nan(length(pfols),1);
     pnames = cell(length(pfols),1);
@@ -98,7 +98,7 @@ ConfData.INDEX_Error= ERRid;
     
 end
 end
-%%
+
 if jobs.plotPFX_conf
    for ippant=1:length(pfols)
        cd(behdatadir);
@@ -108,17 +108,56 @@ if jobs.plotPFX_conf
     load(lfile.name);
     
     pname = ['p_' subject.id];
+    pnames{ippant} = pname;
     
+    %store the experiment order for later plots.
+    ExpOrder = lower(cfg.stimTypes);
+    if strcmp(ExpOrder{1}, 'visual')
+        ExperimentOrder(ippant) = 1;   
+        xmodd = 'auditory'; % the modality conf jdgmnts were provided in
+    else
+        ExperimentOrder(ippant) = 2;
+        xmodd = 'visual'; % the modality conf jdgmnts were provided in
+    end
+    
+    
+
     Confidence_summary_plot; %xmodd,pname used w/in.
     
    end
     
 end
 
-%%
+
 if jobs.plotGFX_conf
     %% %now plot across participants.
-   
+    
+    clf;
+    set(gcf, 'units', 'normalized', 'position', [0 0 .4 .5], 'color', 'w')
+    % sort into modality * by section
+    partA = GFX_allConfD(:,1);
+    partB = GFX_allConfD(:,2);
+    
+    % first plot all A vs B:
+    Xdata=[partA,partB];
+    [a,b]=CousineauSEM(Xdata);
+    
+    dataX{1} = b(:,1);
+    dataX{2} = b(:,2);
+    bh =rm_raincloud(dataX', [cmap(8,:)]);
+    
+    hold on;
+    %add plot specs
+    set(gca, 'yticklabel', {['Error'], ['Correct']})
+    title(['Responses x Confidence, n' num2str(length(b))])
+    % xlim([.4 1])
+    xlabel('z(Confidence)')
+    set(gca, 'fontsize', fontsizeX)
+    print('-dpng', ['GFX zscored confidence by CE, n' num2str(length(b))]);
+    %% as before, separate by modality order.
+end
+
+    
 vis_first = find(ExperimentOrder==1);
 aud_first = find(ExperimentOrder==2);
 
@@ -220,7 +259,6 @@ sigheight = setx(2)*.9;
     
     
     
-end
 end
 % print('-dpng', ['GFX zscored confidence by CE, split by order']);
 %%

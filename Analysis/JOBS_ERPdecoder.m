@@ -10,9 +10,12 @@ cd(eegdatadir);
 pfols = dir([pwd filesep 'p_*']);
 
     %%
-job.trainclassifierpartA_CvsE            =0;
+job.trainclassifierpartA_CvsE            =0; % first version, with a fixed time window.
+
+job.trainclassifierpartA_CvsE_alltimepoints=0; % diagonal training and testing (same axis).
 
 job.plot_A_vs_Untrainedtrials            = 0;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
+job.plot_A_vs_Untrainedtrials_diagonal   = 1;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
 job.plot_A_vs_Untrainedtrials_pooled            = 0;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
 job.plot_A_vs_Untrainedtrials_GFX        = 0;    %  GFX_ of above
 job.plot_A_vs_untrainedtrials_GFX_AUCsplit =0;
@@ -47,9 +50,21 @@ if job.trainclassifierpartA_CvsE==1
     Call_classifer_VIS_AUDIO;
 end
 
+if trainclassifierpartA_CvsE_alltimepoints==1
+    
+      Call_classifer_VIS_AUDIO_diagonal;
+    
+end
 if job.plot_A_vs_Untrainedtrials==1
     %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.    
   Plot_decA_vs_untrained;
+end
+
+
+if job.plot_A_vs_Untrainedtrials_diagonal   
+    
+    Plot_decA_vs_untrained_diagonal; % as above, but we have trained and tested along the same data points.
+    
 end
 %%%%%%%%%%%%%%%%%%%%%
 if job.plot_A_vs_Untrainedtrials_pooled==1

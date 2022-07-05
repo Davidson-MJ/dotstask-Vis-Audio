@@ -15,7 +15,8 @@ jobs.concat_Acc=1; %prepare for plots.
 
 jobs.plotPFX_Acc =1; % per ppant
 
-jobs.plotGFX_Acc =1 ; %tidy (raincloud) GFX
+jobs.plotGFX_Acc =1 ; %tidy (raincloud) manuscript version.
+
 
 %preallocate some variables
 ExperimentOrder = zeros(length(pfols),1); % auditory or visual first

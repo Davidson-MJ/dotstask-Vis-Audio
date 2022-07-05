@@ -12,9 +12,9 @@ jobs=[];
 
 jobs.concat_RT=1; %prepare for plots.
 
-jobs.plotPFX_RT =0; % per ppant
+jobs.plotPFX_RT =1; % per ppant
 
-jobs.plotGFX_RT =1 ; %tidy (raincloud) GFX
+jobs.plotGFX_RT =0 ; %tidy (raincloud) GFX
 
 %%
 

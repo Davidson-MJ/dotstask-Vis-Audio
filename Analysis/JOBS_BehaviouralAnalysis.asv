@@ -9,6 +9,8 @@ close all
 behdatadir = '/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/Exp_output/DotsandAudio_behaviour/ver2';
 figdir ='/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/Figures';
 eegdatadir ='/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/EEG/ver2';
+%%
+
 cd(behdatadir);
 pfols = dir([pwd filesep '*_p*']);
 
@@ -23,7 +25,7 @@ pfols = dir([pwd filesep '*_p*']);
  
  job.Plottype2AUC=1;
  
- job.Plot_MS_summary =0; % Manuscript (summary) figure.
+ job.Plot_MS_summary = % 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% >........................................>.............................
 if job.PlotAccuracy_perExpOrder ==1
