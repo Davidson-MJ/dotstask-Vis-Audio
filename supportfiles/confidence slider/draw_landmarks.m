@@ -20,11 +20,13 @@ Screen('TextFont', Sc.Number, 'Myriad Pro');
 
 switch stimtype
     case {'visual', 'VISUAL'}
-        instrsAR= {'LEFT', 'RIGHT'};        
+        instrsAR= {'Left box', 'Right box'};        
     case {'audio', 'AUDIO'}        
-        instrsAR= {'FIRST', 'SECOND'};
+        instrsAR= {'Lower pitch', 'Higher pitch'};
         
 end
+%% note that these are the new instr...
+instrsAR= {'Certain Wrong', 'Certain Correct'};
             
 cfg.instr.interval = instrsAR;
 
@@ -37,6 +39,7 @@ end
 if ~isfield(cfg.instr,'instr')
     cfg.instr.interval = instrsAR;
 end
+%%
 if ~isfield(cfg.instr, 'xshift') % places along barrect to adapt cursor
     cfg.instr.xshift = [linspace(cfg.bar.gaprect(1)-cfg.bar.cursorwidth.*.5,...
             cfg.bar.barrect(1)+cfg.bar.cursorwidth.*.5,length(cfg.instr.cjtext)) ...
@@ -51,7 +54,7 @@ end
 LintBounds              = Screen('TextBounds',Sc.Number,cfg.instr.interval{1});
 RintBounds              = Screen('TextBounds',Sc.Number,cfg.instr.interval{2});
 
-%% draw confidence landmarks
+%% draw confidence landmarks, this will flip the numbers about the central vertical axis.
 for i=1:length(cfg.instr.xshift)
     Screen('DrawText', Sc.Number, ...
         cfg.instr.cjtext{mod(i-1,length(cfg.instr.cjtext))+1}, ...
@@ -59,7 +62,7 @@ for i=1:length(cfg.instr.xshift)
         Sc.Rect(4).*cfg.bar.positiony-40, 0);
 end
 
-%% draw interval landmarks
+%% draw interval landmarks (beneath sliders)
 Screen('DrawText', Sc.Number, cfg.instr.interval{1}, ...
     Sc.Center(1)- (cfg.bar.barlength*.25 + cfg.bar.gaplength*.5) - LintBounds(3)*.5, ...
     (Sc.Rect(4).*cfg.bar.positiony +40), 0);

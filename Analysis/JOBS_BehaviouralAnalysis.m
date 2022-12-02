@@ -3,27 +3,32 @@
 clear variables
 close all
 
-
+addpath(genpath('C:\Github\dotstask-Vis-Audio'));
 % addpath('/Users/matthewdavidson/Documents/GitHub/dotstask-Vis-Audio/Analysis/')
 %update to work on external volume:
-behdatadir = '/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/Exp_output/DotsandAudio_behaviour/ver2';
-figdir ='/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/Figures';
-eegdatadir ='/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/EEG/ver2';
+homedir = 'C:\Users\mdav0285\OneDrive - The University of Sydney (Staff)\Documents\dotstask- Vis+Audio EXP';
+
+behdatadir = [homedir filesep 'Exp_output/DotsandAudio_behaviour/ver2'];
+figdir =[homedir filesep 'Figures'];
+eegdatadir =[homedir filesep 'EEG/ver2'];
 cd(behdatadir);
 pfols = dir([pwd filesep '*_p*']);
+
+%remove any hidden files (onedrive corrupts the fileist).
+pfols = striphiddenFiles(pfols);      
 
 %% JOBS LIST:
 
 % % Plot_Accuracy_perExpOrder
- job.PlotAccuracy_perExpOrder =1;
+ job.PlotAccuracy_perExpOrder =0;
 % Plot_RTsbytype ;
- job.PlotRTs_perExpOrder =1;
+ job.PlotRTs_perExpOrder =0;
 % Plot_Confidence distributions
- job.PlotConfdistributions=1;
+ job.PlotConfdistributions=0;
  
- job.Plottype2AUC=1;
+ job.Plottype2AUC=0;
  
- job.Plot_MS_summary =0; % Manuscript (summary) figure.
+ job.Plot_MS_summary =1; % Manuscript (summary) figure.
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% >........................................>.............................
 if job.PlotAccuracy_perExpOrder ==1

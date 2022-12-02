@@ -33,8 +33,8 @@ switch stimtype
     DrawFormattedText(window.Number, 'Right Box', window.Center(1)+cfg.MouseRect(3)*.25, window.Rect(4)*cfg.bar.positiony, [255,255,255]);
     
     case {'audio', 'AUDIO'}
-    DrawFormattedText(window.Number, '1st Tone', window.Center(1)-cfg.MouseRect(3)*.75, window.Rect(4)*cfg.bar.positiony, [255,255,255]);
-    DrawFormattedText(window.Number, '2nd Tone', window.Center(1)+cfg.MouseRect(3)*.25, window.Rect(4)*cfg.bar.positiony, [255,255,255]);    
+    DrawFormattedText(window.Number, 'Lower pitch', window.Center(1)-cfg.MouseRect(3)*.9, window.Rect(4)*cfg.bar.positiony, [255,255,255]);
+    DrawFormattedText(window.Number, 'Higher pitch', window.Center(1)+cfg.MouseRect(3)*.1, window.Rect(4)*cfg.bar.positiony, [255,255,255]);    
 end
 end
 

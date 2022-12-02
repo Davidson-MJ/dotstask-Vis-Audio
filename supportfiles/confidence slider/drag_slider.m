@@ -33,12 +33,14 @@ while ~hasconfirmed
         [resp_x, resp_y, buttons] = GetMouse();
 
 
-        if resp_x>=cfg.bar.barrect(1) && resp_x<window.Center(1) % if mouse's on the left rect
-              resp = find(resp_x < (cfg.bar.xshift+cfg.bar.cursorwidth.*.5),1) - cfg.bar.maxScale-1;
+%         if resp_x>=cfg.bar.barrect(1) && resp_x<window.Center(1) % if mouse's on the left rect
+        if resp_x<window.Center(1) % if mouse's on the left rect
+
+            resp = find(resp_x < (cfg.bar.xshift+cfg.bar.cursorwidth.*.5),1) - cfg.bar.maxScale-1;
             haschanged = true;
             int = -1;
             if resp==0, resp=int;end
-        elseif resp_x>=window.Center(1) && resp_x<=cfg.bar.barrect(3) % if mouse's on the right rect
+        elseif resp_x>=window.Center(1) %&& resp_x<=cfg.bar.barrect(3) % if mouse's on the right rect
             resp = find(resp_x < (cfg.bar.xshift+cfg.bar.cursorwidth.*.5),1) - cfg.bar.maxScale;
             haschanged = true;
             int = 1;

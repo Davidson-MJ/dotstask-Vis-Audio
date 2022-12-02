@@ -7,7 +7,7 @@ meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57]; %response locked. channel
 meanoverChans_VIS = [20:31, 57:64];
 meanoverChans_AUD = [4:15,39:52];
 
-elocs= readlocs('BioSemi64.loc');
+elocs= getelocs(3);
 smoothON=0;
 plottopos_sep = 1; % create a separate figure for the topoplots over defined window.
 alltopos=[]; topocounter=1;% store topos for plotting a difference topo at end.
@@ -19,7 +19,7 @@ load('GFX_averageERPsxConf.mat');
 load('GFX_averageERPs TRIG based.mat', 'vis_first', 'aud_first');
 %%
 figure(1); clf;
-set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
+set(gcf, 'units', 'normalized', 'position', [0.01 0.01 .95 .95]);
 %%
 
 
@@ -53,7 +53,7 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
                     usechans= meanoverChans_VIS;
                 end
                 
-                use_xvec = ([1:size(conf_x_slEEG,2)]./ 256 - 0.5 ) *1000 ;
+                use_xvec = ([1:size(GFX_conf_x_slEEG,3)]./ 256 - 0.5 ) *1000 ;
                     
             case 2
                 datacIN = GFX_conf_x_rlEEG; % response locked
@@ -131,7 +131,7 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
             if plottopos_sep ==1
                 figure(10);
                 subplot(2,4,tcount);
-                set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
+                set(gcf, 'units', 'normalized', 'position', [0.01 0.01 .95 .95]);
                 %average over window:
                 winav = dsearchn(use_xvec', [200 350]');
                 
@@ -171,8 +171,8 @@ for iorder=1%:2 % third case is all together (vis-audio, and audio-vis)
     end
     end
     %% add label above all subplots.
-    st=suptitle(orderi);
-    st.FontSize=20;
+%     st=suptitle(orderi);
+%     st.FontSize=20;
     %%
     set(gcf, 'color', 'w')
     cd(figdir)

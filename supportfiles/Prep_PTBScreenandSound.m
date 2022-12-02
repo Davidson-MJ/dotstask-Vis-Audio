@@ -2,7 +2,7 @@
 % script to set up basic screen background for running dots task in PTB
 % prep screen in PTB:
 close all
-
+% cfg.debugging=1;
 
 %% Stimulus (Screen) variables
 
@@ -11,24 +11,44 @@ cfg.fontsize=32;
 
 
 %% INITIALIZE PsychToolBox
-% select offscreen window if we can
-if cfg.offscreen==1
+% select offscreen window if we can. Note that in the Anna Watts building,
+% Windows 10 prevents PTB from opening off the main screen, so set the 'mainscreen'
+% in system preferences to be within the eeg booth.
+alls=Screen('Screens');
+if cfg.offscreen==0    
     scrnwin=max(Screen('Screens'));
 else
-    scrnwin=min(Screen('Screens'));
+    
+    if length(alls)>2 % some windows display includes a '0' option, to throw across both screens.
+    scrnwin=1;
+    else
+        scrnwin=min(Screen('Screens'));
+    end
+
 end
 
 %note because we are on a MAC, need to skip synctests, PTB drivers are not
 %well supported for new releases.
-if strcmp(cfg.computer, 'MACI64')
+% if strcmp(cfg.computer, 'MACI64')
      Screen('Preference', 'SkipSyncTests', 1);
-end
+% end
 
 %open screen:
 AssertOpenGL;
-[window.Number, window.Rect]=Screen('OpenWindow', scrnwin, cfg.backgroundColour);
+scrnsize = Screen('Rect', scrnwin);
 
-% window = SetScreen('BGColor',cfg.backgroundColour,'FontSize',24,'OpenGL',1, 'Window', scrnwin);
+if cfg.debugging==1 %for debugging: (half screen)    
+[window.Number, window.Rect]=Screen('OpenWindow', scrnwin, cfg.backgroundColour, [0, 0, scrnsize(3)/2, scrnsize(4)/2]);
+else %full screen.
+    
+[window.Number, window.Rect]=Screen('OpenWindow', scrnwin, cfg.backgroundColour, []);
+
+%if consistently throwing an error, throw with rect size, and different
+%index:
+% scrnwin=1
+% [window.Number, window.Rect]=Screen('OpenWindow', 1, cfg.backgroundColour, [scrnsize]);
+
+end
 
 %define params for easy reference
 window.Width        = RectWidth(window.Rect);
@@ -83,7 +103,8 @@ InitializePsychSound
 %%
 
 if subject.id~=999 
-    ListenChar(2);
+    ListenChar(-1); % note that -1 must be implemented to use in parallel with the KbQueue functions
+
     HideCursor();
 end
 

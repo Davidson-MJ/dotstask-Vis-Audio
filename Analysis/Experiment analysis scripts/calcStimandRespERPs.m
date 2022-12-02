@@ -10,7 +10,7 @@ dbstop if error
 %% updated 23-06-20, to also calculate response locked ERPs, with prestim baseline.
 
 %extra preprocessing before plotting:
-lindetrend = 1; %% now detrending with longer epochs.
+lindetrend = 0; %% now detrending with longer epochs.
 rmbase = 1;
 
 % job list:
@@ -75,7 +75,12 @@ if job1.calcindividual == 1
                 %% remove baseleine, 
                 EEGrmb = zeros(size(EEG_tmpsub1));
 %                 zerostart = dsearchn(plotXtimes', [-250 -50]');
-                zerostart = dsearchn(plotXtimes', [-150 -50]');
+                if itype==2 % response locked
+                zerostart = dsearchn(plotXtimes', [-150 -50]'); % response locked is unaffected?
+                else % stim lockedm there is a 250 ms delay (approx).
+
+                zerostart = dsearchn(plotXtimes', [150 250]');
+                end
                 %% which data to use for baseline subtraction?
                 if itype <3
                     baselinewith = EEG_tmpsub1;
@@ -195,7 +200,7 @@ if job1.concat_GFX == 1
         GFX_visrespCOR(ippant,:,:) = corr_Vis_rl;
         GFX_visrespERR(ippant,:,:) = err_Vis_rl;
         
-        GFX_audrespCOR(ippant,:,:) = corr_Aud_rl;ac
+        GFX_audrespCOR(ippant,:,:) = corr_Aud_rl;
         GFX_audrespERR(ippant,:,:) = err_Aud_rl;
         
         GFX_visstimCOR(ippant,:,:) = corr_Vis_sl;
@@ -204,7 +209,7 @@ if job1.concat_GFX == 1
         GFX_audstimCOR(ippant,:,:) = corr_Aud_sl;
         GFX_audstimERR(ippant,:,:) = err_Aud_sl;
         
-        
+        disp(['fin concat for pp ' num2str( ippant)])
     end
     %%
     % %% % save Group FX

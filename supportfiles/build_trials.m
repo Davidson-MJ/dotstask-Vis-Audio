@@ -12,19 +12,29 @@ if strcmp(cfg.df_order,'vA')
     cfg.stimTypes={['visual'],['AUDIO']};
     cfg.xmodBlockTypes=[1,2];
 else
-    cfg.stimTypes={['audio'], ['VISUAL']};
+    cfg.stimTypes={['audio'], ['VISUAL']};    
     cfg.xmodBlockTypes=[3,4];
 end
 
 % practice blocks cfgs
-cfg.ntrialsprac             = 30;
-cfg.nblocksprac             = 3;
+cfg.ntrialsprac             = 30; %30
+cfg.nblocksprac             = 3; %3
+
 
 % experimental blocks cfg
-cfg.ntrials                 = 60 ; % 60 per block;
-cfg.nblocks_partA           = 5; 
-cfg.nblocks_partB           = 7; 
+cfg.ntrials                 = 30 ; % instructions provided after each block;
 cfg.SeeAgain_proportion     =.7; % on how many trials should the 'see-again' response be available for partB?
+
+if cfg.AllowInfoSeeking==1    
+cfg.nblocks_partA           = 8; %4
+cfg.nblocks_partB           = 10; %5
+else
+    % simply providing conf responses, so can fit in more trials...
+    cfg.nblocks_partA           = 13;
+    cfg.nblocks_partB           = 10;
+end
+
+
 cfg.ntotalblocks            = cfg.nblocksprac*2 + cfg.nblocks_partA + cfg.nblocks_partB;
 
 N_alltrials = cfg.ntrialsprac*cfg.nblocksprac*2 + ... %prac blocks
@@ -36,7 +46,8 @@ N_alltrials = cfg.ntrialsprac*cfg.nblocksprac*2 + ... %prac blocks
 
 
 % Part A and Part B. Note Part B requires the 'see again' option on
-% proportion of trials:
+% proportion of trials (this info is redundant if cfg.AllowInfoSeeking==0,
+% but the code runs as is).
 
 % we'll randomize in a vector,
 %See again:
@@ -67,10 +78,10 @@ for iEXP=1:2 % for first then second type. (partA vs partB).
         block_trialsPRAC = []; 
         
         % shuffle per block (only using in part B)
-        pracBtrials=shuffle(pracBtrials); 
+        pracBtrials=Shuffle(pracBtrials); 
     
         
-        wheretrue_vec = shuffle(wheretrue_vec);
+        wheretrue_vec = Shuffle(wheretrue_vec);
         for itrial = 1: cfg.ntrialsprac %for each trial per prac block
             
             %preallocate each trial in prac block            
@@ -78,9 +89,15 @@ for iEXP=1:2 % for first then second type. (partA vs partB).
             block_trialsPRAC(itrial).trialid              = trialid*.01; %['prac ' num2str(trialid)];            
             block_trialsPRAC(itrial).stimtype             = cfg.stimTypes{iEXP}; % Vis or Audio.
             block_trialsPRAC(itrial).xmodtype             = cfg.xmodBlockTypes(iEXP);
+            
             block_trialsPRAC(itrial).blockcount           =  iblock*.01;
-            block_trialsPRAC(itrial).whereTrue            = wheretrue_vec(itrial);
-  
+            
+%     break
+%     InfoOption
+%     ExpType
+%     whereTrue
+%     SeeAgainOpt
+         
             if itrial==1 
                 block_trialsPRAC(itrial).break                = true; %break after last trial of each block. 
                 
@@ -92,16 +109,22 @@ for iEXP=1:2 % for first then second type. (partA vs partB).
             if iEXP==1
                 block_trialsPRAC(itrial).InfoOption           = NaN;
                 block_trialsPRAC(itrial).ExpType              = 'A';
+                block_trialsPRAC(itrial).whereTrue            = wheretrue_vec(itrial);
+  
                 block_trialsPRAC(itrial).SeeAgainOpt          = 'n';
             else
-                block_trialsPRAC(itrial).ExpType              = 'B';
                 block_trialsPRAC(itrial).InfoOption           = pracBtrials(itrial);
+                block_trialsPRAC(itrial).ExpType              = 'B';
+                block_trialsPRAC(itrial).whereTrue            = wheretrue_vec(itrial);
+  
                 if pracBtrials(itrial)==0 %resp now.
                 block_trialsPRAC(itrial).SeeAgainOpt          = 'n';
                 else
                 block_trialsPRAC(itrial).SeeAgainOpt          = 'y';
                 end
             end
+               
+            
             trialid=trialid+1;
         end
         
@@ -176,12 +199,12 @@ for iEXP=1:2 % for first then second type.
         block_trialsEXP = []; %clear vector for each individual block, concatenated at end.
         
       %  (only using in part B)
-        expBtrials=shuffle(expBtrials); 
+        expBtrials=Shuffle(expBtrials); 
       
         % shuffle per block
-        wheretrue_tmpA= shuffle(wheretrue_vecA);
-        wheretrue_tmpSee= shuffle(wheretrue_vecSeeagain);
-        wheretrue_tmpResp= shuffle(wheretrue_vecRespnow);
+        wheretrue_tmpA= Shuffle(wheretrue_vecA);
+        wheretrue_tmpSee= Shuffle(wheretrue_vecSeeagain);
+        wheretrue_tmpResp= Shuffle(wheretrue_vecRespnow);
                
         %reset proportionate trial counts per block
         trialid_seeag=1;
@@ -193,9 +216,11 @@ for iEXP=1:2 % for first then second type.
             %preallocate each trial in prac block
              block_trialsEXP(itrial).isprac               = 0; 
             block_trialsEXP(itrial).trialid              = trialid;
-            block_trialsEXP(itrial).blockcount           = blockcounter;           
+
             block_trialsEXP(itrial).stimtype             = cfg.stimTypes{iEXP}; % Vis or Audio.
             block_trialsEXP(itrial).xmodtype             = cfg.xmodBlockTypes(iEXP);
+            
+                        block_trialsEXP(itrial).blockcount           = blockcounter;           
             
             if itrial==1 
                 block_trialsEXP(itrial).break                = true; %break at last trial of each block. 
@@ -242,43 +267,32 @@ for iEXP=1:2 % for first then second type.
 end
 
 
-% combine all practice and experimental blocks.
-alltrials = [practiceblocks_A, experimentalblocks_A, practiceblocks_B, experimentalblocks_B];
-
 %Index if debugging and want to jump straight to second half:
 partBstart = length(practiceblocks_A)+ length(experimentalblocks_A);
 
-%sanity checks:
-if length(alltrials)~=N_alltrials
-    error('check code: ntrial count incorrect')
-end
 
-
-
-%% check the design manually
-%create image of experimental parameters:    
-%  print in ppant folder.    
+if cfg.restarted~=1
+    % combine all practice and experimental blocks.
+    alltrials = [practiceblocks_A, experimentalblocks_A, practiceblocks_B, experimentalblocks_B];
+    
+    %sanity checks:
+    if length(alltrials)~=N_alltrials
+        error('check code: ntrial count incorrect')
+    end
+    
+    
+    
+    %% check the design manually
+    %create image of experimental parameters:
+    %  print in ppant folder.
     imgExpOutline(alltrials, {'xmodtype',  'isprac', 'InfoOption', 'whereTrue', 'break'})
-     %print output.
+    %print output.
     comeback=pwd;
     cd(ppantsavedir)
     print('-dpng', 'Exp overview');
     close all
-    cd(comeback);
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% in case experiment was restarted after crash
- if (subject.restart)
-    [filename, pathname] = uigetfile('*.mat', 'Pick last saved file ');
-    load([pathname filename]);
-    % prompt dubject info
-
-prompt = {'Restart at trial:'};
-starttrial_r = inputdlg(prompt);
-starttrial = str2num(cell2mat(starttrial_r));
-
-cfg.restarted = 1;
-else
-    starttrial=1;
+     cd(comeback);
 end
+   
+
 

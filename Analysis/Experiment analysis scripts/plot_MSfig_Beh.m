@@ -23,8 +23,9 @@ RTs_byAorB = nan(4, length(pfols)); % A_correct, A_error, B_correct, B_error
         cd(behdatadir);
         cd(pfols(ippant).name);
         
-        lfile = dir([pwd filesep '*final' '*']);
-        
+        lfile = dir([pwd filesep '*final.mat']);
+        lfile= striphiddenFiles(lfile);
+
         load(lfile.name);
         %% region (modality):
          
@@ -222,6 +223,11 @@ set(gcf, 'units', 'normalized', 'position', [0 0 1 .5], 'color', 'w')
 set(gcf, 'units', 'normalized', 'position', [0 0 .5 1], 'color', 'w')
 
 fontsizeX= 20;
+%separate into Aud and Visual.
+cmap = cbrewer('qual', 'Paired',10);
+colormap(cmap)
+viscolour = cmap(3,:);
+audcolour=cmap(9,:);
 %positions of subplot panels:
 subSpots = [2,2,1; ...
     2,2,2; ...

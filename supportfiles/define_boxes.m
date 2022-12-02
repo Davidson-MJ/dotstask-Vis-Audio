@@ -8,8 +8,13 @@
 
 
 %required dva:
-boxwidthDVA= 8;% width of square boxes containing dots.
-boxecc = boxwidthDVA/2+4; % the box eccentricity from screen centre (centre edge of box ).
+if cfg.debugging==1
+    %use small width (half size)
+    boxwidthDVA= 4;% width of square boxes containing dots.
+else
+boxwidthDVA= 6;% width of square boxes containing dots.
+end
+boxecc = boxwidthDVA/2+2; % the box eccentricity from screen centre (centre edge of box ).
 framewidth = .1;  % width of the frame around boxes.
 
 display.dist=60; %cm approxviewDist

@@ -4,6 +4,7 @@ cfg.resetrn                 = rng('shuffle');
 cfg.computer                = computer;
 
 %-- Configure Input keys for current device
+KbName('UnifyKeyNames');
 cfg.response.until_release  = 1;
 cfg.response.escape         = KbName('ESCAPE');
 cfg.response.pause          = KbName('p');
@@ -20,15 +21,16 @@ if ~isfield(cfg,'restarted'),       cfg.restarted = false;end
 
 cfg.useInfoSeeking_or_Advice=1;             % change to 1 to include 'see again' as the option, 2 for advice from an agent (2 unfinished).
 
-% stimulus variables
-cfg.stim.durstim                = .3;                                       % presentation time of sensory stimuli.
-cfg.stim.respduration           = 1 ;                                    % timeout for primary task (only first half of exp.)
 
 %interval timings:
-%segmenting 400ms for preperation fixation cross:
-cfg.stim.TW1               = .4;                                    % TW1= down-time before 'getready' indicated by large fix cross
-% cfg.stim.TW2               = .2;
-% % TW2= 'get ready' indicator pre stim presentation. not in use
+%segmenting 200ms for preperation fixation cross:
+cfg.stim.TW1               = .2;                                    % TW1= fixation cross, before stim presentation.
+
+%TW2 is stimulus presentaiton
+cfg.stim.durstim                = .3;                                       % presentation time of sensory stimuli.
+%(dots) on screen. Note that audio is 2x 100ms tones, separated by 
+cfg.stim.respduration           = 1 ;                                    % timeout for primary task (only first half of exp.)
+
 
 %long wait between stim/response presentations, for decoding.
 cfg.stim.TW3               = .8;% 0.2;                                        % TW3= time after Stim before response/next presentation (small fix cross).
@@ -40,7 +42,9 @@ cfg.dispFeedback_stats      =0;  % change to 1 to give audio feedback, and hard 
 cfg.giveAudioFeedback       =0;  %1 will provide trial level feedback during practice.
 
 cfg.auddur                  =0.1; 
-cfg.tonegap                 = 0.1; %seconds, gap between tones to be discriminated (was 0.5?)
+% cfg.tonegap                 = 0.1; %seconds, gap between tones to be discriminated
+cfg.tonegap                 = 0.5; %seconds, gap between tones to be discriminated
+
 cfg.audrate                 = 44100;
 cfg.stim.beepvolume         = 1;                                          % error tone volume
 
@@ -48,20 +52,20 @@ cfg.stim.beepvolume         = 1;                                          % erro
 
 %% configure STAIRCASE parameters (using Palamedes toolbox).
 cfg.stepDown_partA             = 4; % 4 incorrect before stim change = 84% accuracy 
-cfg.stepDown_partB            = 2; %harder difficulty ~71%, encourage see-again choices.
+cfg.stepDown_partB            = 4; %2= harder difficulty ~71%, encourage see-again choices.
 %Set up up/down procedure:
 up      = 1;                       % increase difficulty after 'up' correct
 down    = cfg.stepDown_partA;      % decrease after incorrect.
 
-%Note that this just initializes (70% accuracy)
+%Note that this just initializes 
 % the 'down' value above will be updated based on experiment type, as
 %different accuracy levels are requested.
 
 StepSizeDown = 2;        % 
-StepSizeUp =   2;          %  step size (ndots), Hzratio(85%, 90% increment etc).
+StepSizeUp =   2;          %  step size (ndots), Hzratio(2% increment etc).
 stopcriterion = 'trials';   %
 stoprule = NaN;             % Updated based on ntrials per experiment, see 'updateStaircase_trialstart.m'
-startvalue = 50;           % difference between dot boxes/ Hz, start easy.
+startvalue = 25;           % difference between dot boxes/ Hz, start easy.
 xmax= 100;                 % difference bound
 xmin=1; 
 
@@ -79,7 +83,7 @@ disp(message);
 %%
 %note that to start experiment, we need to convert this log unit diff into
 %dots difference (or Hz).
-%natural log units can be converted to percentage change using the formula:
+% natural log units can be converted to percentage change using the formula?:
 % e.g. if initial dot difference is 175 vs 225
 % percntDiff = log(225)-log(175);
 
@@ -129,6 +133,7 @@ end
 
 % instructions on screen
 cfg.instr.cjtext        = {'50%' '60%' '70%' '80%' '90%' '100%'};           % confidence judgement text
+
 cfg.instr.instr = {'Left click with the mouse' '\n' 'Press spacebar to confirm response'}; % how to respond.
 
 
