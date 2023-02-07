@@ -1,8 +1,8 @@
 function instructions_byXMODtype(window,cfg, setlist)
 
 % cycles through pre-saved instructions based on experiment type
-% type saved in 
-
+% type saved in
+dbstop if error
 
 %set list degined as xmodal types (1,2,3,4).
 % 1 = visual no information seeking option (or confidence).
@@ -11,31 +11,41 @@ function instructions_byXMODtype(window,cfg, setlist)
 % 3 = auditory no information seeking option (or confidence).
 % 4 = Visual with Information seeking option
 
+returnto = pwd;
+cd(cfg.basedirectory)
+
 switch setlist
     
     case 1
         
         instructions_folder = ['instructions' filesep 'visualtask no infoseeking instructions'];
     case 2
-        instructions_folder = ['instructions' filesep 'Auditorytask with infoseeking instructions'];
+        if cfg.AllowInfoSeeking==1
+            instructions_folder = ['instructions' filesep 'auditorytask with infoseeking instructions'];
+        else
+            instructions_folder = ['instructions' filesep 'auditorytask with confidence instructions'];
+        end
     case 3
-        instructions_folder = ['instructions' filesep 'auditorytask no infoseeking instructions'];        
+        instructions_folder = ['instructions' filesep 'auditorytask no infoseeking instructions'];
     case 4
+        if cfg.AllowInfoSeeking==1
         instructions_folder = ['instructions' filesep 'visualtask with infoseeking instructions'];
-        
+        else
+            instructions_folder = ['instructions' filesep 'visualtask with confidence instructions'];
+        end
 end
-
 
 %% now cycle through the appropriate set list.
 
-allinstr= dir([ instructions_folder filesep '*.jpeg']);
+allinstr= dir([ instructions_folder filesep 'Slide*']);
 %%
-r=1; 
-while r<= length(allinstr)
-    
+r=1;
+while r<= length(allinstr)  
     %read image:
-    insimdata = imread([instructions_folder filesep  allinstr(r).name ]);
-    
+    try insimdata = imread([instructions_folder filesep  allinstr(r).name ]);
+    catch
+        insimdata = imread([instructions_folder filesep  allinstr(r).name(3:end) ]);
+    end
     %show in PTB
     texins = Screen('MakeTexture', window.Number, insimdata);
     Screen('DrawTexture', window.Number, texins,[],window.Rect);
@@ -43,11 +53,15 @@ while r<= length(allinstr)
     WaitSecs(.25);
     %wait for response (allows backtracking)
     
-      [~,~, code] = collect_response(cfg,inf);
+    [~,~, code] = collect_response(cfg,inf);
     
     switch code
         case 'LeftArrow'
             r = r-1;
+            %careful to not allow a zero.
+            if r==0
+                r=1;
+            end
         case 'RightArrow'
             r = r+1;
         case 'space'
@@ -63,16 +77,13 @@ while r<= length(allinstr)
             
             %% stimulus presentation
             PsychPortAudio('FillBuffer', cfg.pahandle, chanDATA);
-            %play immediately 
+            %play immediately
             PsychPortAudio('Start', cfg.pahandle, 1);
-
-    end
             
     end
-    %
-    if r<1
-        r=1; % don't allow a zero.
-    end
-end
-    %%
     
+end
+%back to appropriate folder.
+cd(returnto)
+end
+%%

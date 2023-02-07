@@ -32,8 +32,11 @@ function [cj, resp_t, interval, hasconfirmed] = fill_mouseboxes(window,cfg, prev
 
 
 % make sure box is there to be filled)
+if strcmp(trialpos, 'A')
 draw_simpleResponseinstructions(window, cfg, stimtype); 
-
+else % don't draw boxes, just collect response.
+end
+    
 %% collect response
 while ~any(buttons) % wait for click
     [~,~,buttons] = GetMouse; % not interested in location.
@@ -50,7 +53,9 @@ if resp_t > prevfliptime + cfg.stim.respduration
 %     Screen('FillRect', window.Number, [255,0,0], cfg.MouseRect_pos2);    
     
 interval=find(buttons);
-    
+    if interval>2 %avoid click '3' on scroll mouse types.
+        interval=2;
+    end
 else
      hasconfirmed=true; 
     % display response:
@@ -63,7 +68,7 @@ else
 % Screen('FrameRect', window.Number, [127,127,127], cfg.MouseRect_pos2, 1);
         interval=1;
         
-    elseif find(buttons)==2
+    elseif find(buttons)>=2
         %fill right mouse button.
 %         Screen('FrameRect', window.Number, [255,255,255], cfg.MouseRect_pos2, 6);
 %         Screen('FrameRect', window.Number, [127,127,127], cfg.MouseRect_pos1, 1);

@@ -1,16 +1,17 @@
 
 %PLOT GFX, stim and response locked ERPs
 
-job1.plotStimlocked =1;
+job1.plotStimlocked =0;
 job1.plotResplocked =0;
 
+job1.plotCombined_4MS=1; % manuscript version, 2x2 tiled.
 cd(eegdatadir)
 cd('GFX')
 load('GFX_averageERPs TRIG based.mat')
 smoothON=0;
 %%
 figure(1);  clf;
-set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
+set(gcf, 'units', 'normalized', 'position', [0.05 0.05 .8 .8]);
 
 exppart = {'1st half', '2nd half'};
 

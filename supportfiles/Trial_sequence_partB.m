@@ -1,51 +1,15 @@
-% Trial_sequence_partBsca
+% Trial_sequence_partB
 
 % displays stimuli for the second time, and collects a confidence judgement
 
 % MDavidson August 2019
 
-%% -- INTERVAL 1a --  small fixation cross on screen 
-    % this is displayed for cfg.stim.TW1, indicating start of a trial.
-    % a blank screen is displayed with small fixation cross, which
-    % increases in size (next step) before stim presentation.
-     
-    
-    %Note that whentoFlip_NEW is defined by previous trial.
-    
-    draw_static; % draw fix cross and response options
-    
-% - - Flip to show small FIX CROSS: 
-    % collect trial start time (in VBL stamps). Note that first output is
-    % when flip command began, third is when finished:
-    
-    [alltrials(t).VBLtime_starttrial2, flipestimate,... % system time flip command begins
-        alltrials(t).time_starttrial2,... % time flip executed
-        alltrials(t).flip_accuracy_starttrial2] = Screen('Flip',window.Number,whentoFlip_NEW);
-    
-%% -- INTERVAL 1b -- Larger fixation cross on screen.
-    % preparation fixation flash: displayed for short duration.
-% - - Fill buffer
-%  % note that this flip needs to be appropriate time after first fix
-%     % cross   
-%     
-%     whentoFlip = flipestimate + cfg.stim.TW1;  %% if small cross has been on for long enough  
-%         
-%     draw_static_largeFix;     
-%     
-%     %flip screen to show larget fixation cross, and record flip intervals.   
-% % - - Flip  
-%     %flip to show large cross (once time elapsed).    
-%     [alltrials(t).VBLtime_largeFix2, flipestimate,...
-%        alltrials(t).time_largeFix2,...
-%        alltrials(t).flip_accuracy_largeFix2] = Screen('Flip', window.Number, ...
-%         whentoFlip);       
-%%   
+%starting at stimulus presentation (fix cross is on screen).
 %% STIMULUS PRESENTATION     
 % - - Fill buffer    
-    %prep small cross for next interval
-%     whentoFlip = flipestimate + cfg.stim.TW2; %if large fix cross has been up long enough
     
-    whentoFlip = flipestimate +cfg.stim.TW1; %increased length to avoid large fix cross
+    
+    whentoFlip = flipestimate +cfg.stim.TW1; %
     
     %% depending on STIMULUS category, present either dots or tones:
     switch alltrials(t).stimtype

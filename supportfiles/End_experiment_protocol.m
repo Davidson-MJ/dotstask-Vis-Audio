@@ -2,8 +2,22 @@
 %questionnaire
 
 
+cd(ppantsavedir)
 %save final file.
-save([ppantsavedir '/behaviour/' subject.fileName '_final'],'alltrials', 'cfg', 'subject', 't', 'UD')
+if t>partBstart
+    UpDownStruct_partB=UD;
+    
+    save([subject.fileName '_final'],'alltrials',...
+    'cfg', 'subject', 't', 'UpDownStruct_partB', 'UpDownStruct_partA')
+else
+    if ~exist('UpDownStruct_partA', 'var')
+        UpDownStruct_partA = UD;
+    end
+    
+save([ subject.fileName '_final'],'alltrials',...
+    'cfg', 'subject', 't', 'UpDownStruct_partA')
+    
+end
 
 %% display instructions
 
@@ -17,6 +31,7 @@ Screen('Flip', window.Number);
 
 % wait till release of all keys, then a single stroke.
 KbWait([],2)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Thanks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
