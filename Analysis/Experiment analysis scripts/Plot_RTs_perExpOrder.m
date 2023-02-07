@@ -50,7 +50,7 @@ if jobs.concat_RT
         
         
         lfile = dir([pwd filesep '*final' '*']);
-        
+        lfile= striphiddenFiles(lfile);
         load(lfile.name);
         %use file name for debugging plots
         pname = ['p_' subject.id];
@@ -132,6 +132,10 @@ if jobs.concat_RT
                 %now adjust to start RT after second tone ONSET.
                 thisRT = thisRT-.6;
                 
+            else % if visual, the trigger was 0.2 sec early. 
+                % i.e. trigger, 0.2s delay, stim on screen for 0.3s, then
+                % response collected.
+                thisRT = thisRT-0.2;
             end
             
             

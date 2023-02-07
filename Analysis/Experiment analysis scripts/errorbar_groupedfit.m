@@ -14,5 +14,5 @@ groupwidth = min(0.8, nbars/(nbars + 1.5));
 for i = 1:nbars
     % Calculate center of each bar
     x = (1:ngroups) - groupwidth/2 + (2*i-1) * groupwidth / (2*nbars);
-    eH=errorbar(x, mData(:,i), ErrData(:,i), 'k', 'linestyle', 'none');
+    eH=errorbar(x, mData(:,i), ErrData(:,i), 'LineStyle', 'none','color', 'k', 'LineWidth',2);
 end

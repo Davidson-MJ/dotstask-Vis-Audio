@@ -59,7 +59,8 @@ whentoFlip = flipestimate +cfg.stim.TW1; %
             % Show stimulus on screen at next possible display refresh cycle,
             % and record stimulus onset time in 'onsetstim':
             
-                         % Trigger
+                         % Trigger (visual triggers are leading the flip!
+                         % (mistake).
         if cfg.EEG==1        
             trigcode = 2+addtoTrigger;  % 02 for visual, 03 for auditory (below)
             sendTrig(trigcode, useport)

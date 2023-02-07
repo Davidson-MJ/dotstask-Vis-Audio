@@ -77,9 +77,9 @@ if job1.calcindividual == 1
 %                 zerostart = dsearchn(plotXtimes', [-250 -50]');
                 if itype==2 % response locked
                 zerostart = dsearchn(plotXtimes', [-150 -50]'); % response locked is unaffected?
-                else % stim lockedm there is a 250 ms delay (approx).
+                else % stim lockedm there is a 200 ms delay (approx, but only on vis trials).
 
-                zerostart = dsearchn(plotXtimes', [150 250]');
+                zerostart = dsearchn(plotXtimes', [0 200]');
                 end
                 %% which data to use for baseline subtraction?
                 if itype <3

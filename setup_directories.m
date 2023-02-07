@@ -17,16 +17,20 @@ switch str
             cd('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio');
         end
     case 'PCWIN64'
-         if ~isfolder('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio')        
-            mkdir('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio');
-            cd('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio');
-        else
-            cd('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio');
-         end
+%          if ~isfolder('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio')        
+%             mkdir('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio');
+%             cd('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio');
+%         else
+%             cd('/Users/mdavidson/Desktop/MDexp_dots+audio/dotstask- Vis+Audio');
+%          end
          
          %if in Anna Watts, and testing, set up serial-port to send/receive
          %triggers:
-         useport = pairStimtoEEG;
+         
+         
+%          useport = pairStimtoEEG;
+
+
          % now 'write(trigger, useport)' will send triggers.
          %define triggers based on trial position.
          cfg.EEG=1;% to send triggers

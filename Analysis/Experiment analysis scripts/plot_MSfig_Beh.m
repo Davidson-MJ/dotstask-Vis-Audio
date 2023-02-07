@@ -133,6 +133,8 @@ RTs_byAorB = nan(4, length(pfols)); % A_correct, A_error, B_correct, B_error
                 %now adjust to start RT after second tone ONSET.
                 thisRT = thisRT-.6;
                 
+            else
+                thisRT= thisRT-.2;
             end
             
             
@@ -237,7 +239,7 @@ subSpots = [2,2,1; ...
 plotData={Xdata_Acc,Xdata_RTsA,Xdata_RTsB, Xdata_Conf};%, Xdata_Conf};
 titlesare ={'Accuracy', 'Visual RT', 'Auditory RT', 'Auditory Confidence'};
 ylabels ={'proportion correct', 'seconds', 'seconds', 'z-scored confidence'};
-ylimsare=[.4,1.1 ; .3 .65; .5 1.9; -3.5 3.5];
+ylimsare=[.4,1.1 ; .1 .45; .5 1.9; -3.5 3.5];
 xtickdetails ={{'\bfVisual', '\bfAuditory'},...
     {'Correct', 'Error'},...
     {'Correct', 'Error'},...
