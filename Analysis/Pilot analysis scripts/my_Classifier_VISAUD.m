@@ -112,10 +112,11 @@ for nIteration = 1:dec_params.nIter
         clear temp; hold on
         temp = squeeze(errors_test(dec_params.showchannel, :,:));
         
+        xlim([ - 100 700]);
         plot(Xtimes, mean(temp,2), 'color', 'r');
         %add patch for classifier window
         %specify vertices clockwise from bottom left.
-        axis tight
+%         axis tight
         xverts= [times(frames_out(1)+init),times(frames_out(1)+init), times(frames_out(1)+init+pts-1), times(frames_out(1)+init+pts-1)];
         yx = get(gca, 'ylim');
         yverts= [yx(1), yx(2), yx(2), yx(1)];
@@ -137,8 +138,12 @@ for nIteration = 1:dec_params.nIter
         
         %plot
         subplot(2,4,4);
-        topoplot(mean(tempDiff(:,[tmpt(1):tmpt(2)]),2), elocs);
+        topoplot(mean(tempDiff(:,[tmpt(1):tmpt(2)]),2), elocs, 'emarker2',{dec_params.showchannel} );
+        hold on;
+        
         title('Raw Data, difference error-corr'); %colorbar
+        
+        
         %%
     end
     %now normalize EEG data for comparison:
@@ -160,9 +165,12 @@ for nIteration = 1:dec_params.nIter
                 temp=allDt(elec,:,trial);
                 %remove baseline if specified:
                 
+                if dec_params.removebaseline
                 if sum(baseline)>1
                     temp=temp-mean(temp(baseline));
                 end
+                end
+                
                 
                 %perform normalization by specified type.
                 if strcmp(dec_params.normtype, 'n1')
@@ -213,8 +221,9 @@ for nIteration = 1:dec_params.nIter
         %% add patch for classifier window
         %specify vertices clockwise from bottom left.
         xverts= [times(frames_out(1)+init),times(frames_out(1)+init), times(frames_out(1)+init+pts-1), times(frames_out(1)+init+pts-1)];
-        axis tight
-        yx = get(gca, 'ylim');
+%         axis tight
+        xlim([-100 700]);
+yx = get(gca, 'ylim');
         yverts= [yx(1), yx(2), yx(2), yx(1)];
         
         pch=patch(xverts,yverts, 'k');
@@ -331,7 +340,8 @@ for nIteration = 1:dec_params.nIter
         plot(times,mean(corr_y,2),'g'); hold on; clear temp;
         set(gca,'YDir','reverse');
         hold on
-        
+        xlim([ - 100 700]);
+
         plot(times,mean(err_y,2),'r'); hold on;
         title('y - matched training trials');
         

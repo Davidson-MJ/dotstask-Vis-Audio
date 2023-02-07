@@ -18,7 +18,7 @@ nIter = 10; % 10; % n iterations, final output is the average spatial discrimina
 
 useERNorPE=2;
 
-for ippant =1:length(pfols);
+for ippant =1%:length(pfols);
     
 pcounter=1;
 
@@ -31,7 +31,8 @@ lis = pfols(ippant).name;
 ppantnum = str2num(cell2mat(regexp(lis, '\d*', 'Match')));
 %% Load participant data. and set classifier parameters.
 
-load('participant TRIG extracted ERPs.mat');
+% load('participant TRIG extracted ERPs.mat');
+load('participant Long TRIG extracted ERPs.mat');
 load('Epoch information.mat');
 
 %for this participant, specify the classifier parameters we want:
@@ -51,13 +52,14 @@ dec_params.LOO = 1; % perform Leave one out sanity check.
 dec_params.matchCE= 1; % match size of correct and errors.
 dec_params.filtlo= 0; % filter lo/ hi
 dec_params.filthi= 0;
-dec_params.showchannel= 32; % display ERP at channel, if printing
+dec_params.showchannel= 31; % display ERP at channel, if printing
 dec_params.dispprogress=1; % 1 for figure output.
 
 
 % analysis parameters:
 dec_params.window_frames_ms = [plotXtimes(1) plotXtimes(end)];  %needs to be shorter than actual epoch, or will error.
-dec_params.baseline_ms = [-250 -50];
+dec_params.baseline_ms = [-100 -50];
+dec_params.removebaseline=0; % toggle for additional baseline subtraction.
 
 if useERNorPE==1
 dec_params.training_window_ms= [05 100]; % ERN

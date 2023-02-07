@@ -13,7 +13,7 @@ elocs = readlocs('BioSemi64.loc');
 job1.plotStimlocked=1;
 job1.plotResplocked=0;
 %%
-for ippant=1:length(pfols)
+for ippant=1%:length(pfols)
     
     
     cd(eegdatadir)
@@ -23,7 +23,12 @@ for ippant=1:length(pfols)
     
     %PLOT participant level ERPs.
     
-    load('participant TRIG extracted ERPs.mat');
+    load('participant Long TRIG extracted ERPs.mat');
+    
+% load('participant TRIG extracted ERPs.mat');
+    
+        %timevector (if trig, not long)
+%         plotXtimes = ([1:size(plotm,2)] ./ 256   -  0.5)*1000; %ms
     load('Epoch information');
     exppart = {'1st half', '2nd half'};
     %%
@@ -35,7 +40,7 @@ for ippant=1:length(pfols)
         
         
         %timevector
-        plotXtimes = ([1:size(plotm,2)] ./ 256   -  0.5)*1000; %ms
+%         plotXtimes = ([1:size(plotm,2)] ./ 256   -  0.5)*1000; %ms
    
         
         
@@ -268,7 +273,10 @@ for ippant=1:length(pfols)
             
             %%
             p1= plot(plotXtimes, squeeze(mean(d1,1)), [':b'], 'linew', 2); hold on
-            p2= plot(plotXtimes, squeeze(mean(d2,1)),  [':r'], 'linew', 2);                        
+            p2= plot(plotXtimes, squeeze(mean(d2,1)),  [':r'], 'linew', 2);  
+            
+%             p1= plot(plotXtimes, squeeze(mean(d1,1)), [':b'], 'linew', 2); hold on
+%             p2= plot(plotXtimes, squeeze(mean(d2,1)),  [':r'], 'linew', 2);  
             set(gca, 'ydir', 'reverse')
             
             hold on;

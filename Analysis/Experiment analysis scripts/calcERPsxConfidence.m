@@ -5,24 +5,30 @@
 
 
 % called from Plot_dataforERPs_EEGtrigbased
-normON=1;
 
 %%
-for ippant=1:length(pfols)
+for ippant=1%:length(pfols)
     cd(eegdatadir)
     
     cd(pfols(ippant).name);    
-    
-    load('participant TRIG extracted ERPs', ...
+%     
+%     load('participant TRIG extracted ERPs', ...
+%         'resplockedEEG', 'stimlockedEEG', 'resplockedEEG_stimbaserem', ...
+%         'plotXtimes', 'ExpOrder', 'BEH_matched');
+
+
+    load('participant Long TRIG extracted ERPs', ...
         'resplockedEEG', 'stimlockedEEG', 'resplockedEEG_stimbaserem', ...
-        'plotXtimes', 'ExpOrder', 'BEH_matched');
-       
+         'ExpOrder', 'BEH_matched')
+    
+
     % for each participant, we also require the behavioural data, should
     % already be stored, if not see Plot_PFX_Classifier results, job1.
     %% load index information
     load('Epoch information');
     
-    
+        plotXtimes =  ([1:size(stimlockedEEG,2)] ./ 256   -  0.5)*1000; %ms
+
     %so we have both stimlocked and resplocked. just need to use the
     %correct indexing, based on the BEH_Matched information.
     
@@ -35,10 +41,13 @@ for ippant=1:length(pfols)
         partBindx = corBindx;
                 
         %Using  correct  trials, collect confj
-       confjmnts = ([BEH_matched(partBindx).confj]); 
-        
+%        confjmnts = ([BEH_matched(partBindx).confj]); 
+       
+       confjmnts = BEH_matched.confj(partBindx);
+       confjmnts = cell2mat(confjmnts);
+       
         % take zscore to compare across participants.
-        zconfj = zscore((confjmnts)); %% not abs(conjmnts)
+        zconfj = zscore(confjmnts); %% not abs(conjmnts)
         
         %avoid trials in which there was a change of mind (negative
         %confidence value).
@@ -110,14 +119,14 @@ for ippant=1:length(pfols)
       
 % %%     %%
 % % sanity check    
-% clf;
-% plot(plotXtimes, squeeze(conf_x_rlEEG(31,:,:))); title(['participant ' num2str(ippant)]);
-% set(gca, 'ydir' , 'reverse')%     
-% legend({['q1'], ['q2'], ['q3'], ['q4']})
+clf;
+plot(plotXtimes, squeeze(conf_x_rlEEG(31,:,:))); title(['participant ' num2str(ippant)]);
+set(gca, 'ydir' , 'reverse')%     
+legend({['q1'], ['q2'], ['q3'], ['q4']})
 %%
 disp(['saving conf x ERP for ppant ' pfols(ippant).name]);
 
-    save('part B ERPs by confidence', ...
+    save('part B Long ERPs by confidence', ...
         'conf_x_rlEEG', 'terclists',...
         'conf_x_slEEG', 'plotXtimes', 'ExpOrder');
 %     

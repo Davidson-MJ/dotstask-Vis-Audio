@@ -22,7 +22,7 @@ pfols = striphiddenFiles(pfols);
 
 %% jobs list:
 % Participant stimulus trigger and response locked ERPs.
-job.calc_individualERPs = 0; %1 Trig and response locked, also concatenates across participants for GFX.
+job.calc_individualERPs = 1; %1 Trig and response locked, also concatenates across participants for GFX.
 
 job.plot_StimandResplocked_participantaverage =0;
 job.plot_StimandResplocked_grandaverage_GFX =0;
