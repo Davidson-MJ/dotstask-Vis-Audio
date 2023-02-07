@@ -5,25 +5,29 @@ jobs.useERNorPe =2; % 1 or 2.
 
 jobs.calculate_perppant =1;
 
-jobs.plot_perppant=0;
+jobs.plot_perppant=1;
 
 normON=1;
 % for plots: use raw discrim vector or scalp projection:
 useVorScalpProjection= 1;
 
     %% called from JOBS_ERPdecoder.m
-    for ippant = 1:length(pfols)
+    for ippant = 1%:length(pfols)
         
       
-        [PFX_classifierA_onERP_fromscalp, PFX_classifierA_onERP] =deal([]); % note that there will be an extra dimension, for each iteration.
         
         cd(eegdatadir)
         cd(pfols(ippant).name);
         sstr= pfols(ippant).name;
         %% load the Classifer and behavioural data:
         load('Classifier_objectivelyCorrect');
+      
+        
+        [PFX_classifierA_onERP_fromscalp, PFX_classifierA_onERP] =deal([]); % note that there will be an extra dimension, for each iteration.
+        
         load('Epoch information');
-        load('participant TRIG extracted ERPs.mat');
+%         load('participant TRIG extracted ERPs.mat');
+        load('participant Long TRIG extracted ERPs.mat');
         
         %how many times was the classifier repeated?
         nIterations = size(DEC_Pe_window.scalpproj,1);
@@ -180,7 +184,7 @@ useVorScalpProjection= 1;
             windowvec = DEC_Pe_windowparams.training_window_ms;
             mtopo = mean(DEC_Pe_window.scalpproj,1);
         end
-        
+        %%
         
         for itestdata=1:4       
         % take average performance over all iterations.

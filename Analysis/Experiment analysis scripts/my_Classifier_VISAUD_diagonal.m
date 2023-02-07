@@ -148,11 +148,11 @@ for nIteration = 1:dec_params.nIter
                 
                 temp=allDt(elec,:,trial);
                 %remove baseline if specified:
-                
+                if dec_params.removebaseline
                 if sum(baseline)>1
                     temp=temp-mean(temp(baseline));
                 end
-                
+                end
                 %perform normalization by specified type.
                 if strcmp(dec_params.normtype, 'n1')
                     % rescale

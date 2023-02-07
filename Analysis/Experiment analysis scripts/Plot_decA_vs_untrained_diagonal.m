@@ -28,7 +28,8 @@ useVorScalpProjection= 1;
         %% load the Classifer and behavioural data:
         load('Classifier_objectivelyCorrect', 'DEC_diagonal_window');
         load('Epoch information', 'corAindx', 'corBindx', 'errAindx', 'errBindx');
-        load('participant TRIG extracted ERPs.mat', 'resplockedEEG');
+%         load('participant TRIG extracted ERPs.mat', 'resplockedEEG');
+        load('participant Long TRIG extracted ERPs.mat', 'resplockedEEG');
         
         %how many times was the classifier repeated?
         nIterations = size(DEC_diagonal_window.scalpproj,1);
@@ -104,7 +105,8 @@ useVorScalpProjection= 1;
             allvecs = DEC_diagonal_window.discrimvector;                  
                 for itime = 1:size(allvecs,2)
                     %                     p = bernoull(1,[x 1]*v);
-                    v= DEC_diagonal_window.discrimvector(nIter,itime,:)';
+                    v = squeeze( DEC_diagonal_window.discrimvector(nIter,itime,:));
+%                     v= DEC_diagonal_window.discrimvector(nIter,itime,:)';
                     
                     ytest = testdata * v(1:end-1) + v(end);
                     %% reshape for plotting.
@@ -208,12 +210,12 @@ useVorScalpProjection= 1;
        
         %add patch
         ylims = get(gca, 'ylim');
-        pch = patch([windowvec(1) windowvec(1) windowvec(2) windowvec(2)], [ylims(1) ylims(2) ylims(2) ylims(1)], [.8 .8 .8]);
-        pch.FaceAlpha= .1;
+%         pch = patch([windowvec(1) windowvec(1) windowvec(2) windowvec(2)], [ylims(1) ylims(2) ylims(2) ylims(1)], [.8 .8 .8]);
+%         pch.FaceAlpha= .1;
         xlabel('Time since response (ms)')
         ylabel('A.U');
         %%
-        title({['Trained part A(error)' ];[num2str(nIterations) ' iterations, testing ' testComp]}, 'fontsize', 25);
+        title({['Trained part A(error)' ];[num2str(nIterations) ' iterations, testing ' testComp ', all time poinst']}, 'fontsize', 25);
         legend(leg, {['Corr A (' ExpOrder{1} ') n' num2str(ntrials(1))],...
             ['Corr B (' ExpOrder{2} ') n' num2str(ntrials(2))],...
             ['Err A, (' ExpOrder{1} ') trained n' num2str(ntrials(3))],...

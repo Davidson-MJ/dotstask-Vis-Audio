@@ -21,7 +21,7 @@ nIter = 10; % 10; % n iterations, final output is the average spatial discrimina
 
 
 
-for ippant =1:length(pfols);
+for ippant =1%:length(pfols);
     
 pcounter=1;
 
@@ -34,7 +34,8 @@ lis = pfols(ippant).name;
 ppantnum = str2num(cell2mat(regexp(lis, '\d*', 'Match')));
 %% Load participant data. and set classifier parameters.
 
-load('participant TRIG extracted ERPs.mat');
+% load('participant TRIG extracted ERPs.mat');
+load('participant Long TRIG extracted ERPs.mat');
 load('Epoch information.mat');
 
 %for this participant, specify the classifier parameters we want:
@@ -61,7 +62,7 @@ dec_params.dispprogress=0; % 1 for figure output.
 % analysis parameters:
 dec_params.window_frames_ms = [plotXtimes(1) plotXtimes(end)];  %needs to be shorter than actual epoch, or will error.
 dec_params.baseline_ms = [-250 -50];% this baseline is subtracted (again).
-
+dec_params.removebaseline=0;
 
 %create data for classifier:
 allD = resplockedEEG;

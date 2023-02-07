@@ -10,7 +10,7 @@ dbstop if error
 %% updated 23-06-20, to also calculate response locked ERPs, with prestim baseline.
 
 %extra preprocessing before plotting:
-lindetrend = 1; %% now detrending with longer epochs.
+lindetrend = 0; %% now detrending with longer epochs.
 rmbase = 1;
 
 % job list:
@@ -22,36 +22,41 @@ idatatypes = {'STIM', 'RESP', 'RESP-stimbase'};
 
 %first job is to match the EEG and behavioural data. This is the most
 %important step!
+%%
 if job1.calcindividual == 1
     
     for ippant=1:length(pfols)
         
+        clearvars EEG*
         %load eeg folder
         cd(eegdatadir)
         cd(pfols(ippant).name);
         pdir = pwd;
         
         %load raw EEG, matched for trial index with behaviour.
-        load('participant TRIG extracted ERPs.mat');
+        disp([' loading ppant ' num2str(ippant) ]);
+
+        load('participant trigger matched EEG.mat');
         load('Epoch information.mat'); 
         clc;
-        disp([' loading ppant ' num2str(ippant) ]);
         %%%%%% Here some extra preprocessing as required
         %stimulus locked, response locked, and response locked- with a pre-stimulus
         %baseline.
+        %%
         for itype = 1:3
-            
+            disp(['Preprocessing eeg data ' num2str(itype)]);
             %which data type to load?
             switch itype
                 case 1
                     EEG_tmpsub1 = EEGstimLong_matched;
 %                     EEG_tmpsub1 = EEGstim_matched;
                 case 2
-                    EEG_tmpsub1 = EEGresp_matched;
+%                     EEG_tmpsub1 = EEGresp_matched;
+                    EEG_tmpsub1 = EEGrespLong_matched;
                     
                 case 3
-                    EEG_tmpsub1 = EEGresp_matched;
-                    EEG_tmpsub2 = EEGstim_matched;
+                    EEG_tmpsub1 = EEGrespLong_matched;
+                    EEG_tmpsub2 = EEGstimLong_matched;
             end
             
             
@@ -75,7 +80,8 @@ if job1.calcindividual == 1
                 %% remove baseleine, 
                 EEGrmb = zeros(size(EEG_tmpsub1));
 %                 zerostart = dsearchn(plotXtimes', [-250 -50]');
-                zerostart = dsearchn(plotXtimes', [-150 -50]');
+%                 zerostart = dsearchn(plotXtimes', [-150 -50]');
+                zerostart = dsearchn(plotXtimes', [-100 0]');
                 %% which data to use for baseline subtraction?
                 if itype <3
                     baselinewith = EEG_tmpsub1;
@@ -95,18 +101,18 @@ if job1.calcindividual == 1
                     end
                 end
                 
-                EEG_tmpsub = EEGrmb;
+                EEG_tmpsub1 = EEGrmb;
             end
             
             
             %save again
             switch itype
                 case 1
-                    stimlockedEEG = EEG_tmpsub;
+                    stimlockedEEG = EEG_tmpsub1;
                 case 2
-                    resplockedEEG = EEG_tmpsub;
+                    resplockedEEG = EEG_tmpsub1;
                 case 3
-                    resplockedEEG_stimbaserem = EEG_tmpsub;
+                    resplockedEEG_stimbaserem = EEG_tmpsub1;
             end
             
         end
@@ -137,17 +143,19 @@ if job1.calcindividual == 1
             err_Aud_sl  = squeeze(mean(stimlockedEEG(:,:,errAindx),3));           
             
         end
-        save('participant TRIG extracted ERPs', ...
+        
+        disp(['SAVING: >>> ' pfols(ippant).name])
+
+        save('PFX ERPs', ...
             'stimlockedEEG',...
             'resplockedEEG',...
             'resplockedEEG_stimbaserem',...
             'corr_Vis_rl','err_Vis_rl',...
             'corr_Aud_rl','err_Aud_rl',...                        
             'corr_Vis_sl', 'err_Vis_sl',...
-            'corr_Aud_sl', 'err_Aud_sl', '-append');
+            'corr_Aud_sl', 'err_Aud_sl');
         
-        disp(['SAVING: >>> pp' pfols(ippant).name])
-        
+        disp(['Done!']);
         
         
     end
@@ -170,9 +178,11 @@ if job1.concat_GFX == 1
     for ippant=1:length(pfols)
         cd(eegdatadir)
         cd(pfols(ippant).name);
-        load('participant TRIG extracted ERPs');
+        clearvars stimlocked* resplocked*
+        load('PFX ERPs');
         load('Epoch information');
-        %
+        disp(['concat participant.. ' num2str(ippant)]);
+        
         %
         %     %sort by modality.
         if strcmp(ExpOrder{1}, 'visual') % visual in first half of exp:
@@ -195,7 +205,7 @@ if job1.concat_GFX == 1
         GFX_visrespCOR(ippant,:,:) = corr_Vis_rl;
         GFX_visrespERR(ippant,:,:) = err_Vis_rl;
         
-        GFX_audrespCOR(ippant,:,:) = corr_Aud_rl;ac
+        GFX_audrespCOR(ippant,:,:) = corr_Aud_rl;
         GFX_audrespERR(ippant,:,:) = err_Aud_rl;
         
         GFX_visstimCOR(ippant,:,:) = corr_Vis_sl;

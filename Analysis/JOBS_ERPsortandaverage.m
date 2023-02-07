@@ -13,16 +13,16 @@ cd(eegdatadir);
 pfols = dir([pwd filesep 'p_*']);
 
 % Participant stimulus trigger and response locked ERPs.
-job.calc_individualERPs = 0; %1 Trig and response locked, also concatenates across participants for GFX.
+job.calc_individualERPs = 1; %1 Trig and response locked, also concatenates across participants for GFX.
 
-job.plot_StimandResplocked_participantaverage =1;
+job.plot_StimandResplocked_participantaverage =0;
 job.plot_StimandResplocked_grandaverage_GFX =0;
 
 
 % Calculated ERPs, after stratifying by subjective confidence.
-job.calc_individualERPsxConfidence =1; %Response locked, also concatenates across participants for GFX.
+job.calc_individualERPsxConfidence =0; %Response locked, also concatenates across participants for GFX.
 job.plot_PFXxConf =0;
-job.plot_GFXxConf=  1;
+job.plot_GFXxConf=  0;
 
 %% Stimulus and response locked ERPs >
 if job.calc_individualERPs == 1 % Trig and response locked, also concatenates across participants for GFX.        

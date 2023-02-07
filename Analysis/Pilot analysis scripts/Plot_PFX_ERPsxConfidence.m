@@ -7,7 +7,7 @@ elocs = readlocs('BioSemi64.loc'); %%
 meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57];
 smoothON=0;
 %%
-for ippant=1:length(pfols)
+for ippant=1%length(pfols)
     cd(eegdatadir)
     clf
     cd(pfols(ippant).name);
@@ -18,7 +18,8 @@ for ippant=1:length(pfols)
     
     %PLOT participant level ERPs.
     
-    load('part B ERPs by confidence')    
+%     load('part B ERPs by confidence')    
+    load('part B Long ERPs by confidence')    
     %%
     figure(2);  clf;
     set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
@@ -93,7 +94,7 @@ for ippant=1:length(pfols)
     
     set(gcf, 'color', 'w')
     %%
-    printname = ['participant ' num2str(ippant) ' respERPs x Conf terc (long)'];
+    printname = ['participant ' num2str(ippant) ' respERPs x Conf terc (long NEW)'];
     print('-dpng', printname)
     
     
