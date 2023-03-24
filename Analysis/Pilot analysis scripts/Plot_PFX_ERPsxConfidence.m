@@ -1,13 +1,14 @@
 
-cmap = cbrewer('seq', 'Reds', 4);
+cmap = flipud(cbrewer('seq', 'Reds', 10));
 % usechan = 31;
 
-elocs = readlocs('BioSemi64.loc'); %%
+elocs= getelocs(3);
+% meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57];
+meanoverChans_RESP = [4,38,39,11,12,19,47,46,48,49,32,56,20,31,57];
 
-meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57];
 smoothON=0;
 %%
-for ippant=1%length(pfols)
+for ippant=1:length(pfols)
     cd(eegdatadir)
     clf
     cd(pfols(ippant).name);
@@ -17,9 +18,8 @@ for ippant=1%length(pfols)
     ppantnum = str2num(cell2mat(regexp(lis, '\d*', 'Match')));
     
     %PLOT participant level ERPs.
-    
-%     load('part B ERPs by confidence')    
-    load('part B Long ERPs by confidence')    
+        load('part B ERPs by confidence')   ;
+        use_xvec = plotXtimes(1:size(stimlockedEEG,2));
     %%
     figure(2);  clf;
     set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
@@ -29,11 +29,9 @@ for ippant=1%length(pfols)
             case 1
                 datac = conf_x_slEEG;
                 dtype = 'stimulus onset';
-                use_xvec = ([1:size(conf_x_slEEG,2)]./ 256 - 0.5 ) *1000 ;
             case 2
                 datac = conf_x_rlEEG; % response locked
                 dtype = 'response onset';
-                use_xvec = plotXtimes;
         end
         
   
@@ -46,7 +44,7 @@ for ippant=1%length(pfols)
         
         
         ntrials = length(terclists(iterc).list);
-        datatoplot = squeeze(nanmean(datac(meanoverChans,:,iterc),1));
+        datatoplot = squeeze(nanmean(datac(meanoverChans_RESP,:,iterc),1));
         
         if smoothON==1
         winsizet = dsearchn(use_xvec', [0 100]'); % 100ms smooth window.
@@ -63,11 +61,9 @@ for ippant=1%length(pfols)
 
          set(gca, 'ydir', 'reverse')
         hold on;
-        if idtype==1
-         xlim([- 200 2000])
-        else
         xlim([- 200 1000])
-        end
+        ylim([-10 10]);
+
         xlabel(['Time from ' dtype ' [ms]'])
         ylabel(['uV']);
         
@@ -94,7 +90,7 @@ for ippant=1%length(pfols)
     
     set(gcf, 'color', 'w')
     %%
-    printname = ['participant ' num2str(ippant) ' respERPs x Conf terc (long NEW)'];
+    printname = ['participant ' num2str(ippant) ' respERPs x Conf terc'];
     print('-dpng', printname)
     
     

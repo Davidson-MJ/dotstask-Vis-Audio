@@ -1,247 +1,143 @@
 
-%PLOT GFX, stim and response locked ERPs
+%PLOT
 
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
-cd(basedir)
-cd('EEG')
+cd(eegdatadir)
 cd('GFX')
 load('GFX_averageERPs TRIG based.mat')
-smoothON=1;
-
-figure(1);  clf;
-set(gcf, 'units', 'normalized', 'position', [0 .35 .7 .6]);
-%
-getelocs;
+smoothON=0;
+hidetopos=1;
+%%
 
 exppart = {'1st half', '2nd half'};
 
+%ERP channels for plotting: (averages over the list).
+meanoverChans_RESP = [4,38,39,11,12,19,47,46,48,49,32,56,20,31,57];
+meanoverChans_VIS = [20:31, 57:64];
+meanoverChans_AUD = [4:15,39:52];
+    
+%same colours as beh data?
+%separate into Aud and Visual.
+cmap = cbrewer('qual', 'Paired',10);
+% colormap(cmap)
+% viscolour = cmap(3,:);
+% audcolour=cmap(9,:);
+grCol=cmap(4,:); %greenish
+redCol =cmap(6,:); %reddish
+elocs = readlocs('BioSemi64.loc'); %%
+%
+clf
+% subspots = [1,3];
 
-usechan = 31;
+%%  2 figures first the stim locked:
+% then the Resp locked
+titlesAre = {'visual', 'auditory'};
 
-for ixmod = 1:2
-    
-    switch ixmod
-        case 1
-            datac = GFX_audstimERP;
-            showt = [300,500]; %ms;
-            titleis=  'Auditory stimulus';
-            
-        case 2
-            datac= GFX_visstimERP;
-            showt = [80,190]; %ms;
-            titleis=  'Visual stimulus';
-    end
-    
-    
-    %apply smoothing to dataset:
-    %50 ms window.
-    if smoothON==1
-        printname = ['GFX stimulus locked ERP topography smoothed'];
-        winsize =  ceil(250/20); % 50 ms
-        tmpout = zeros(size(datac));
-        for ippant=1:size(datac,1)
-            for ichan= 1:size(datac,2)
-                
-                tmpout(ippant,ichan,:) = smooth(squeeze(datac(ippant,ichan,:)), winsize);
-            end
-        end
-        datac=tmpout;
-    else
-        printname=['GFX stimulus locked ERP topography no detrend'];
-    end
-    
-    topoX=dsearchn(plotXtimes', showt');
-    %
-    
-    for plotts = 1:2
-        plotspot = plotts + 2*(ixmod-1);
-        
-        subplot(3,4,plotspot);
-        topoplot(nanmean(datac(:,:,topoX(plotts)),1), biosemi64);
-        c=colorbar;
-        ylabel(c, 'uV')
-        caxis([-5 5])
-        title([num2str(showt(plotts)) 'ms'])
-        set(gca, 'fontsize', 15);
-    end
-    
-    plotspot = [5:6,9:10] + 2*(ixmod-1);
-    
-    subplot(3,4,plotspot);
-    
-    plot(plotXtimes, squeeze(nanmean(datac,1)), 'k')
-    set(gca, 'ydir', 'reverse')
-    hold on;
-    plot([showt(1) showt(1)], [ -2 2], 'r', 'linew', 4)
-    plot([showt(2) showt(2)], [ -2 2], 'r', 'linew', 4)
-    
-    xlabel(['Time from stimulus onset [ms]'])
-    ylabel(['uV']);
-    
-    set(gca, 'fontsize', 15);
-    ylim([-12 5])
-    title([titleis])
-    plot([0 0], ylim, ['k-'])
+for idata= 1:2
+
+figure(idata);  clf;
+set(gcf, 'units', 'normalized', 'position', [0.05 0.05 .8 .8]);
+
+if idata==1
+    corrDataA = GFX_visstimCOR;
+    errDataA = GFX_visstimERR;
+    corrDataB = GFX_audstimCOR;
+    errDataB = GFX_audstimERR;
+    xlabis= 'stimulus';
+    outputdir= 'Stimulus locked ERPs';
+
+     showt1=[50,150];  % approx 
+     showt2=[250,350]; % approx % change per stim
+
+     
+else % resp locked:
+
+    corrDataA = GFX_visrespCOR;
+    errDataA = GFX_visrespERR;
+    corrDataB = GFX_audrespCOR;
+    errDataB = GFX_audrespERR;
+    xlabis= 'response';
+    outputdir= 'Response locked ERPs';
+% times for topoplots:
+        showt1=[-10,90];  % approx ERN
+     showt2=[250,350]; % approx Pe
+
 end
-colormap('magma')
-%%
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
-cd(basedir);
 
-cd('Figures')
-cd('Stimulus locked ERPs')
-set(gcf, 'color', 'w')
-%%
 
-print('-dpng', printname)
-
-%% >>>>>>>>>>>>>>>>> now response locked.
-
-%
-%
-% figure(1);  clf;
-% set(gcf, 'units', 'normalized', 'position', [0 .35 .7 .6], 'color', 'w');
-% %
-% getelocs;
-%
-%
-% for ixmod = 1:2
-%
-%     if ixmod==1
-% %         dataCOR = squeeze(nanmean(GFX_audrespCOR,1));
-% %         dataErr = squeeze(nanmean(GFX_audrespERR,1));
-%         g1=GFX_audrespCOR;
-%         g2=GFX_audrespERR;
-%         titleis = 'Auditory stimulus';
-%     else
-% %         dataCOR = squeeze(nanmean(GFX_visrespCOR,1));
-% %         dataErr = squeeze(nanmean(GFX_visrespERR,1));
-%         g1=GFX_visrespCOR;
-%         g2=GFX_visrespERR;
-%         titleis = 'Visual stimulus';
-%     end
-% %     datac= dataErr-dataCOR;
-%
-%     tmp1 = g2-g1;
-%     datac=squeeze(mean(tmp1,1));
-%
-%      %apply smoothing to dataset, for plotting:
-%     %50 ms window.
-%     if smoothON==1
-%         printname =['GFX response locked diff-ERP topography smoothed'] ;
-%      winsize = 250/20;
-%     tmpout= zeros(size(datac));
-%     for ichan=1:size(datac,1)
-%         tmpout(ichan,:) = smooth(datac(ichan,:), winsize);
-%     end
-%
-%     datac=tmpout;
-%     else
-%        printname =['GFX response locked diff-ERP topography'] ;
-%     end
-%
-%
-%
-%     %times for topography
-%     showt=[60,250];
-%     topoX=dsearchn(plotXtimes', showt');
-%
-%
-%
-%     for plotts = 1:2
-%         plotspot = plotts + 2*(ixmod-1);
-%
-%         subplot(3,4,plotspot);
-%         topoplot(datac(:,topoX(plotts)), biosemi64);
-%         colorbar
-%         caxis([-5 5])
-%         title([num2str(showt(plotts)) 'ms'])
-%     end
-%
-%     plotspot = [5:6,9:10] + 2*(ixmod-1);
-%
-%     subplot(3,4,plotspot);
-%
-%     plot(plotXtimes, datac, 'k')
-%     set(gca, 'ydir', 'reverse')
-%     hold on;
-%     plot([showt(1) showt(1)], [ -2 2], 'r', 'linew', 4)
-%     plot([showt(2) showt(2)], [ -2 2], 'r', 'linew', 4)
-%
-%
-%     xlabel(['Time from response onset [ms]'])
-%     ylabel(['uV']);
-%     set(gca, 'fontsize', 15);
-%    ylim([-12 5])
-%     title(['Error - correct after ' titleis])
-%     plot([0 0], ylim, ['k-'])
-% end
-% colormap('magma')
-% %%
-% basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
-% cd(basedir);
-% cd('Figures')
-% cd('Response locked ERPs')
-% set(gcf, 'color', 'w')
-% print('-dpng', printname)
-
-%% alternate plot
-figure(1);  clf;
-set(gcf, 'units', 'normalized', 'position', [0 .35 .7 .6], 'color', 'w');
-%
-getelocs;
-%%
-for ixmod = 1:2
+for ixmod = 1:2 % Visual AUditory
     
     if ixmod==1
-        g1=GFX_audrespCOR;
-        g2=GFX_audrespERR;
-        titleis = 'Auditory stimulus';
+        g1=corrDataA;
+        g2=errDataA;
+        meanoverChans= meanoverChans_VIS;
     else
-        %         dataCOR = squeeze(nanmean(GFX_visrespCOR,1));
-        %         dataErr = squeeze(nanmean(GFX_visrespERR,1));
-        g1=GFX_visrespCOR;
-        g2=GFX_visrespERR;
-        titleis = 'Visual stimulus';
+        g1=corrDataB;
+        g2=errDataB;
+        meanoverChans= meanoverChans_AUD;
     end
-    %     datac= dataErr-dataCOR;
     
-    topo1 = g2-g1;
+    % unless RESP< then overwrite:
+    if idata==2
+
+        meanoverChans= meanoverChans_RESP;
+    end
+    %apply smoothing to dataset, for plotting:
+    %50 ms window.
+    if smoothON==1
+        printname =['GFX ' xlabis ' locked compare ERP smoothed'] ;
+        winsize = 256/20; % 50 ms.
+        
+        tmpout1= zeros(size(g1));
+        tmpout2= zeros(size(g2));
+        
+        %corrects.
+        for ippanttmp = 1:size(g1,1)
+            for ichan=1:size(g1,2)
+                tmpout1(ippanttmp,ichan,:) = smooth(g1(ippanttmp,ichan,:), winsize);
+            end
+        end
+        %errors.
+        for ippanttmp = 1:size(g2,1)
+            for ichan=1:size(g2,2)
+                tmpout2(ippanttmp,ichan,:) = smooth(g2(ippanttmp,ichan,:), winsize);
+            end
+        end
+        
+        g1=tmpout1; g2=tmpout2;
+    else
+        printname =['GFX ' xlabis ' locked compare ERP'] ;
+    end
+    
+    %difference:
+    topo1 = g2-g1; %(errors - correct)
+    
     
     %mean difference waveform.
     datac=squeeze(nanmean(topo1,1));
     
-    %apply smoothing to dataset, for plotting:
-    %50 ms window.
-    if smoothON==1
-        printname =['GFX response locked compare ERP topography smoothed'] ;
-        winsize = 250/10;
-        tmpout= zeros(size(datac));
-        for ichan=1:size(datac,1)
-            tmpout(ichan,:) = smooth(datac(ichan,:), winsize);
-        end
-        
-        datac=tmpout;
-    else
-        printname =['GFX response locked compare ERP topography no detrend'] ;
-    end
-    
-    
-    
     %times for topography
-    showt=[60,250];
-    topoX=dsearchn(plotXtimes', showt');
+
+    topoX1=dsearchn(plotXtimes', showt1');
+   
+    topoX2=dsearchn(plotXtimes', showt2');
+    for plotts=1:2
+        if plotts ==1
+            topot = topoX1;
+            realt = showt1;
+        else
+            topot = topoX2;
+            realt = showt2;
+        end
     
-    
-    
-    for plotts = 1:2
-        plotspot = plotts + 2*(ixmod-1);
-        
-        subplot(3,4,plotspot);
-        topoplot(datac(:,topoX(plotts)), biosemi64);
-        c=colorbar;
-        %         caxis([-5 5])
-        title([num2str(showt(plotts)) 'ms'])
+    %plot data from Corrects?
+tD = squeeze(nanmean(g1,1));
+
+
+    plotspot = plotts + 2*(ixmod-1);        
+    subplot(3,4,plotspot);
+    topoplot(mean(tD(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans], '.' 'w'} );
+    c=colorbar;        
+        title([num2str(realt(1)) '-' num2str(realt(2)) 'ms (Corr)'])        
         set(gca, 'fontsize', 15)
         ylabel(c, 'uV')
     end
@@ -251,18 +147,39 @@ for ixmod = 1:2
     subplot(3,4,plotspot);
     
     %PLOT the Correct and ERRORs separtely.
+     %place patches first (as background)   
+    ylim([-5 8])
+    
+%place patches (as background) first:
+    ytx= get(gca, 'ylim');    
+hold on
+%plot topo patches.
+ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
+ph.FaceAlpha=.4;
+ph.LineStyle= 'none';
+ph=patch([showt2(1) showt2(1) showt2(2) showt2(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
+ph.FaceAlpha=.4;
+ph.LineStyle= 'none';
+    
+    
+    
     %%
-    d1 = squeeze((g1(:,usechan,:)));
-    d2 = squeeze((g2(:,usechan,:)));
+    d1 = squeeze(nanmean(g1(:,meanoverChans,:),2));
+    d2 = squeeze(nanmean(g2(:,meanoverChans,:),2));
     
     stE1 = CousineauSEM(d1);
     stE2 = CousineauSEM(d2);
     %%
-    p1= plot(plotXtimes, squeeze(nanmean(d1,1)), 'b', 'linew', 2); hold on
-    p2= plot(plotXtimes, squeeze(nanmean(d2,1)), 'color', 'r', 'linew', 2);
+
+
+    sh=shadedErrorBar(plotERPtimes, squeeze(nanmean(d1,1)), stE1,{'color',grCol, 'linew', 2},1);
+    p1= sh.mainLine;
+    hold on;
+    sh=shadedErrorBar(plotERPtimes, squeeze(nanmean(d2,1)), stE1,{'color',redCol, 'linew', 2},1);
+    p2= sh.mainLine;
     
     diffplot= p2.YData - p1.YData;
-    plot(plotXtimes, diffplot, 'k', 'linew', 4)
+    pd= plot(plotERPtimes, diffplot, 'k', 'linew', 2);
     set(gca, 'ydir', 'reverse')
     
     hold on;
@@ -270,25 +187,33 @@ for ixmod = 1:2
     
     xlabel(['Time from response onset [ms]'])
     ylabel(['uV']);
-    set(gca, 'fontsize', 15);
-    ylim([-10 10])
-    title(['Response ERP at ' biosemi64(usechan).labels  ' after ' titleis])
+    set(gca, 'fontsize', 25);
+    
+    %%
+    
+%     title({[titleis ', (' orderw ')']})
+    title(titlesAre{ixmod});
+    
+    %%
     plot([0 0], ylim, ['k-'])
     plot([xlim], [0 0], ['k-'])
-    ytx= get(gca, 'ylim');
-    
-    plot([showt(1) showt(1)], [ ytx(1)*.4 ytx(1)*.9], 'color', [.7 .7 .7], 'linew', 4)
-    plot([showt(2) showt(2)], [ ytx(1)*.4 ytx(1)*.9], 'color', [.7 .7 .7], 'linew', 4)
-    ylim([-12 5])
-    legend('Correct', 'Error', 'Err-Corr')
 end
-colormap('magma')
+%%
+    
+    
+    legend([p1 p2, pd], {'Correct', 'Error', 'Err-Corr'})
+%     legend([p1 p2], {'Correct', 'Error'})
+%     xlim([- 200 600]);
+%     ylim([-5 8])
+
+colormap('inferno')
 set(gcf, 'color', 'w')
 %
-basedir= '/Users/mdavidson/Desktop/dotstask- Vis+Audio EXP';
-cd(basedir);
-cd('Figures')
-cd('Response locked ERPs')
+cd(figdir)
+cd(outputdir)
 set(gcf, 'color', 'w')
-print('-dpng', printname)
+%%
+print('-dpng', [printname ])
+%% 
+end
 

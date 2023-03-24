@@ -1,5 +1,5 @@
 
-smoothON=0;  % smooth the output by sliding 50ms window?
+smoothON=1;  % smooth the output by sliding 50ms window?
 %first plot the stimulus locked ERPs.
 
 
@@ -10,10 +10,10 @@ meanoverChans_AUD = [4:15,39:52];
 
 elocs = readlocs('BioSemi64.loc');
 
-job1.plotStimlocked=1;
-job1.plotResplocked=0;
+job1.plotStimlocked=0;
+job1.plotResplocked=1;
 %%
-for ippant=1%:length(pfols)
+for ippant=1:length(pfols)
     
     
     cd(eegdatadir)
@@ -23,7 +23,8 @@ for ippant=1%:length(pfols)
     
     %PLOT participant level ERPs.
     
-    load('participant Long TRIG extracted ERPs.mat');
+    load('PFX ERPs.mat');
+    load('participant EEG preprocessed.mat');
     
 % load('participant TRIG extracted ERPs.mat');
     
@@ -45,7 +46,7 @@ for ippant=1%:length(pfols)
         
         
         figure(2);  clf;
-        set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
+        set(gcf, 'units', 'normalized', 'position', [0.1 0.1 .8 .8]);
         
         
         for ixmod = 1:2
@@ -100,19 +101,21 @@ for ippant=1%:length(pfols)
             %full screen
             
             %auditory times are:
-            
+             plotXtimesPLOT = plotXtimes(1:size(datac,2,2));
             topoX=dsearchn(plotXtimes', showt');
             %
+
+            dataplot = datae-datac; % difference waveform.
             %% show topo plots at times of interest.
             for plotts = 1:2
                 plotspot = plotts + 2*(ixmod-1);
                 
                 subplot(3,4,plotspot);
-                topoplot(mean(datac(:,topoX(plotts),:),3), elocs, 'emarker2', {[meanoverChans], 's' 'w'} );
+                topoplot(mean(dataplot(:,topoX(plotts),:),3), elocs, 'emarker2', {[meanoverChans], '.' 'w'} );
                 c=colorbar;
                 ylabel(c, 'uV')
                 caxis([-10 10])
-                title([num2str(showt(plotts)) 'ms (correct)'])
+                title([num2str(showt(plotts)) 'ms (diff)'])
                 set(gca, 'fontsize', 15);
             end
             %% now plot ERP.
@@ -129,7 +132,7 @@ for ippant=1%:length(pfols)
             
             
             
-            plot(plotXtimes, plotm, 'k', 'linew', 5)
+            pd=plot(plotXtimesPLOT, plotm, 'k', 'linew', 2);
             set(gca, 'ydir', 'reverse')
             hold on;
             ylim([-15 15])
@@ -145,8 +148,8 @@ for ippant=1%:length(pfols)
             d2 = squeeze(datae(meanoverChans,:));
             
             %%
-            p1= plot(plotXtimes, squeeze(mean(d1,1)), [':b'], 'linew', 2); hold on
-            p2= plot(plotXtimes, squeeze(mean(d2,1)),  [':r'], 'linew', 2);
+            p1= plot(plotXtimesPLOT, squeeze(mean(d1,1)), [':b'], 'linew', 2); hold on
+            p2= plot(plotXtimesPLOT, squeeze(mean(d2,1)),  [':r'], 'linew', 2);
             
 
             set(gca, 'ydir', 'reverse')
@@ -155,7 +158,7 @@ for ippant=1%:length(pfols)
             
             xlabel(['Time from stimulus onset [ms]'])
             ylabel(['uV']);
-            legend([p1 p2], {['corr n' num2str(nCor)], ['err n' num2str(nErr)]})
+            legend([p1 p2, pd], {['corr n' num2str(nCor)], ['err n' num2str(nErr)], 'diff'}, 'autoupdate', 'off')
             set(gca, 'fontsize', 15);
             %%
             % also plot tones (patches) to help with interpretation.
@@ -184,7 +187,7 @@ for ippant=1%:length(pfols)
     if job1.plotResplocked==1
         
         figure(1);  clf;
-        set(gcf, 'units', 'normalized', 'position', [0 0 1 1]);
+        set(gcf, 'units', 'normalized', 'position', [.1 .1 .8 .8]);
         %
         meanoverChans=meanoverChans_RESP;
         
@@ -233,9 +236,14 @@ for ippant=1%:length(pfols)
             end
             
             
-            datac= dataErr-dataCOR;
+            dataplot= dataErr-dataCOR;
             
             
+            temp =mean(dataplot,3);
+            plotm = squeeze(mean(temp(meanoverChans,:),1));
+            
+            
+            hold on;
             %times for topography
             showt1=[-10,90];
             topoX1=dsearchn(plotXtimes', showt1');
@@ -253,30 +261,34 @@ for ippant=1%:length(pfols)
                 
                 plotspot = plotts + 2*(ixmod-1);
                 subplot(3,4,plotspot);
-                topoplot(mean(datac(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans], 's' 'w'} );
+                topoplot(mean(dataplot(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans], '.' 'w'} );
                 c=colorbar;
-                title([num2str(realt(1)) '-' num2str(realt(2)) 'ms'])
+                title([num2str(realt(1)) '-' num2str(realt(2)) 'ms (diff)'])
                 set(gca, 'fontsize', 15)
                 ylabel(c, 'uV')
             end
             
             
             
-            
+            plotXtimesPLOT = plotXtimes(1:size(dataplot,2,2));
+
             plotspot = [5:6,9:10] + 2*(ixmod-1);
             
             subplot(3,4,plotspot);
+
+            %PLOT difference:
+            pd=plot(plotXtimesPLOT, plotm, 'k', 'linew', 2);
+            hold on
             %PLOT the Correct and ERRORs separtely.
             %%
             d1 = squeeze(dataCOR(meanoverChans,:));
             d2 = squeeze(dataErr(meanoverChans,:));
             
             %%
-            p1= plot(plotXtimes, squeeze(mean(d1,1)), [':b'], 'linew', 2); hold on
-            p2= plot(plotXtimes, squeeze(mean(d2,1)),  [':r'], 'linew', 2);  
+            p1= plot(plotXtimesPLOT, squeeze(mean(d1,1)), [':b'], 'linew', 2); hold on
+            p2= plot(plotXtimesPLOT, squeeze(mean(d2,1)),  [':r'], 'linew', 2);  
             
-%             p1= plot(plotXtimes, squeeze(mean(d1,1)), [':b'], 'linew', 2); hold on
-%             p2= plot(plotXtimes, squeeze(mean(d2,1)),  [':r'], 'linew', 2);  
+
             set(gca, 'ydir', 'reverse')
             
             hold on;
@@ -304,8 +316,8 @@ for ippant=1%:length(pfols)
             plot([0 0], ylim, ['k-'])
             plot([xlim], [0 0], ['k-'])
             
-            legend(['Correct (n' num2str(nCor) ')'], ['Error (n' num2str(nErr) ')'], 'Err-Corr')
-            xlim([- 200 600]);
+            legend([p1,p2,pd], {['Correct (n' num2str(nCor) ')'], ['Error (n' num2str(nErr) ')'], 'Err-Corr'})
+%             xlim([- 200 600]);
         end
         %%
         colormap('viridis')

@@ -10,45 +10,62 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 
 
 
-job1.calcandconcat_PFX =0;
+job1.calcandconcat_PFX =1;
 
-job1.plotPFX=1;
+job1.plotPFX=0;
 job1.plotGFX=1;
 
 
 
 
 
-normON = 0; % normalize EEG data.
+normON = 1; % normalize EEG data. (prior to applying classifier).
 
 
 
-
+smoothON=1; % for final plot (not stats)
 
 %%
 if job1.calcandconcat_PFX ==1
-    
-    
-    
-    GFX_DECA_Conf_Bsplit=nan(length(pfols), 384,2);
-    GFX_DecA_ScalpProj=nan(length(pfols), 64);
-     GFX_ExpOrders=[];
+
+
+   GFX_DECA_Pe_Conf_Bsplit=[];    
+   GFX_DecA_ScalpProj=nan(length(pfols), 64);
+
     for ippant = 1:length(pfols)
         cd(eegdatadir)
         cd(pfols(ippant).name);
         %% load the Classifer and behavioural data:
-        load('Classifier_objectivelyCorrect');
-        load('participant TRIG extracted ERPs.mat');
+        load('Classifier_trained_A_resp_Pe_window.mat');
+        load('participant EEG preprocessed.mat');
         load('Epoch information.mat');
         %%
         %
-        
-        partBindx = sort([corBindx]);
-        
+        PFX_classifier_onERPsplit=[];
+
+        DEC_x_rlEEG =[];% zeros(size(ytest_trials,1), 2);
+        for ilist= 1:3
+            switch ilist
+                case 1
+                    partBindx = sort([corBindx]);
+                case 2
+                      partBindx = sort([errBindx]);
+                case 3
+                    tmptrials= zeros(1,size(resplockedEEG,3));
+                    tmptrials(corBindx)=1;
+                    tmptrials(errBindx)=1;
+
+                    truth= zeros(1,length(tmptrials));
+                    truth(errBindx)=1;
+                    %back to indx.
+                    partBindx= find(tmptrials);
+                    truth= truth(partBindx);
+            end
+
         partBdata = resplockedEEG(:,:,partBindx);
         [nchans, nsamps, ntrials] =size(partBdata);
-        
-        
+
+
         if normON==1
             data_norm = zeros(size(partBdata));
             for ichan = 1:nchans
@@ -59,198 +76,315 @@ if job1.calcandconcat_PFX ==1
                     if(min(temp)~=max(temp))
                         temp=temp/max(temp);
                     end
-                    
+
                     data_norm(ichan,:,itrial) = temp;
                 end
             end
             partBdata= data_norm;
         end
-        
-        
+
+
         %%
         % collect confj for this dataset
         %confidence is from sure incorrect (neg) to sure correct (pos).
-        zconfj= zscore([BEH_matched(partBindx).confj]);
-        
+        zconfj= zscore([BEH_matched.confj{partBindx}]);
+
         %before continuing, we want to apply the spatial discrim to each trial.
         %% we are using the decoder from part A (correct vs Errors)
-        v = mean(DEC_Pe_window.discrimvector,1)';
-        
+        vtime = squeeze(mean(DEC_Pe_window.discrimvector,1))'; % take mean over iterations
+
         %we want to take the probability, when this decoder is applied to a
         %sliding window across part B epochs.
-        testdata = reshape(partBdata, nchans, nsamps* ntrials)';%
+%         testdata = reshape(partBdata, nchans, nsamps* ntrials)';%
         %% multiply data by classifier:
-        
-        ytest_tmp = testdata* v(1:end-1) + v(end);
-        
-        
-        %take the prob
-        ytest_tmp= bernoull(1,ytest_tmp);
-        
-        
-        %         ?smooth?
-        % ytest_tmp_f = eegfilt(ytest_tmp', 256,0, 8);
-        
-        % reshape for single trial decoding
-        
-        ytest_trials = reshape(ytest_tmp,nsamps,ntrials);
-        
+
+        % for each point in the sliding window, (or one point, multiply
+        % classifier).
+
+            testdataON = reshape(partBdata, nchans, nsamps* ntrials)';%
+            %%
+            ytest = testdataON * vtime(1:end-1) + vtime(end);
+            %convert to prob:
+                                    bptest = bernoull(1,ytest);
+            %% reshape for plotting.
+
+                                    bptest = reshape(bptest, nsamps, ntrials);
+
+            % reshape for single trial decoding
+
+            ytest_trials = reshape(ytest,nsamps,ntrials);
+
+            % store for averaging over each iteration.
+%             PFX_classifier_onERPsplit = ytest_trials;
+            PFX_classifier_onERPsplit = bptest;
+
+
+     
+
         %% now take terciles of confidence:
+
+%       quants = quantile(zconfj, [3]); %quartiles
+        quants= quantile(zconfj, [.5]); % median split
+        terclists=[];
+
+        if length(quants)>1
+        if diff(quants)==0 % can't separate into terciles.
+            %instead,  save as high/low after median split.
+            %just skip
+%             continue
+              quants = quantile(zconfj, [.5]);
+               t1 = nan;
+               t2 = find(zconfj<=quants(1));
+               t3= find(zconfj>quants(1));
+               t4 = nan;
+            disp(['Warning: using median split for ppant ' num2str(ippant)]);   
+        else
+            
+        %now we have all the data, and confidence rows per quartile:
+        %split EEEG into terciles:
+        %lowest
+        t1 = find(zconfj<=quants(1));
+        %middle
+        t2a = find(zconfj>quants(1));
+        t2b = find(zconfj<=quants(2));
+        t2= intersect(t2a, t2b); 
+        %next
+        t3a = find(zconfj>quants(2));
+        t3b = find(zconfj<=quants(3));
+        t3= intersect(t3a, t3b); 
         
-        quants = quantile(zconfj, [.5]);
-        t1 = find(zconfj<quants(1));
-        t2 = find(zconfj>=quants(1));
-        
-        
+        %highest
+        t4 = find(zconfj>quants(3));
+        end
+
         %store for easy access.
         terclists(1).list = t1;
         terclists(2).list = t2;
-        %         terclists(3).list = t3;
-        
+        terclists(3).list = t3;
+        terclists(4).list = t4; 
+        else
+    % MEDIAN SPLIT:
+
+    if quants==max(zconfj)
+        t1 = find(zconfj<quants(1));
+        t2 = find(zconfj>=quants(1));
+
+    else
+        t1 = find(zconfj<=quants(1));
+        t2 = find(zconfj>quants(1));
+    end
+    terclists(1).list = t1;
+    terclists(2).list = t2;
+
+        end
+
+
         %now for each tercile, take the mean EEG
         %%
-        DEC_x_rlEEG = zeros(size(ytest_trials,1), 2);
-        for iterc=1:2
-            
-            %             try
+%        
+        for iterc=1:length(terclists)
+
+            try
             %take mean corr ERP for this tercile:
-            tempERP = squeeze(nanmean(ytest_trials(:,terclists(iterc).list),2));
+            tempERP = squeeze(nanmean(PFX_classifier_onERPsplit(:,terclists(iterc).list),2));
             %% now store:
-            DEC_x_rlEEG (:,iterc) =tempERP;
-            %
-            %                 %now take mean for stimulus locked equivalent.
-            %                 tempERP = squeeze(nanmean(stimEEGd(:,:,terclists(iterc).list),3));
-            %                 conf_x_slEEG(:,:,iterc) =tempERP;
-            % %
-        end
-      
+            DEC_x_rlEEG(:,iterc,ilist) =tempERP;
+
+            % unless we can take AUC:
+
+            if ilist==3
+                for itime= 1:size(PFX_classifier_onERPsplit,1)
+
+                    [Az,Ry,Rx] = rocarea(PFX_classifier_onERPsplit(itime,terclists(iterc).list),truth(terclists(iterc).list));
+                    DEC_x_rlEEG(itime,iterc,ilist) =Az;
+
+                end
+            end
+
+
+            
+            catch
+                DEC_x_rlEEG (:,iterc,ilist) =repmat(nan, [1, size(PFX_classifier_onERPsplit,1)]);
+
+            end
+        end % each tercile/quantile.
+        end 
+        % after corrects and errors, we can also combine in the third dimension for
+        %overall performance split by confidence.
+        % % similar to how we plot the Pe GFX.
+%          tmpComb= squeeze(DEC_x_rlEEG(:,:,2))+ (.5-squeeze(DEC_x_rlEEG(:,:,1)));
+           
+%          subplot(131);
+%          plot(squeeze(DEC_x_rlEEG(:,:,1))); title('corr x conf');
+% 
+%          subplot(132);
+%          plot(squeeze(DEC_x_rlEEG(:,:,2))); title('err x conf');
+%           
+%          subplot(133);
+%         
+%           plot(squeeze(DEC_x_rlEEG(:,:,3))); title('AUC x conf');
+%         
+% %          subplot(133);
+%          plot(tmpComb); title('all x conf');
+% DEC_x_rlEEG(:,:,3)= tmpComb;
         %% store output participants:
-        GFX_DECA_Conf_Bsplit(ippant,:,:) = DEC_x_rlEEG;
+        GFX_DECA_Pe_Conf_Bsplit(ippant,:,:,:) = DEC_x_rlEEG;
         GFX_DecA_ScalpProj(ippant,:) = mean(DEC_Pe_window.scalpproj,1);
-        GFX_ExpOrders(ippant).d= ExpOrder;
-        
+%         GFX_ExpOrders(ippant).d= ExpOrder;
+
         disp([' Fin calc conf split for decA on resp B... ppant ' num2str(ippant)]);
     end
-      
-        cd(eegdatadir)
-        cd('GFX')        
-        save('GFX_DecA_predictsConfidencesplit', 'GFX_DECA_Conf_Bsplit', 'GFX_DecA_ScalpProj', 'GFX_ExpOrders',  'plotXtimes');
-    
+
+    cd(eegdatadir)
+    cd('GFX')
+    save('GFX_DecA_Pe_predicts_Confidencesplit_normERPs', 'GFX_DECA_Pe_Conf_Bsplit', 'GFX_DecA_ScalpProj');
+
 end
 if job1.plotPFX==1
-    if ~exist('GFX_DECA_Conf_corr_slid','var')
+    if ~exist('GFX_DECA_Pe_Conf_Bsplit','var')
         cd(eegdatadir);
         cd('GFX')
-        load('GFX_DecA_slidingwindow_predictsConfidence');
+        load('GFX_DecA_Pe_predicts_Confidencesplit');
     end
-    
-        cd(figdir)
-        cd('Classifier Results')
-        cd('PFX_Trained on Correct part A, conf x part B conf split');
+
+    cd(figdir)
+    cd('Classifier Results')
+    cd('PFX_Trained on resp Errors in part A x part B conf split');
     %%
-        set(gcf, 'units', 'normalized', 'position',[0 0 1 1], 'color', 'w', 'visible', 'off');
-        for ippant = 1:length(pfols);
-            
+    figure(1)
+    set(gcf, 'units', 'normalized', 'position',[0.1 0.1 .7 .7], 'color', 'w', 'visible', 'on');
+    cmap= cbrewer('seq', 'Purples',10);
+       colsare= cmap(5:10,:);
+       nQuants= size(GFX_DECA_Pe_Conf_Bsplit,3);
+    %%
+    for ippant = 1:length(pfols);
+
         clf
-        plotdata = squeeze(GFX_DECA_Conf_Bsplit(ippant,:,:));
+        plotdata = squeeze(GFX_DECA_Pe_Conf_Bsplit(ippant,:,:));
         plotscalp = GFX_DecA_ScalpProj(ippant,:);
-        ExpOrder = GFX_ExpOrders(ippant).d;
-        
+        legh=[];
+       for iterc=1:nQuants
         subplot(1,3,1:2)
-        plot(plotXtimes, plotdata(:,1), 'color', 'r', 'linew', 3); hold on
-        plot(plotXtimes, plotdata(:,2), 'color', 'b', 'linew', 3);
-        %%
-        title({['P' num2str(ippant) ', Classifier trained on ERP A (C vs E) x ERP B (cor only)'];[ExpOrder{1} '- ' ExpOrder{2} ]});
+       legh(iterc)= plot(plotERPtimes, plotdata(:,iterc), 'color', colsare(iterc,:), 'linew', 3); hold on
+       end
+%         %%
+        title({['P' num2str(ippant) ', Classifier trained on visual Pe  x ERP B (corr only)']});
         xlabel(['Time [ms] after response in part B']);
         ylabel('Accuracy ')
-        ylim([.2 .8])
+%         ylim([.2 .8])
+ylim([-.5 .5])
+% axis tight
         hold on; plot(xlim, [0.5 0.5 ], ['k:'], 'linew', 2)
         hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
         set(gca, 'fontsize', 15)
-        legend('low conf', 'high conf')
+        if nQuants==4
+        legend(legh, {'lowest', 'low',' higher', 'highest conf'})
+        else
+        legend(legh, {'low conf', 'high conf'})
+        end
+
         %%
         subplot(1,3,3)
         topoplot(plotscalp, elocs);
         title(['Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']'])
         set(gca, 'fontsize', 15)
-        
+
         %%
+shg;
         set(gcf, 'color', 'w')
-        printname = ['Participant ' num2str(ippant) ' Dec A, part B conf ' ExpOrder{1} '- ' ExpOrder{2} '(new)'];
+        printname = ['Participant ' num2str(ippant) ' classifier A resp (Pe) x ERP B (corrects by confidence) normERPs'];
         print('-dpng', printname)
-        end % ppant    
+    end % ppant
 end % job
 
 if job1.plotGFX==1
     %% plot results across participants:
     for iorder =1%:3
+        
         figure(1); clf
+        set(gcf, 'units', 'normalized', 'position',[0.1 0.1 .7 .7], 'color', 'w', 'visible', 'on');
         lgh=[];
-        switch iorder
-            case 1
-                useppants = vis_first;
-                ordert='visual-audio';
-            case 2
-                useppants = aud_first;
-                ordert= 'audio-visual';
-            case 3
-                useppants = 1:size(GFX_DECA_Conf_Bsplit,1);
-                ordert= 'all combined';
-        end
+
+
+        nQuants= size(GFX_DECA_Pe_Conf_Bsplit,3);
+        dtypes={'correct', 'error', 'all'};
+
+        colsAre= {'r', 'b'};
+
+      for idata= 1:size(GFX_DECA_Pe_Conf_Bsplit,4)
+          
+          dataIN = GFX_DECA_Pe_Conf_Bsplit(:,:,:, idata); % Corrects, errors, combiend.
         
-        dataIN = squeeze(GFX_DECA_Conf_Bsplit(useppants,:,:));
-        
-        colsare = {'r', 'b'};
-        for iterc=1:2
-            
-            
-            Ste = CousineauSEM(dataIN(:,:,iterc));
-            
-            subplot(1,3,1:2)
-            set(gcf, 'color', 'w')
-            sh= shadedErrorBar(plotXtimes, mean(dataIN(:,:,iterc),1), Ste, colsare{iterc},1);
-            sh.mainLine.LineWidth= 3;
-            lgh(iterc) = sh.mainLine;
-            shg
-            hold on
-        end
-        legend([lgh(1) lgh(2)], {'low confidence', 'high confidence'});
-        %
+          if smoothON==1
+              winsizet = dsearchn(plotERPtimes', [0 40]'); % 100ms smooth window.
+              winsize = diff(winsizet);
+              dataout= zeros(size(dataIN));
+              for isubj=1:size(dataIN,1)
+                  for iterc= 1:size(dataIN,3)
+                      dataout(isubj,:,iterc) = smooth(squeeze(dataIN(isubj,:, iterc)), winsize);
+                  end
+              end
+              dataIN=dataout;
+              disp(['HAVE SMOOTHED at participant level!']);
+          end
+
+
+          for iterc=1:nQuants
+
+              Ste = CousineauSEM(dataIN(:,:,iterc));
+
+              subplot(1,3,idata)
+              set(gcf, 'color', 'w')
+              sh= shadedErrorBar(plotERPtimes, nanmean(dataIN(:,:,iterc),1), Ste, {'color', colsAre{iterc}},1);
+              sh.mainLine.LineWidth= 1;
+              lgh(iterc) = sh.mainLine;
+              shg
+              hold on
+          end
+
+          if nQuants==2
+        legend([lgh], {'low confidence', 'high confidence'},'autoupdate', 'off');
+          else
+legend([lgh], {'lowest confidence', 'lower confidence',...
+            'higher confidence', 'highest confidence'}, 'autoupdate', 'off');
+          end
         xlabel(['Time [ms] after response in part B']);
-        ylabel('Decoder accuracy')
-        ylim([.375 .6])
+        ylabel('p(Error)')
+        ylim([.4 .6])
+% ylim([-.5 .5])
         hold on; plot(xlim, [.5 .5 ], ['k:'], 'linew', 2)
         hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
-        set(gca, 'fontsize', 25)
-        title({['Classifier trained on ERP A (C vs E) x ERP B'];[ordert ', n=' num2str(length(useppants))]}, 'fontsize', 20)
+        set(gca, 'fontsize', 12)
+        title({['Trained vis (Pe): test aud ' dtypes{idata}]}, 'fontsize', 12)
         %
         % add sig tests:
         %ttests
-        pvals= nan(1, length(plotXtimes));
-        
-        for itime = 1:length(plotXtimes)
+        pvals= nan(1, length(plotERPtimes));
+
+        for itime = 1:length(plotERPtimes)
             [~, pvals(itime)] = ttest(dataIN(:,itime,1),dataIN(:,itime,2));
-            
-            if pvals(itime)<.05 && plotXtimes(itime)>0
-                text(plotXtimes(itime), [.39], '*', 'color', 'k','fontsize', 25);
+
+            if pvals(itime)<.05 && plotERPtimes(itime)>0
+                text(plotXtimes(itime), [.41], '*', 'color', 'k','fontsize', 25, 'HorizontalAlignment', 'center');
             end
         end
-        xlim([-200 600])
+      end
+%         xlim([-200 600])
         %%
         % add topoplot of discrim used to aid interpretation.
-        
-        subplot(1,3,3)
+figure(2);
+%         subplot(1,3,3)
         topoplot(mean(GFX_DecA_ScalpProj(useppants,:)), elocs);
         title(['Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']']);
-        set(gca, 'fontsize', 25)
-        
+        set(gca, 'fontsize', 12)
+
         set(gcf,'color', 'w')
         %%
-        cd(figdir)
-        cd('Classifier Results')
-        cd('PFX_Trained on Correct part A, conf x part B conf split');
-        printname = ['GFX Dec A predicts confidence split, for ' ordert '(new)'];
-        print('-dpng', printname)
+      cd(figdir)
+    cd('Classifier Results')
+    cd('PFX_Trained on resp Errors in part A x part B conf split');
+        printname = ['GFX classifier A resp (Pe) x ERP B (corrects by confidence)'];
+        print('-dpng', printname);
     end
 end
 %%

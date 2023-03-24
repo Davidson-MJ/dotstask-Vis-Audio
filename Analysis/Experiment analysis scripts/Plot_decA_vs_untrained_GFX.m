@@ -5,7 +5,7 @@
 
 
 
-jobs.concat_GFX=0;
+jobs.concat_GFX=1;
 jobs.plot_GFX=1;
 %%
 %plotType
@@ -33,16 +33,11 @@ if jobs.concat_GFX==1;
         load('Epoch information', 'ExpOrder');
         
         if useVorScalpProjection== 1; % use the raw discrim vector.
-        %ERN
-        GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained,2));
-        GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
-        %Pe
+       %Pe
         GFX_classifierA_onERP_Pe(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_PEtrained,2));
         GFX_classifierA_topo_Pe(ippant,:) = squeeze(mean(DEC_Pe_window.scalpproj,1));
         else % use the scalp projection of the discrim vector:
-            GFX_classifierA_onERP_ERN(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_ERNtrained_fromscalp,2));
-        GFX_classifierA_topo_ERN(ippant,:) = squeeze(mean(DEC_ERN_window.scalpproj,1));
-        %Pe
+%       %Pe
         GFX_classifierA_onERP_Pe(ippant,:,:) = squeeze(mean(PFX_classifierA_onERP_PEtrained_fromscalp,2));
         GFX_classifierA_topo_Pe(ippant,:) = squeeze(mean(DEC_Pe_window.scalpproj,1));
         end
@@ -54,9 +49,9 @@ if jobs.concat_GFX==1;
         else
             aud_first= [aud_first, ippant];
         end
-        disp(['Fin for ppant ' num2str(ippant)]);
+        disp(['Fin concat (dec trained on Pe in A) for ppant ' num2str(ippant)]);
     end
-    
+    %%
     % save!
     cd(eegdatadir);
     cd('GFX')
@@ -67,10 +62,10 @@ if jobs.concat_GFX==1;
 %     save('GFX_DecA_predicts_untrainedtrials', ...
 %         'GFX_classifierA_onERP_Pe_fromscalp', '-append');
         
-    save('GFX_DecA_predicts_untrainedtrials', ...
-        'GFX_classifierA_onERP_ERN','GFX_classifierA_onERP_Pe',...
-        'GFX_classifierA_topo_ERN', 'GFX_classifierA_topo_Pe', ...
-        'vis_first', 'aud_first', 'Xtimes', '-append');
+    save('GFX_DecA_Pe_predicts_untrainedtrials', ...
+        'GFX_classifierA_onERP_Pe',...
+        'GFX_classifierA_topo_Pe', ...
+        'vis_first', 'aud_first', 'Xtimes');
 %     
     
 end % concat job
@@ -133,34 +128,45 @@ for iorder = 1%:3
             orderis = 'all';
     end
     figure(1); clf;
-    set(gcf, 'units', 'normalized', 'Position', [0 0 1 1]); shg
+    set(gcf, 'units', 'normalized', 'Position', [0.1 0.1 .7 .7]); shg
     leg=[];
     
-    for itestdata = 1:4
+    for itestdata = 1:6
         
         switch itestdata
             case 1 % corr A
-            subplot(1, 2, 1);
+            subplot(2, 2, 1);
             
             usecol = grCol;
             case 2 % corr B
-                subplot(1, 2, 2);
+                subplot(2, 2, 3);
             usecol = grCol;
             case 3
                 %errA
-                subplot(1, 2, 1);
+                subplot(2, 2, 1);
                 usecol= redCol;
-                title('Part A: visual')
+                title('train visual (Pe): test visual resp ')
             case 4 % err B
-                subplot(1, 2, 2);
-                title('Part B: auditory')
+                subplot(2, 2, 3);
+                title('train visual (Pe): test auditory resp')
                 usecol= redCol;
                 
         end
-        plotdata = squeeze(GFX_classifierA_onERP(useppants,itestdata,:));
-        
+
+
+            plotdata = squeeze(GFX_classifierA_onERP(useppants,itestdata,:));
+      if itestdata==5 % pCorrect
+            subplot(2,2,2);
+%             %E + inverse Corr.
+%             plotdata = squeeze(GFX_classifierA_onERP(useppants,3,:))+ (.5-squeeze(GFX_classifierA_onERP(useppants,1,:)));
+            usecol='k';
+        elseif itestdata==6
+            subplot(2,2,4);
+%             plotdata = squeeze(GFX_classifierA_onERP(useppants,4,:))+ (.5-squeeze(GFX_classifierA_onERP(useppants,2,:)));
+%             usecol='k';
+        end
         % for plots, zero on y axis:
-        plotdata = plotdata-0.5; 
+%         plotdata = plotdata-0.5; 
         
         if smoothON==1
             winsize = 256/20;
@@ -187,10 +193,10 @@ for iorder = 1%:3
         %ttests
         pvals= nan(1, length(Xtimes));
         for itime = 1:length(Xtimes)
-            [~, pvals(itime)] = ttest(plotdata(:,itime), 0);
+            [~, pvals(itime)] = ttest(plotdata(:,itime), .5);
             
             if pvals(itime)<.05
-                text(Xtimes(itime), [-.15+(0.01*itestdata)], '*', 'color', usecol,'fontsize', 25);
+                text(Xtimes(itime), [.40+(0.01*itestdata)], '*', 'color', usecol,'fontsize', 25);
             end
         end
         %    pvals(pvals>=.05) = nan;
@@ -199,25 +205,29 @@ for iorder = 1%:3
         % text(Xtimes(pvals<.05), [0.2], '*',  'color', cmap(itestdata,:), 'FontSize', 5)
     
     
-    ylim([-.15 .15])
+    ylim([.40 .8])
     % add extra plot elements:
-    hold on; plot(xlim, [0 0], '--', 'color', [.3 .3 .3], 'linew', 3)
+    hold on; plot(xlim, [.5 .5], '--', 'color', [.3 .3 .3], 'linew', 3)
     hold on; plot([0 0 ], ylim, '--', 'color', [.3 .3 .3], 'linew', 3)
     
     if itestdata==1;
-    %add patch
-    ylims = get(gca, 'ylim');
-    pch = patch([windowvec(1) windowvec(1) windowvec(2) windowvec(2)], [ylims(1) ylims(2) ylims(2) ylims(1)], [.8 .8 .8]);
-    pch.FaceAlpha= .1;
+        %add patch
+        ylims = get(gca, 'ylim');
+        pch = patch([windowvec(1) windowvec(1) windowvec(2) windowvec(2)], [ylims(1) ylims(2) ylims(2) ylims(1)], [.8 .8 .8]);
+        pch.FaceAlpha= .1;
     end
     xlabel('Time since response (ms)')
-    ylabel('A.U');
-     set(gca, 'fontsize', 15)
-     set(gca,'ydir', 'reverse')
+    if itestdata<5
+        ylabel('p(Error)');
+    else
+        ylabel('A.U.C.');
+    end
+    set(gca, 'fontsize', 15)
+     set(gca,'ydir', 'normal')
      
      if itestdata>2
         % place legend. 
-        legend([leg(itestdata-2) leg(itestdata)] , {'correct', 'error'});
+        legend([leg(1) leg(3)] , {'corrects', 'errors'});
         
      end
     end % itest data
@@ -234,11 +244,11 @@ for iorder = 1%:3
     set(gca, 'fontsize', 15)
     %% print results
     cd(figdir)
-    cd(['Classifier Results' filesep 'PFX_Trained on Correct part A']);
+    cd(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window']);
     
     %%
     set(gcf, 'color', 'w')
-    printname = ['GFX classifier trained on Correct part A-' winwas ',' orderis ', w-' num2str(nIter) 'reps (fromscalp)' ];
+    printname = ['GFX classifier trained on Correct part A-' winwas ', w-' num2str(nIter) 'reps (fromscalp)' ];
     
     if smoothON==1
         printname = [printname ', smoothed'];

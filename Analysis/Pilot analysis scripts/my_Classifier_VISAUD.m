@@ -60,93 +60,7 @@ if C~= E
     disp(['Warning: Will repeat this process over n = ' num2str(dec_params.nIter) 'iterations']);
 end
 
-% Match the size of the data subsets (default is that this is done)
-% -------------------------------------------------------------------------
-
-for nIteration = 1:dec_params.nIter
-    
-    disp(['Performing iteration: ' num2str(nIteration) ' of ' num2str(dec_params.nIter)]);
-    
-    if dec_params.matchCE
-        % Select a random subset of the trials to match no. of trials per
-        % condition
-        
-        newtrials=find(randperm(max([C;E]))<=min([C;E]));
-        
-        corrects_test=corrects(:,:,newtrials);
-        %match sizes.
-        Ctmp=Etmp;
-        errors_test = errors;
-        
-        
-        DECODERout.Correctindices_usedintraining(nIteration,:)= newtrials;
-        
-        if E>C
-            error('more errors than correct trials!')
-            %         errors_test=errors(:,:,newtrials);
-            %         E=C;
-            %         corrects_test = corrects;
-        end
-        
-    end
-    
-    %make sure to save the trial indices used in training.
-    Training_index = [newtrials, find(error_index)];
-    
-    DECout.Trainingtrials_index = Training_index;
-    
-    
-    %%
-    if ~isfield(dec_params, 'chans'); chansubset=1:chans;    else
-        chansubset=dec_params.chans; chans=size(chansubset,2) ;  end
-    
-    if dec_params.dispprogress==1
-        %% Now plot raw ERP, and later the normalized version, for comparison.
-        %Raw first: plot corrects:
-        temp = squeeze(corrects_test(dec_params.showchannel, :,:));
-        
-        figure(1); clf;
-        subplot(2,4,1)
-        plot(Xtimes, mean(temp,2), 'color', [0 .5 0]);
-        % plot errors:
-        clear temp; hold on
-        temp = squeeze(errors_test(dec_params.showchannel, :,:));
-        
-        xlim([ - 100 700]);
-        plot(Xtimes, mean(temp,2), 'color', 'r');
-        %add patch for classifier window
-        %specify vertices clockwise from bottom left.
-%         axis tight
-        xverts= [times(frames_out(1)+init),times(frames_out(1)+init), times(frames_out(1)+init+pts-1), times(frames_out(1)+init+pts-1)];
-        yx = get(gca, 'ylim');
-        yverts= [yx(1), yx(2), yx(2), yx(1)];
-        
-        pch=patch(xverts,yverts, 'k');
-        pch.FaceAlpha=.1;
-        ylabel('uV');
-        xlabel('Time from response [ms]');
-        set(gca, 'YDir', 'reverse'); legend('corrects', 'errors');
-        
-        title({['Raw ERP at ' elocs(dec_params.showchannel).labels ','];['ntrials (matched) = ' num2str(Ctmp)]});
-        
-        %% now plot the topography, of the difference, in our window of interest.
-        tempC =  squeeze(nanmean(corrects_test(:, :,:),3));
-        tempE =  squeeze(nanmean(errors_test(:, :,:),3));
-        
-        % take difference per channel:
-        tempDiff = tempE-tempC;
-        
-        %plot
-        subplot(2,4,4);
-        topoplot(mean(tempDiff(:,[tmpt(1):tmpt(2)]),2), elocs, 'emarker2',{dec_params.showchannel} );
-        hold on;
-        
-        title('Raw Data, difference error-corr'); %colorbar
-        
-        
-        %%
-    end
-    %now normalize EEG data for comparison:
+%now normalize EEG data for comparison:
     fprintf('Warning: Now normalizing data: Corrects and Errors normd together.\n');
     
     
@@ -201,6 +115,48 @@ for nIteration = 1:dec_params.nIter
     end
     
     
+
+% Match the size of the data subsets (default is that this is done)
+% -------------------------------------------------------------------------
+
+for nIteration = 1:dec_params.nIter
+    
+    disp(['Performing iteration: ' num2str(nIteration) ' of ' num2str(dec_params.nIter)]);
+    
+    if dec_params.matchCE
+        % Select a random subset of the trials to match no. of trials per
+        % condition
+        
+        newtrials=find(randperm(max([C;E]))<=min([C;E]));
+        
+        corrects_test=corrects(:,:,newtrials);
+        %match sizes.
+        Ctmp=Etmp;
+        errors_test = errors;
+        
+        
+        DECODERout.Correctindices_usedintraining(nIteration,:)= newtrials;
+        
+        if E>C
+            error('more errors than correct trials!')
+            %         errors_test=errors(:,:,newtrials);
+            %         E=C;
+            %         corrects_test = corrects;
+        end
+        
+    end
+    
+    %make sure to save the trial indices used in training.
+    Training_index = [newtrials, find(error_index)];
+    
+    DECout.Trainingtrials_index = Training_index;
+    
+    
+    %%
+    if ~isfield(dec_params, 'chans'); chansubset=1:chans;    else
+        chansubset=dec_params.chans; chans=size(chansubset,2) ;  end
+    
+    
     
     if C>E
         corrects_normtest=corrects_norm(:,:,newtrials);
@@ -208,32 +164,6 @@ for nIteration = 1:dec_params.nIter
     end
     
     
-    
-    %% now plot the normalized data for comparison.
-    if dec_params.dispprogress==1
-        temp = squeeze(corrects_normtest(dec_params.showchannel, :,:));
-        subplot(2,4,2)
-        plot(Xtimes, mean(temp,2), 'color', [0 .5 0]);
-        % plot errors:
-        clear temp; hold on
-        temp = squeeze(errors_normtest(dec_params.showchannel, :,:));
-        plot(Xtimes, mean(temp,2), 'color', 'r');
-        %% add patch for classifier window
-        %specify vertices clockwise from bottom left.
-        xverts= [times(frames_out(1)+init),times(frames_out(1)+init), times(frames_out(1)+init+pts-1), times(frames_out(1)+init+pts-1)];
-%         axis tight
-        xlim([-100 700]);
-yx = get(gca, 'ylim');
-        yverts= [yx(1), yx(2), yx(2), yx(1)];
-        
-        pch=patch(xverts,yverts, 'k');
-        pch.FaceAlpha=.1;
-        ylabel('uV');
-        xlabel('Time from response [ms]');
-        set(gca, 'YDir', 'reverse'); legend('corrects', 'errors');
-        
-        title({['Baseline corrected, Normalized ERP ']});
-    end
     %%
     %>>>>> RUN logistic regression
     %>>>>>>>>>>>>>>>>>>
@@ -295,11 +225,15 @@ yx = get(gca, 'ylim');
     truth2(1:Ctmp)=zeros;
     truth2(Ctmp+1:Ctmp+Etmp)=ones;
     
+    % apply to the data from all trials:
     for i=1:Ctmp+Etmp
         
+        %index of trialdata for testing:
         start=(i-1)*trainingwindowlength+1;
-        bpsort(start:start+trainingwindowlength-1)=sort(bp(start:start+trainingwindowlength-1));
-        trial_bp(i)=mean(bpsort(start:start+trainingwindowlength-1));
+        endidx= start+trainingwindowlength-1;
+        %?
+        bpsort(start:endidx)=sort(bp(start:endidx));
+        trial_bp(i)=mean(bpsort(start:endidx)); % trial wise bernoulli, testing only the specified window.
         
     end
     
@@ -308,19 +242,128 @@ yx = get(gca, 'ylim');
     fprintf('Window Onset: %f \nAz for training set (ROC by trial average): %6.2f\n',times(tmpt(1)), Az);
     
     
+    %%
+    % now apply to all data (incl. untrained trials).
+    %from Boldt: size(testdata) = [samps * alltrials, nchans]
+    % testdata = reshape(data_norm(chansubset,:,testing==1),size(chansubset,2),size(data_norm,2)*size(data_norm(chansubset,:,testing==1),3))';
+    testdata=cat(3,corrects_norm, errors_norm);
+    
+    [nchans, nsamps, ntrials] =size(testdata);
+    testdata = reshape(testdata, nchans, nsamps* ntrials)';%
+    %%
+    
+    ytest = testdata * v(1:end-1) + v(end);
+    
+    %this output will leave the folder
+    bptest = bernoull(1,ytest);
+    bptest = reshape(bptest, nsamps, ntrials);
+    
+    %% reshape for plotting.
+    ytest_trials = reshape(ytest,nsamps,ntrials);
+     %separate into correct and error:
+        corr_y = ytest_trials(:, [1:size(corrects_norm,3)]);
+        err_y = ytest_trials(:, [size(corrects_norm,3)+1:end]);
+        corr_ybp = bptest(:, [1:size(corrects_norm,3)]);
+        err_ybp = bptest(:, [size(corrects_norm,3)+1:end]);
+       
+    %this output will leave the function (all trials).
+    % (contains both correct and error trials).
+    
+    testedvector = [DECODERout.Correctindices_usedintraining(nIteration,:), find(dec_params.error_index)];
+    
+    %>>>>>>>>>>>>>>>>>>
+    DECODERout.all_trials_bp(nIteration,:,:)= bptest;
+    DECODERout.all_trials_y(nIteration,:,:)= ytest_trials;
+    DECODERout.trainingtrials_vector(nIteration,:) = testedvector;
+    %>>>>>>>>>>>>>>>>>>
+    
+    disp(['Completed iteration: ' num2str(nIteration) ' of ' num2str(dec_params.nIter)])
+
+    if dec_params.dispprogress==1
+        %% Now plot raw ERP, and later the normalized version, for comparison.
+        %Raw first: plot corrects:
+        temp = squeeze(mean(corrects_test(dec_params.showchannel, :,:),1));
+        
+        figure(1); clf;
+        subplot(2,4,1)
+        plot(Xtimes, mean(temp,2), 'color', [0 .5 0]);
+        % plot errors:
+        clear temp; hold on
+        temp = squeeze(mean(errors_test(dec_params.showchannel, :,:),1));
+        
+        xlim([ - 100 700]);
+        plot(Xtimes, mean(temp,2), 'color', 'r');
+        %add patch for classifier window
+        %specify vertices clockwise from bottom left.
+%         axis tight
+        xverts= [times(frames_out(1)+init),times(frames_out(1)+init), times(frames_out(1)+init+pts-1), times(frames_out(1)+init+pts-1)];
+        yx = get(gca, 'ylim');
+        yverts= [yx(1), yx(2), yx(2), yx(1)];
+        
+        pch=patch(xverts,yverts, 'k');
+        pch.FaceAlpha=.1;
+        ylabel('uV');
+        xlabel('Time from response [ms]');
+        set(gca, 'YDir', 'reverse'); legend('corrects', 'errors');
+        
+        title({['Raw ERP at ' elocs(dec_params.showchannel).labels ','];['ntrials (matched) = ' num2str(Ctmp)]});
+        
+        %% now plot the topography, of the difference, in our window of interest.
+        tempC =  squeeze(nanmean(corrects_test(:, :,:),3));
+        tempE =  squeeze(nanmean(errors_test(:, :,:),3));
+        
+        % take difference per channel:
+        tempDiff = tempE-tempC;
+        
+        %plot
+        subplot(2,4,4);
+        topoplot(mean(tempDiff(:,[tmpt(1):tmpt(2)]),2), elocs, 'emarker2',{dec_params.showchannel} );
+        hold on;
+        
+        title('Raw Data, difference error-corr'); %colorbar
+        
+        
+        %%
+    end
+    
+    %% now plot the normalized data for comparison.
+    if dec_params.dispprogress==1
+        temp = squeeze(mean(corrects_normtest(dec_params.showchannel, :,:),1));
+        subplot(2,4,2)
+        plot(Xtimes, mean(temp,2), 'color', [0 .5 0]);
+        % plot errors:
+        clear temp; hold on
+        temp = squeeze(mean(errors_normtest(dec_params.showchannel, :,:),1));
+        plot(Xtimes, mean(temp,2), 'color', 'r');
+        %% add patch for classifier window
+        %specify vertices clockwise from bottom left.
+        xverts= [times(frames_out(1)+init),times(frames_out(1)+init), times(frames_out(1)+init+pts-1), times(frames_out(1)+init+pts-1)];
+%         axis tight
+        xlim([-100 700]);
+yx = get(gca, 'ylim');
+        yverts= [yx(1), yx(2), yx(2), yx(1)];
+        
+        pch=patch(xverts,yverts, 'k');
+        pch.FaceAlpha=.1;
+        ylabel('uV');
+        xlabel('Time from response [ms]');
+        set(gca, 'YDir', 'reverse'); legend('corrects', 'errors');
+        
+        title({['Normalized ERP ']});
+    end
     if dec_params.dispprogress==1
          %plot ROC by this testing window.
     subplot(2,4,5); rocarea(bp,truth);
-    title('ROC by sample');
+    title('ROC by sample window');
     %ROC stats of sample window.
     [Az,Ry,Rx] = rocarea(bp,truth);
     
 %     fprintf('Window Onset: %d; Length: %d;  Az: %6.2f\n',trainingwindowoffset(i),pts,Az);
         subplot(2,4,6);
         rocarea(trial_bp,truth2);
-        title('ROC by trial average (training C+E)');
+        title('ROC by sample average within trial (training C+E)');
         
-        %% now apply to all (tested) trials.
+        %% now apply to all (tested) trials (all time points).
         testdata=cat(3,corrects_normtest, errors_normtest);
         
         [nchans, nsamps, ntrials] =size(testdata);
@@ -349,38 +392,25 @@ yx = get(gca, 'ylim');
         subplot(248);
         topoplot(sp, elocs);
         title('scalp projection');
-    end
-    %%
-    % now apply to all data (incl. untrained trials).
-    %from Boldt: size(testdata) = [samps * alltrials, nchans]
-    % testdata = reshape(data_norm(chansubset,:,testing==1),size(chansubset,2),size(data_norm,2)*size(data_norm(chansubset,:,testing==1),3))';
-    testdata=cat(3,corrects_norm, errors_norm);
-    
-    [nchans, nsamps, ntrials] =size(testdata);
-    testdata = reshape(testdata, nchans, nsamps* ntrials)';%
-    %%
-    
-    ytest = testdata * v(1:end-1) + v(end);
-    
-    %this output will leave the folder
-    bptest = bernoull(1,ytest);
-    bptest = reshape(bptest, nsamps, ntrials);
-    
-    %% reshape for plotting.
-    ytest_trials = reshape(ytest,nsamps,ntrials);
-    
-    %this output will leave the function (all trials).
-    % (contains both correct and error trials).
-    
-    testedvector = [DECODERout.Correctindices_usedintraining(nIteration,:), find(dec_params.error_index)];
-    
-    %>>>>>>>>>>>>>>>>>>
-    DECODERout.all_trials_bp(nIteration,:,:)= bptest;
-    DECODERout.all_trials_y(nIteration,:,:)= ytest_trials;
-    DECODERout.trainingtrials_vector(nIteration,:) = testedvector;
-    %>>>>>>>>>>>>>>>>>>
-    
-    disp(['Completed iteration: ' num2str(nIteration) ' of ' num2str(dec_params.nIter)])
+    end 
+ if dec_params.dispprogress==1
+        subplot(2,4,7); cla
+%         plot(times,mean(corr_y,2),'g'); hold on; clear temp;
+        hold on
+        xlim([ - 100 700]);
+        set(gca,'YDir', 'normal')
+%         plot(times,mean(err_y,2),'r'); hold on;
+         hold on;
+%          yyaxis right
+         hold on;
+        plot(times,mean(corr_ybp,2),'b'); hold on; clear temp;
+        plot(times,mean(err_ybp,2),'color','b', 'linestyle',':'); hold on; clear temp;
+        legend('correct',' error');
+        ylim([.4 .8])
+        title('bernouilli prob - all trials');
+ end
+
+
 end % niterations
 
 % 

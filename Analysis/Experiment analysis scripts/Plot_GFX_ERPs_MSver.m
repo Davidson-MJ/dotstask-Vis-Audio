@@ -4,19 +4,25 @@
 cd(eegdatadir)
 cd('GFX')
 load('GFX_averageERPs TRIG based.mat')
-smoothON=0;
-hidetopos=1;
+smoothON=1;
+hidetopos=0;
+fntsize= 10;
 %%
 figure(1);  clf;
-set(gcf, 'units', 'normalized', 'position', [0.05 0.05 .8 .8]);
+set(gcf, 'units', 'normalized', 'position', [0.05 0.05 .8 .8], 'color', 'w');
+figure(4);  clf; % for topos:
+set(gcf, 'units', 'normalized', 'position', [0.05 0.05 .8 .8], 'color', 'w');
+
 
 exppart = {'1st half', '2nd half'};
 
 % meanoverChans = [11,12,19,47,46,48,49,32,56,20,31,57]; % resp
-meanoverChans = [4,38,39,11,12,19,47,46,48,49,32,56,20,31,57];
+meanoverChans_RESP = [4,38,39,11,12,19,47,46,48,49,32,56,20,31,57];
 meanoverChans_VIS = [20:31, 57:64];
 meanoverChans_AUD = [4:15,39:52];
     
+meanoverChans_POCC = [20:31, 57:64];
+
 %same colours as beh data?
 %separate into Aud and Visual.
 cmap = cbrewer('qual', 'Paired',10);
@@ -28,43 +34,95 @@ redCol =cmap(6,:); %reddish
 elocs = readlocs('BioSemi64.loc'); %%
 %
 clf
-subspots = [1,3];
-for ixmod = 1:2
+
+%%%% first plot the stimulus locked data, then the response locked:
+
+for idata = 1:2
+    if idata==1 % stimulus locked. 
+        subspots = [1,5];
+        tspots = [1, 9];
+        corrA = GFX_visstimCOR;
+        errA = GFX_visstimERR;
+        corrB = GFX_audstimCOR;
+        errB = GFX_audstimERR;
+        
+         xlabis= 'stimulus';
+    else
+        subspots = [3, 7]; % subplot spots (for ERPs)
+        tspots = [5, 13]; % spots for topos
+  corrA = GFX_visrespCOR;
+        errA = GFX_visrespERR;
+        corrB = GFX_audrespCOR;
+        errB = GFX_audrespERR;
+
+         xlabis= 'response';
+
+
+
+    end
+    %%
+for ixmod = 1:2 % vis - aud
     
     switch ixmod
         case 1
 %             datac= GFX_visstimERP(vis_first, :,:);
-            datac= GFX_visstimCOR(vis_first, :,:);
-            datae= GFX_visstimERR(vis_first, :,:);
-            
-            showt1 = [345,445]; %ms;
-            showt2=[700,800]; % ms 
-            titleis=  'Part A (visual)';
+            datac= corrA;
+            datae= errA;
+            titleis=  ['Visual ' xlabis ];
          meanoverChans_tmp= meanoverChans_VIS;
          stimbar = [0 300];
-         use_xvec = ([1:size(datac,3)] ./ 256 - 0.7 ) * 1000;
-         
+
+        % topo times to patch: (stim locked)
+         showt1 = [100,200]; %ms;
+        showt2=[250,400]; % ms
+         % when looking at difference ERP:
+
+        difft1 = [100,200];
+        difft2 = [300, 500]; % ?
+        
         case 2
             
-%                datac = GFX_audstimERP(vis_first,:,:);
-            datac= GFX_audstimCOR(vis_first, :,:);
-            datae= GFX_audstimERR(vis_first, :,:);
-            
-              showt1 = [280,380]; %ms;
-            showt2=[600,700];
-            titleis=  'Part B (auditory)';
+            datac= corrB;
+            datae= errB;
+
+                    % topo times to patch: (stim locked)
+
+        % topo times to patch: (stim locked)
+         showt1 = [100,200]; %ms;
+        showt2=[250,400]; % ms
+        % when looking at difference ERP:
+
+        difft1 = [100,200];
+        difft2 = [300, 500]; % ?
+
+        titleis=  ['Auditory ' xlabis];
             meanoverChans_tmp= meanoverChans_AUD;
-            stimbar = [180 280]; %!Check! 
+            stimbar = [0 100]; %!Check! 
 %             use_xvec = plotXtimes;
-            use_xvec = ([1:size(datac,3)] ./ 256 - 0.7 ) * 1000; % (was - .5)
     end
+
+
+    % note that if response locked data, use ERN ,Pe windows:
+    if idata==2
+        showt1 = [-50,150]; %ms;
+        showt2=[250,450];
+        difft1 = [-50,150]; %ms;
+        difft2=[250,450];
+        meanoverChans_tmp = meanoverChans_POCC;
+
+%         meanoverChans_tmp = meanoverChans_RESP;
+    end
+
+
+    use_xvec = plotXtimes(1:size(datac,3));
     
     
     %apply smoothing to dataset:
     %50 ms window.
     if smoothON==1
-        printname = ['GFX stimulus locked ERP topography smoothed'];
-        winsize =  ceil(256/20); % 50 ms
+        printname = ['GFX univariate ERP summary smoothed'];
+         winsizet = dsearchn(use_xvec', [0 100]'); % 100ms smooth window.
+            winsize = diff(winsizet);
         [tmpoutc, tmpoute] = deal(zeros(size(datac)));
         for ippant=1:size(datac,1)
             for ichan= 1:size(datac,2)
@@ -76,14 +134,104 @@ for ixmod = 1:2
         datac=tmpoutc;
         datae=tmpoute;
     else
-        printname=['GFX stimulus locked ERP topography no detrend (long)'];
+        printname=['GFX univariate ERP summary'];
     end
     
     
     %
     %%
-     %times for topography
-     if ~hidetopos
+    
+    %%
+%     
+%   
+%   PREPARE ERP PLOTS  (Correct and Error)
+plotD= {datac, datae, datae-datac};
+colsAre= {grCol, redCol, 'k'};
+legh=[];
+lgc=1; % counter for legend entries (resets at 3)
+for iplotd= 1:3
+    if iplotd<3
+        figure(1);
+        subplot(2,4,subspots(ixmod));
+        ylim([-3 5])
+        xlim([- 200 1000]);
+        title([titleis])
+
+    else % difference waveform: update info for next plot:
+        legh=[];
+        subplot(2,4,subspots(ixmod)+1);
+        ylim([-3 5])
+        xlim([- 500 1000])
+        title('difference waveform')
+        lgc=1;
+
+        showt1 = difft1;
+        showt2= difft2;
+    end
+
+%place patches first (as background)
+%place patches (as background) first:
+ytx= get(gca, 'ylim');
+hold on
+%plot topo patches.
+ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
+ph.FaceAlpha=.4;
+ph.LineStyle= 'none';
+ph=patch([showt2(1) showt2(1) showt2(2) showt2(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
+ph.FaceAlpha=.4;
+ph.LineStyle= 'none';
+
+
+hold on
+% mean over relevant channels:
+tmp_plotData = squeeze(mean(plotD{iplotd}(:, meanoverChans_tmp,:),2));
+plotMean = squeeze(mean(tmp_plotData,1));
+stE1 = CousineauSEM(tmp_plotData );
+%Corrects, errors, difference:
+
+sh=shadedErrorBar(use_xvec, plotMean, stE1,{'color',colsAre{iplotd}, 'linew', 1},1);
+p1= sh.mainLine;
+    legh(lgc) = sh.mainLine;
+plot([0 0], ylim, ['k-'])
+plot(xlim, [0 0], ['k-'])
+
+set(gca, 'ydir', 'normal', 'fontsize', fntsize)
+
+xlabel(['Time from ' xlabis ' onset [ms]'])
+ylabel(['\muV']);
+    hold on;
+% add topo inset to show locations.
+gax = get(gca);
+xS= gax.Position(1);
+yS= gax.Position(2);
+wdth = gax.Position(3);
+hght = gax.Position(4);
+% place new pos within bounds of subplot.
+newpos = [gax.Position(1)+wdth/3 ,gax.Position(2)+hght/3, wdth/3 hght/3];
+% ax= subplot('Position', newpos)
+
+
+if iplotd==2 && ixmod==1
+    legend([legh(1) legh(2)], {'Correct', 'Error'}, 'autoupdate', 'off');
+
+elseif iplotd==3 && ixmod==1
+legend([legh(1)], {'E-C'}, 'autoupdate', 'off');
+end
+    
+lgc= lgc+1;
+
+%% we can also show the relevant topos in the next figure:
+ %times for topography
+     if ~hidetopos &&(  iplotd==1 || iplotd==3) % corrects and diff. 
+         figure(4); hold on;%
+         if iplotd<3
+             usespot = tspots(ixmod);
+compwas = 'corr';
+         else
+             usespot = tspots(ixmod)+2;
+             compwas = 'diff';
+         end
+
          topoX1=dsearchn(use_xvec', showt1');
          topoX2=dsearchn(use_xvec', showt2');
 
@@ -92,297 +240,60 @@ for ixmod = 1:2
              if plotts ==1
                  topot = topoX1;
                  realt = showt1;
+                 subplot(2,8,usespot);
              else
                  topot = topoX2;
                  realt = showt2;
+                 subplot(2,8,usespot+1);
              end
 
-             %prepar topoplots
-             plotspot = plotts + 2*(ixmod-1);
-
-
-             subplot(2,2,plotspot);
-
-
-             gfx = squeeze(mean(datac,1));
-
-             topoplot(mean(gfx(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans_tmp], 's' 'w'} );
-             c=colorbar;
-             title([num2str(realt(1)) '-' num2str(realt(2)) 'ms (corr)'])
-             set(gca, 'fontsize', 15)
-             ylabel(c, 'uV')
-
-             % add corr and err separately.
+             gfx= squeeze(mean(plotD{iplotd},1)); % mean over participants.
+             topoData =mean(gfx(:,[topot(1):topot(2)]),2) ;% mean within time points:
+             topoplot(topoData, elocs, 'emarker2', {[meanoverChans_tmp], '.' 'w'} );
+%              c=colorbar;
+             title({[xlabis];[num2str(realt(1)) '-' num2str(realt(2)) 'ms (' compwas ')']})
+             set(gca, 'fontsize', fntsize/2)
+%              ylabel(c, '\muV')
+             caxis([-2 2]);
 
          end
+         figure(1);
+         hold on;
 
      end
-    %%
-%     
-%   
-%   PREPARE ERP PLOTS  
-%     plotspot = [5:6,9:10] + 2*(ixmod-1);
-    
-    subplot(2,2,subspots(ixmod));
-    
-    %place patches first (as background)   
-    ylim([-8 8])
-    
-%place patches (as background) first:
-    ytx= get(gca, 'ylim');    
-hold on
-%plot topo patches.
-ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
-ph.FaceAlpha=.4;
-ph.LineStyle= 'none';
-ph=patch([showt2(1) showt2(1) showt2(2) showt2(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
-ph.FaceAlpha=.4;
-ph.LineStyle= 'none';
-    
-hold on
-    
-%% difference waveform:
-    dataplot = datae-datac; % diff waveform. (error - correct).
-    plotme = squeeze(nanmean(dataplot(:,meanoverChans_tmp,:),2));
-        
-    stERP = CousineauSEM(plotme);
-%     sh=shadedErrorBar(use_xvec, mean(plotme,1), stERP, 'k', 1);
-    
-    
-    %% now C and E separate:
-    %%
-    d1 = squeeze(nanmean(datac(:,meanoverChans,:),2));
-    d2 = squeeze(nanmean(datae(:,meanoverChans,:),2));
-    
-    stE1 = CousineauSEM(d1);
-    stE2 = CousineauSEM(d2);
-    %%
 
-    sh=shadedErrorBar(use_xvec, squeeze(nanmean(d1,1)), stE1,{'color',grCol, 'linew', 2},1);
-    p1= sh.mainLine;
-    hold on;
-    sh=shadedErrorBar(use_xvec, squeeze(nanmean(d2,1)), stE1,{'color',redCol, 'linew', 2},1);
-    p2= sh.mainLine;
-    
-    diffplot= p2.YData - p1.YData;
-%     pd= plot(plotXtimes, diffplot, 'k', 'linew', 2);
-    set(gca, 'ydir', 'reverse')
-    
-    hold on;
-    
-    
-    
-    
-    set(gca, 'ydir', 'normal')
-    hold on;
-    set(gca, 'fontsize', 25);
-    
-    title([titleis])
-    plot([0 0], ylim, ['k-'])
-   
-    
-    if ixmod ==1
-        xlim([- 200 2000]);
-    else
-        xlim([- 200 2000]);
-    end
-    
-        
-    
-    
-    xlabel(['Time from stimulus onset [ms]'])
-    ylabel(['uV']);
+
+
+
+
+end % after all 3
+% tidy axes:
         
      %plot stim bar to aid interp of ERP waveforms
      
-     xvs= [stimbar(1) stimbar(1) stimbar(2) stimbar(2)];
-     yvs= [-4.95 -5 -5 -4.95];
-     pch=patch(xvs, yvs, ['k']);
-     if ixmod==2 % add second tone.
-     patch(xvs+600, yvs,['k'])
-     end
-     
+%      xvs= [stimbar(1) stimbar(1) stimbar(2) stimbar(2)];
+%      yvs= [-4.95 -5 -5 -4.95];
+%      pch=patch(xvs, yvs, ['k']);
+%      if ixmod==2 % add second tone.
+%      patch(xvs+600, yvs,['k'])
+%      end
+%      xlim([])
 %      legend([p1, p2, sh.mainLine, pch], {'cor', 'err', 'diff','stimulus'}, 'location', 'NorthEast')
 %      legend([p1, p2, pch], {'cor', 'err', 'stimulus'}, 'location', 'NorthEast')
+
+
+
+
+
+
+
+
 end
+end % stim and response locked
 colormap('inferno')
 cd(figdir)
-cd('Stimulus locked ERPs')
+% cd('Stimulus locked ERPs')
 set(gcf, 'color', 'w')
- 
-%% response locked:
 
-%% have now restricted to just the vis- audio order.
-for iorder=1%,2% 3 = all.
-   
-    switch iorder
-        case 1
-        useppants = vis_first;
-        orderw = 'visual-audio';
-        case 2
-        useppants = aud_first;
-        orderw = 'audio-visual';
-        case 3
-            useppants = 1:size(GFX_visrespCOR,1);
-            orderw = 'All resp';
-    end
-        
-for ixmod = 1:2
-    
-    if ixmod==1
-        g1=GFX_visrespCOR(useppants,:,:);
-        g2=GFX_visrespERR(useppants,:,:);
-        
-        if iorder==1
-        titleis = 'Visual response Part A';
-        elseif iorder==2
-            titleis = 'Visual response, part B';
-        elseif iorder==3
-            titleis = 'All Visual response locked';
-        end
-    else
-        %         dataCOR = squeeze(nanmean(GFX_visrespCOR,1));
-        %         dataErr = squeeze(nanmean(GFX_visrespERR,1));        
-           g1=GFX_audrespCOR(useppants,:,:);
-           g2=GFX_audrespERR(useppants,:,:);
-        if iorder==1
-            titleis = 'Auditory response Part B';
-        elseif iorder==2
-            titleis = 'Auditory response, part A';
-        elseif iorder==3
-                    titleis = 'All Auditory response locked';
-        end
-    end
-    
-    %apply smoothing to dataset, for plotting:
-    %50 ms window.
-    if smoothON==1
-        printname =['GFX response locked compare ERP smoothed'] ;
-        winsize = 256/20; % 50 ms.
-        
-        tmpout1= zeros(size(g1));
-        tmpout2= zeros(size(g2));
-        
-        %corrects.
-        for ippanttmp = 1:size(g1,1)
-            for ichan=1:size(g1,2)
-                tmpout1(ippanttmp,ichan,:) = smooth(g1(ippanttmp,ichan,:), winsize);
-            end
-        end
-        %errors.
-        for ippanttmp = 1:size(g2,1)
-            for ichan=1:size(g2,2)
-                tmpout2(ippanttmp,ichan,:) = smooth(g2(ippanttmp,ichan,:), winsize);
-            end
-        end
-        
-        g1=tmpout1; g2=tmpout2;
-    else
-        printname =['GFX response locked compare ERP (NEW)'] ;
-    end
-    
-    %difference:
-    topo1 = g2-g1;
-    
-    
-    %mean difference waveform.
-    datac=squeeze(nanmean(topo1,1));
-    
-    %times for topography
-    showt1=[-10,90];
-    topoX1=dsearchn(plotXtimes', showt1');
-    
-    showt2=[250,350];
-    topoX2=dsearchn(plotXtimes', showt2');
-    for plotts=1:2
-        if plotts ==1
-            topot = topoX1;
-            realt = showt1;
-        else
-            topot = topoX2;
-            realt = showt2;
-        end
-    
-    plotspot = plotts + 2*(ixmod-1);        
-    subplot(3,4,plotspot);
-%     topoplot(mean(datac(:,[topot(1):topot(2)]),2), elocs);
-    topoplot(mean(datac(:,[topot(1):topot(2)]),2), elocs, 'emarker2', {[meanoverChans], 's' 'w'} );
-    c=colorbar;        
-        title([num2str(realt(1)) '-' num2str(realt(2)) 'ms'])        
-        set(gca, 'fontsize', 15)
-        ylabel(c, 'uV')
-    end
-    
-    plotspot = [5:6,9:10] + 2*(ixmod-1);
-    
-    subplot(3,4,plotspot);
-    
-    %PLOT the Correct and ERRORs separtely.
-     %place patches first (as background)   
-    ylim([-5 8])
-    
-%place patches (as background) first:
-    ytx= get(gca, 'ylim');    
-hold on
-%plot topo patches.
-ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
-ph.FaceAlpha=.4;
-ph.LineStyle= 'none';
-ph=patch([showt2(1) showt2(1) showt2(2) showt2(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
-ph.FaceAlpha=.4;
-ph.LineStyle= 'none';
-    
-    
-    
-    %%
-    d1 = squeeze(nanmean(g1(:,meanoverChans,:),2));
-    d2 = squeeze(nanmean(g2(:,meanoverChans,:),2));
-    
-    stE1 = CousineauSEM(d1);
-    stE2 = CousineauSEM(d2);
-    %%
 
-    sh=shadedErrorBar(plotXtimes, squeeze(nanmean(d1,1)), stE1,{'color',grCol, 'linew', 2},1);
-    p1= sh.mainLine;
-    hold on;
-    sh=shadedErrorBar(plotXtimes, squeeze(nanmean(d2,1)), stE1,{'color',redCol, 'linew', 2},1);
-    p2= sh.mainLine;
-    
-    diffplot= p2.YData - p1.YData;
-    pd= plot(plotXtimes, diffplot, 'k', 'linew', 2);
-    set(gca, 'ydir', 'reverse')
-    
-    hold on;
-    
-    
-    xlabel(['Time from response onset [ms]'])
-    ylabel(['uV']);
-    set(gca, 'fontsize', 25);
-    
-    %%
-    
-%     title({[titleis ', (' orderw ')']})
-    title(titleis )
-     printname =[printname ', ' orderw ];
-    
-    %%
-    plot([0 0], ylim, ['k-'])
-    plot([xlim], [0 0], ['k-'])
-    
-    
-    
-    legend([p1 p2, pd], {'Correct', 'Error', 'Err-Corr'})
-%     legend([p1 p2], {'Correct', 'Error'})
-    xlim([- 200 600]);
-%     ylim([-5 8])
-end
-colormap('inferno')
-set(gcf, 'color', 'w')
-%
-cd(figdir)
-cd('Response locked ERPs')
-set(gcf, 'color', 'w')
-%%
-% print('-dpng', [printname ])
-end
 

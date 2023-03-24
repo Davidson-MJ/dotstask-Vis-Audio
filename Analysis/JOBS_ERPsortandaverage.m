@@ -9,7 +9,7 @@ close all
 addpath(genpath('C:\Github\dotstask-Vis-Audio'));
 % addpath('/Users/matthewdavidson/Documents/GitHub/dotstask-Vis-Audio/Analysis/')
 %update to work on external volume:
-homedir = 'C:\Users\mdav0285\OneDrive - The University of Sydney (Staff)\Documents\dotstask- Vis+Audio EXP';
+homedir = 'C:\Users\mdav0285\Documents\dotstask- Vis+Audio EXP';
 
 behdatadir = [homedir filesep 'Exp_output/DotsandAudio_behaviour/ver2'];
 figdir =[homedir filesep 'Figures'];
@@ -22,23 +22,37 @@ pfols = striphiddenFiles(pfols);
 
 %% jobs list:
 % Participant stimulus trigger and response locked ERPs.
-job.calc_individualERPs = 1; %1 Trig and response locked, also concatenates across participants for GFX.
+job.calc_individualERPs = 0; %1 Trig and response locked, also concatenates across participants for GFX.
 
+
+job.plot_StimandResplocked_butterfly=0;
 job.plot_StimandResplocked_participantaverage =0;
 job.plot_StimandResplocked_grandaverage_GFX =0;
-job.plot_StimandResplocked_grandaverage_GFX_MS =1;
+job.plot_StimandResplocked_grandaverage_GFX_MS =0;
 
 
 % Calculated ERPs, after stratifying by subjective confidence.
-job.calc_individualERPsxConfidence =0; %Response locked, also concatenates across participants for GFX.
+job.calc_individualERPsxConfidence =1; %Response locked, also concatenates across participants for GFX.
 job.plot_PFXxConf =0;
-job.plot_GFXxConf=  0;
+job.plot_GFXxConf=  1;
+
+
+% Calculated ERPs, after stratifying by RT (both part A and B).
+job.calc_individualERPsxRT=0; %Response locked, also concatenates across participants for GFX.
+job.plot_PFXxRT =0;
+job.plot_GFXxRT=  0;
+
 
 %% Stimulus and response locked ERPs >
 if job.calc_individualERPs == 1 % Trig and response locked, 
     % also concatenates across participants for GFX.        
     calcStimandRespERPs;
 end
+
+if job.plot_StimandResplocked_butterfly==1
+    plot_stimandrespERPs_butterfly;
+end
+
 
 if job.plot_StimandResplocked_participantaverage ==1
     plot_stimandrespERPs;
@@ -50,7 +64,7 @@ end
 
 
 if job.plot_StimandResplocked_grandaverage_GFX_MS ==1
-    Plot_GFX_ERPs;    
+    Plot_GFX_ERPs_MSver;    
 end
 
 %% Response locked ERPs, by confidence >
@@ -62,4 +76,19 @@ if job.plot_PFXxConf ==1
 end
 if job.plot_GFXxConf ==1
     Plot_GFX_ERPsxConfidence
+end
+
+%% stimulus and response locked by rt
+
+% Calculated ERPs, after stratifying by RT (both part A and B).
+if job.calc_individualERPsxRT==1; %Response locked, also concatenates across participants for GFX.
+    calc_ERPsxRTs;
+end
+
+if job.plot_PFXxRT ==1
+    Plot_PFX_ERPsxReactiontime;
+end
+
+if job.plot_GFXxRT==  1;
+Plot_GFX_ERPsxReactiontime;
 end

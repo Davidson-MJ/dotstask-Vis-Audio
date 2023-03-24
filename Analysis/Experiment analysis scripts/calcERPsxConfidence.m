@@ -7,35 +7,31 @@
 % called from Plot_dataforERPs_EEGtrigbased
 
 %%
-for ippant=1%:length(pfols)
+for ippant=1:length(pfols)
     cd(eegdatadir)
     
     cd(pfols(ippant).name);    
-%     
-%     load('participant TRIG extracted ERPs', ...
-%         'resplockedEEG', 'stimlockedEEG', 'resplockedEEG_stimbaserem', ...
-%         'plotXtimes', 'ExpOrder', 'BEH_matched');
 
+    load('participant EEG preprocessed.mat');
 
-    load('participant Long TRIG extracted ERPs', ...
-        'resplockedEEG', 'stimlockedEEG', 'resplockedEEG_stimbaserem', ...
-         'ExpOrder', 'BEH_matched')
     
-
+    %
     % for each participant, we also require the behavioural data, should
     % already be stored, if not see Plot_PFX_Classifier results, job1.
     %% load index information
-    load('Epoch information');
+    load('Epoch information'); % contains BEH_matched
     
-        plotXtimes =  ([1:size(stimlockedEEG,2)] ./ 256   -  0.5)*1000; %ms
+
+
+    plotXtimesPLOT = plotXtimes(1:size(stimlockedEEG,2)); % adjust according to preprocessing window.
 
     %so we have both stimlocked and resplocked. just need to use the
     %correct indexing, based on the BEH_Matched information.
     
     % for resp in part B, split by confidence.        
         %pre allocate data (response locked and stim locked)                          
-        [conf_x_rlEEG] = deal(zeros(size(resplockedEEG,1), size(resplockedEEG,2), 4));      
-        [conf_x_slEEG]  = deal(zeros(size(stimlockedEEG,1), size(stimlockedEEG,2), 4));      
+        [conf_x_rlEEG] = [];%deal(zeros(size(resplockedEEG,1), size(resplockedEEG,2), 4));      
+        [conf_x_slEEG]  = [];%deal(zeros(size(stimlockedEEG,1), size(stimlockedEEG,2), 4));      
         
         %changed to corrects only:
         partBindx = corBindx;
@@ -46,6 +42,8 @@ for ippant=1%:length(pfols)
        confjmnts = BEH_matched.confj(partBindx);
        confjmnts = cell2mat(confjmnts);
        
+       % note that confidence went from sure wrong -- to sure right
+       % (-100        100)
         % take zscore to compare across participants.
         zconfj = zscore(confjmnts); %% not abs(conjmnts)
         
@@ -61,17 +59,23 @@ for ippant=1%:length(pfols)
         
         %%
         %now take terciles, based on conf judgements:        
-        quants = quantile(zconfj, [3]); %quartiles
-%          t1 = find(zconfj<quants(1));
-%          t2 = find(zconfj>=quants(1));
-         
+%         quants = quantile(zconfj, [3]); %quartiles
+        quants = quantile (zconfj, [.5]); %median split,
+
+
+
+        terclists=[];
+        if length(quants)>1 % more than a median split
+
         if diff(quants)==0 % can't separate into terciles.
             %instead,  save as high/low after median split.
+            %just skip
+%             continue
               quants = quantile(zconfj, [.5]);
-               t1 = find(zconfj<quants(1));
-               t2 = nan;
-               t3= nan;
-               t4 = find(zconfj>=quants(1));
+               t1 = nan;
+               t2 = find(zconfj<quants(1));
+               t3= find(zconfj>=quants(1));
+               t4 = nan;
             disp(['Warning: using median split for ppant ' num2str(ippant)]);   
         else
             
@@ -97,10 +101,23 @@ for ippant=1%:length(pfols)
         terclists(2).list = t2;
         terclists(3).list = t3;
         terclists(4).list = t4;
-        
+        else
+
+            if quants==max(zconfj)
+             t1 = find(zconfj<quants(1));
+            t2 = find(zconfj>=quants(1));
+            else
+         t1 = find(zconfj<=quants(1));
+         t2 = find(zconfj>quants(1));
+            end
+           terclists(1).list = t1;
+        terclists(2).list = t2;
+%         terclists(3).list = t3;s
+%         terclists(4).list = t4;
+        end
         %now for each tercile, take the mean EEG      
 %%
-        for iterc=1:4
+        for iterc=1:length(terclists)
            
             try
                 %take mean corr ERP for this tercile:
@@ -112,32 +129,32 @@ for ippant=1%:length(pfols)
                 tempERP = squeeze(nanmean(stimEEGd(:,:,terclists(iterc).list),3));
                 conf_x_slEEG(:,:,iterc) =tempERP;
             catch
-                conf_x_rlEEG(:,:,iterc) =nan;
-                conf_x_slEEG(:,:,iterc) =nan;
+                conf_x_rlEEG(:,:,iterc)= repmat(nan, [64,length(plotERPtimes)]);
+                conf_x_slEEG(:,:,iterc) = repmat(nan, [64,length(plotERPtimes)]);
             end
         end
       
 % %%     %%
-% % sanity check    
-clf;
-plot(plotXtimes, squeeze(conf_x_rlEEG(31,:,:))); title(['participant ' num2str(ippant)]);
-set(gca, 'ydir' , 'reverse')%     
-legend({['q1'], ['q2'], ['q3'], ['q4']})
+% % % sanity check    
+% clf;
+% plot(plotXtimesPLOT, squeeze(conf_x_rlEEG(31,:,:))); title(['participant ' num2str(ippant)]);
+% set(gca, 'ydir' , 'reverse')%     
+% legend({['q1'], ['q2'], ['q3'], ['q4']})
 %%
 disp(['saving conf x ERP for ppant ' pfols(ippant).name]);
 
-    save('part B Long ERPs by confidence', ...
+    save('part B ERPs by confidence', ...
         'conf_x_rlEEG', 'terclists',...
         'conf_x_slEEG', 'plotXtimes', 'ExpOrder');
 %     
 end
 
-%now concatenate and save across participants.
+% now concatenate and save across participants.
     %%
-[GFX_conf_x_rlEEG] =  deal(nan(length(pfols), 64, length(plotXtimes),4));
-[GFX_conf_x_slEEG] =  deal(nan(length(pfols), 64, size(stimlockedEEG,2),4));
+    disp('Concatenating GFX conf x erp');
+[GFX_conf_x_rlEEG,GFX_conf_x_slEEG] =  deal(nan(length(pfols), 64, length(plotXtimesPLOT),length(terclists)));
 
-for ippant=1:length(pfols) % 1,3,4
+for ippant=1:length(pfols) %
     cd(eegdatadir)    
     cd(pfols(ippant).name);
     load('part B ERPs by confidence');
@@ -147,10 +164,10 @@ for ippant=1:length(pfols) % 1,3,4
     GFX_conf_x_slEEG(ippant,:,:,:) = conf_x_slEEG;
 end
 
-%% % save Group FX
+% % save Group FX
 cd(eegdatadir)  
 cd('GFX')
-%%
+%
     save('GFX_averageERPsxConf',...
         'GFX_conf_x_slEEG', 'GFX_conf_x_rlEEG', 'plotXtimes');
  %%

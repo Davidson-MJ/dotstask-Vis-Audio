@@ -10,7 +10,7 @@ dbstop if error
 %% updated 23-06-20, to also calculate response locked ERPs, with prestim baseline.
 
 %extra preprocessing before plotting:
-lindetrend = 0; %% now detrending with longer epochs.
+lindetrend = 1; %% now detrending with longer epochs.
 rmbase = 1;
 
 % job list:
@@ -20,6 +20,12 @@ job1.concat_GFX = 1;
 %data types to analyze.
 idatatypes = {'STIM', 'RESP', 'RESP-stimbase'};
 
+
+% note, now adjusting the auditory epochs to baseline before second tone
+% onset (700-800 ms) in plotXtimes.
+% we will also restrict the size. Shrink down to stim/response -.5 + 1 second.
+
+maxEEGlength = 1000; % ms
 %first job is to match the EEG and behavioural data. This is the most
 %important step!
 %%
@@ -27,7 +33,7 @@ if job1.calcindividual == 1
     
     for ippant=1:length(pfols)
         
-        clearvars EEG*
+        clearvars EEG* -except EEGlength
         %load eeg folder
         cd(eegdatadir)
         cd(pfols(ippant).name);
@@ -43,7 +49,7 @@ if job1.calcindividual == 1
         %stimulus locked, response locked, and response locked- with a pre-stimulus
         %baseline.
         %%
-        for itype = 1:3
+        for itype = 1:2
             disp(['Preprocessing eeg data ' num2str(itype)]);
             %which data type to load?
             switch itype
@@ -59,8 +65,32 @@ if job1.calcindividual == 1
                     EEG_tmpsub2 = EEGstimLong_matched;
             end
             
-            
-            
+            if itype==1 % stim locked epochs. shift onset for baseline subtraction.
+
+                % for vis stim, simply subselect:
+                epochbounds = dsearchn(plotXtimes', [min(plotXtimes) maxEEGlength]');
+                EEG_tmp= [];
+                EEG_tmp(:,:,visStimindx) = EEG_tmpsub1(:,  epochbounds(1):epochbounds(2),visStimindx);
+               
+                plotERPtimes = plotXtimes(epochbounds(1):epochbounds(2));
+                % for auditory, so that time zero is 700 ms?  (2nd tone trial onset).
+
+                epochStart = dsearchn(plotXtimes', [(800 -(abs(min(plotXtimes))))]'); % same pre onset window.
+                epochEnd = epochStart + epochbounds(2) -1; % same length
+                EEG_tmp(:,:,audStimindx) = EEG_tmpsub1(:,  epochStart:epochEnd,audStimindx);
+                
+                EEG_tmpsub1= EEG_tmp;
+    
+
+
+            elseif itype==2 % response locked. shrink.
+                epochbounds = dsearchn(plotXtimes', [min(plotXtimes) maxEEGlength]');
+                EEG_tmpsub1= EEG_tmpsub1(:, epochbounds(1):epochbounds(2), :);
+
+                plotERPtimes = plotXtimes(epochbounds(1):epochbounds(2));
+            end
+
+
             if lindetrend==1
                 %% linearly detrend each channel, all trials.
                 EEGdetr = zeros(size(EEG_tmpsub1));
@@ -83,9 +113,9 @@ if job1.calcindividual == 1
 
                 if itype==2 % response locked
                 zerostart = dsearchn(plotXtimes', [-150 -50]'); % response locked is unaffected?
-                else % stim lockedm there is a 200 ms delay (approx, but only on vis trials).
+                else % stim locked
 
-                zerostart = dsearchn(plotXtimes', [0 200]');
+                zerostart = dsearchn(plotXtimes', [-100 0]');
                 end
                 %% which data to use for baseline subtraction?
                 if itype <3
@@ -109,7 +139,7 @@ if job1.calcindividual == 1
                 EEG_tmpsub1 = EEGrmb;
             end
             
-            
+         
             %save again
             switch itype
                 case 1
@@ -151,14 +181,13 @@ if job1.calcindividual == 1
         
         disp(['SAVING: >>> ' pfols(ippant).name])
 
-        save('PFX ERPs', ...
-            'stimlockedEEG',...
-            'resplockedEEG',...
-            'resplockedEEG_stimbaserem',...
+save('participant EEG preprocessed', 'stimlockedEEG', 'resplockedEEG', 'plotERPtimes','-append');
+
+            save('PFX ERPs', ...           
             'corr_Vis_rl','err_Vis_rl',...
             'corr_Aud_rl','err_Aud_rl',...                        
             'corr_Vis_sl', 'err_Vis_sl',...
-            'corr_Aud_sl', 'err_Aud_sl');
+            'corr_Aud_sl', 'err_Aud_sl', 'plotERPtimes');
         
         disp(['Done!']);
         
@@ -184,7 +213,8 @@ if job1.concat_GFX == 1
         cd(eegdatadir)
         cd(pfols(ippant).name);
         clearvars stimlocked* resplocked*
-        load('PFX ERPs');
+        load('PFX ERPs'); % contains ERPs
+        load('participant EEG preprocessed.mat'); % contains all trials.
         load('Epoch information');
         disp(['concat participant.. ' num2str(ippant)]);
         
