@@ -3,10 +3,10 @@
 clear all
 close all
 
-addpath(genpath('C:\Github\dotstask-Vis-Audio'));
-% addpath('/Users/matthewdavidson/Documents/GitHub/dotstask-Vis-Audio/Analysis/')
+% addpath(genpath('C:\Github\dotstask-Vis-Audio'));
+addpath('/Users/matthewdavidson/Documents/GitHub/dotstask-Vis-Audio/Analysis/')
 %update to work on external volume:
-homedir = 'C:\Users\mdav0285\Documents\dotstask- Vis+Audio EXP';
+% homedir = 'C:\Users\mdav0285\Documents\dotstask- Vis+Audio EXP';
 behdatadir = [homedir filesep 'Exp_output/DotsandAudio_behaviour/ver2'];
 figdir =[homedir filesep 'Figures'];
 eegdatadir =[homedir filesep 'EEG/ver2'];
