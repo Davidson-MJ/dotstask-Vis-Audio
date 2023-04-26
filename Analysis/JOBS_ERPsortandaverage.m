@@ -6,20 +6,7 @@
 clear all
 close all
 
-addpath(genpath('C:\Github\dotstask-Vis-Audio'));
-% addpath('/Users/matthewdavidson/Documents/GitHub/dotstask-Vis-Audio/Analysis/')
-%update to work on external volume:
-homedir = 'C:\Users\mdav0285\Documents\dotstask- Vis+Audio EXP';
-
-behdatadir = [homedir filesep 'Exp_output/DotsandAudio_behaviour/ver2'];
-figdir =[homedir filesep 'Figures'];
-eegdatadir =[homedir filesep 'EEG/ver2'];
-cd(eegdatadir)
-pfols = dir([pwd filesep '*p_*']);
-
-%remove any hidden files (onedrive corrupts the fileist).
-pfols = striphiddenFiles(pfols); 
-
+setdirs_DotsAV;
 %% jobs list:
 % Participant stimulus trigger and response locked ERPs.
 job.calc_individualERPs = 0; %1 Trig and response locked, also concatenates across participants for GFX.
@@ -38,9 +25,9 @@ job.plot_GFXxConf=  1;
 
 
 % Calculated ERPs, after stratifying by RT (both part A and B).
-job.calc_individualERPsxRT=0; %Response locked, also concatenates across participants for GFX.
+job.calc_individualERPsxRT=1; %Response locked, also concatenates across participants for GFX.
 job.plot_PFXxRT =0;
-job.plot_GFXxRT=  0;
+job.plot_GFXxRT=  1;
 
 
 %% Stimulus and response locked ERPs >

@@ -2,10 +2,12 @@ dbstop if error
 elocs= readlocs('BioSemi64.loc');
 
 jobs.useERNorPe =2; % 1 or 2.
-useSingleorMeanvector= 2;% 2
-jobs.calculate_perppant =1; % perform once (slow).
+useSingleorMeanvector= 2;% 2 % ahve tested performance, result is the same if we take the average.
 
-jobs.plot_perppant=0;
+% BOTH jobs performed within the for-loop (NEED TO FIX)
+
+jobs.calculate_perppant =1; % perform once (slow).
+jobs.plot_perppant=1;
 
 normON=1; % needed for this type of decoding. (match the processin call_classifier)
 
@@ -24,9 +26,9 @@ useVorScalpProjection= 1;
         cd(pfols(ippant).name);
         sstr= pfols(ippant).name;
         %% load the Classifer and behavioural data:
-        load('Classifier_objectivelyCorrect');
-      
-        
+%               
+        load('Classifier_trained_A_resp_Pe_window');
+
         [PFX_classifierA_onERP_fromscalp, PFX_classifierA_onERP] =deal([]); % note that there will be an extra dimension, for each iteration.
         
         load('Epoch information');
@@ -185,8 +187,11 @@ useVorScalpProjection= 1;
                 ytest_trials = reshape(ytest_bp_sc,nsamps,ntrials);
                     PFX_classifierA_onERP_fromscalp(itestdata,nIter,:) = mean(ytest_trials,2);
                     
+                    if useSingleorMeanvector==1
                 disp(['Fin iteration ' num2str(nIter)])
-
+                    else
+                        disp(['Fin iteration 1, using MEAN of discrim vectors'])
+                    end
                     end % test type (corA, corB etc).
             end % nIteration
             
@@ -194,13 +199,13 @@ useVorScalpProjection= 1;
             if jobs.useERNorPe==1;
                 PFX_classifierA_onERP_ERNtrained = PFX_classifierA_onERP;
                 PFX_classifierA_onERP_ERNtrained_fromscalp = PFX_classifierA_onERP_fromscalp;
-                save('Classifier_objectivelyCorrect', 'PFX_classifierA_onERP_ERNtrained', ...
+                save('Classifier_trained_A_resp_ERN_window', 'PFX_classifierA_onERP_ERNtrained', ...
                     'PFX_classifierA_onERP_ERNtrained_fromscalp','-append')
             elseif jobs.useERNorPe==2;
                 
                 PFX_classifierA_onERP_PEtrained = PFX_classifierA_onERP;
                 PFX_classifierA_onERP_PEtrained_fromscalp = PFX_classifierA_onERP_fromscalp;
-                save('Classifier_objectivelyCorrect', 'PFX_classifierA_onERP_PEtrained', ...
+                save('Classifier_trained_A_resp_Pe_window', 'PFX_classifierA_onERP_PEtrained', ...
                     'PFX_classifierA_onERP_PEtrained_fromscalp','-append')
             end
         disp(['fin saving for ippant ' num2str(ippant)])
@@ -250,10 +255,19 @@ useVorScalpProjection= 1;
         
         for itestdata=1:4       
         % take average performance over all iterations.
+        if useSingleorMeanvector==1
+            % show perforamnce across iterations.
         avP = squeeze(mean(PFX_toplot(itestdata,:,:),2));
         stE = CousineauSEM(squeeze(PFX_toplot(itestdata,:,:)));
-        stmp = shadedErrorBar(Xtimes, avP ,stE, {'color', useCols{itestdata}, 'linestyle', uselns{itestdata}, 'linewidth', 2}, 1);
+         stmp = shadedErrorBar(Xtimes, avP ,stE, {'color', useCols{itestdata}, 'linestyle', uselns{itestdata}, 'linewidth', 2}, 1);
         leg(itestdata)= stmp.mainLine;
+        
+        else % we used the mean of classifier iterations, display the output only.
+            avP = squeeze(PFX_toplot(itestdata,:,:));
+            ps=  plot(Xtimes, avP, 'color', useCols{itestdata}, 'linestyle', uselns{itestdata}, 'linewidth', 2);
+            leg(itestdata)=ps;
+        end
+       
         hold on
         %% include ntrial info.
         switch itestdata
@@ -282,7 +296,11 @@ useVorScalpProjection= 1;
         xlabel('Time since response (ms)')
         ylabel('prob(Error)');
         %%
+       if useSingleorMeanvector==1
         title({['Trained part A(error)' ];[num2str(nIterations) ' iterations, testing ' testComp]}, 'fontsize', 25);
+       else
+           title({['Trained part A(error)' ];['mean of ' num2str(nIterations) ' iterations, testing ' testComp]}, 'fontsize', 25);
+       end
         legend(leg, {['Corr A (' ExpOrder{1} ') n' num2str(ntrials(1))],...
             ['Corr B (' ExpOrder{2} ') n' num2str(ntrials(2))],...
             ['Err A, (' ExpOrder{1} ') trained n' num2str(ntrials(3))],...
@@ -298,8 +316,11 @@ useVorScalpProjection= 1;
         %% print results
        cd(figdir)
         %%
-        cd(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window']);
-        
+        try cd(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window']);
+        catch 
+            mkdir(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window'])
+            cd(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window']);
+        end
         %%
         set(gcf, 'color', 'w')
         print('-dpng', [sstr ', w-' num2str(nIter) 'reps (Pe)']);

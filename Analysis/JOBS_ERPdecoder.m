@@ -3,22 +3,14 @@
 clear all
 close all
 
-% addpath(genpath('C:\Github\dotstask-Vis-Audio'));
-addpath('/Users/matthewdavidson/Documents/GitHub/dotstask-Vis-Audio/Analysis/')
-%update to work on external volume:
-% homedir = 'C:\Users\mdav0285\Documents\dotstask- Vis+Audio EXP';
-behdatadir = [homedir filesep 'Exp_output/DotsandAudio_behaviour/ver2'];
-figdir =[homedir filesep 'Figures'];
-eegdatadir =[homedir filesep 'EEG/ver2'];
-cd(eegdatadir)
-pfols = dir([pwd filesep 'p_*']);
+setdirs_DotsAV;
 %% JOBS list
 % first training a classifer on a predetermined window (similar to Boldt et al)
 job.trainclassifierpartA_Pe_CvsE            =0; % first version, with a fixed time window.
 
 %perform calc, then plot the above:
-job.plot_Pe_vs_Untrainedtrials            = 0;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
-job.plot_Pe_vs_Untrainedtrials_GFX        = 0;   
+job.plot_Pe_vs_Untrainedtrials            = 0;   % applies the discrim to untrained data. saves. plots PFX
+job.plot_Pe_vs_Untrainedtrials_GFX        = 1;   % concats after the above. then plots GFX
 job.plot_Pe_vs_Confidence_split            =0;
 job.plot_Pe_vs_SLIDINGwindow_corr_in_B      =0;
    
@@ -26,7 +18,7 @@ job.plot_Pe_vs_SLIDINGwindow_corr_in_B      =0;
 %% DIAGONAL (test train same times), also used in time-gen below.
 %  called below, but we can toggle whether to train on A, B, stim locked or
 % resp locked (below).
-job.trainclassifier_CvsE_diagonal=1; % diagonal training and testing (same axis). 
+job.trainclassifier_CvsE_diagonal=0; % diagonal training and testing (same axis). 
 % note the size of the window and steps are specficied in
 % Call_classifier... .m
 
@@ -239,7 +231,7 @@ end
 
 
 %% % %%%%%% TIME GEN -> 
-if job.calc_plot_diagonal_timegen==1 % participant level effects.
+if job.calcplot_diagonal_timegen==1 % participant level effects.
  %%
     cfg=[];
     cfg.pfols=pfols;

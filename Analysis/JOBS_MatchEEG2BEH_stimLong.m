@@ -15,9 +15,8 @@ close all
 
 %set up directories, find participant folders.
 %update to work on external volume:
-behdatadir = '/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/Exp_output/DotsandAudio_behaviour/ver2';
-eegdatadir ='/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/EEG/ver2';
-figdir ='/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/Figures';
+setdirs_DotsAV;
+
 %%
 cd(eegdatadir);
 pfols = dir([pwd filesep 'p_*']);

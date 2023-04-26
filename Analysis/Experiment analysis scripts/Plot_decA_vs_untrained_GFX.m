@@ -29,7 +29,7 @@ if jobs.concat_GFX==1;
         cd(eegdatadir)
         cd(pfols(ippant).name);
         %% load the Classifer and behavioural data:
-        load('Classifier_objectivelyCorrect');
+        load('Classifier_trained_A_resp_Pe_window');
         load('Epoch information', 'ExpOrder');
         
         if useVorScalpProjection== 1; % use the raw discrim vector.
@@ -56,7 +56,7 @@ if jobs.concat_GFX==1;
     cd(eegdatadir);
     cd('GFX')
     %other plot features:
-    Xtimes = DEC_Pe_windowparams.wholeepoch_timevec;
+    Xtimes = DEC_Pe_window.xaxis_ms;
     
 %     GFX_classifierA_onERP_Pe_fromscalp = GFX_classifierA_onERP_Pe;
 %     save('GFX_DecA_predicts_untrainedtrials', ...
@@ -176,7 +176,7 @@ for iorder = 1%:3
         end
         stE = CousineauSEM(plotdata);
         
-        sh= shadedErrorBar(Xtimes, squeeze(nanmean(plotdata,1)), stE, {'color', usecol},1);
+        sh= shadedErrorBar(Xtimes, squeeze(mean(plotdata,1, 'omitnan')), stE, {'color', usecol},1);
         
         
         if itestdata<3
