@@ -4,8 +4,9 @@
 %This is instead accomplished in next scripts.
 clear variables
 close all
-
-basedir= '/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/EEG/ver2';
+%%
+basedir='C:\Users\mdav0285\Documents\Data\dotstask- Vis+Audio EXP\EEG\ver2'
+% basedir= '/Volumes/MattsBackup (2TB)/dotstask- Vis+Audio EXP/EEG/ver2';
 cd(basedir);
 pfols = dir([pwd filesep 'p_*']);
 %%

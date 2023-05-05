@@ -17,6 +17,7 @@ job.plot_StimandResplocked_participantaverage =0;
 job.plot_StimandResplocked_grandaverage_GFX =0;
 job.plot_StimandResplocked_grandaverage_GFX_MS =0;
 
+job.plot_StimandResplocked_grandaverage_GFX_MS_butterfly=1; % summarise response locked this way.
 
 % Calculated ERPs, after stratifying by subjective confidence.
 job.calc_individualERPsxConfidence =1; %Response locked, also concatenates across participants for GFX.

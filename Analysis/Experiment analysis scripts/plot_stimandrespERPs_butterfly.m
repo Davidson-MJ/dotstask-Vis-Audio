@@ -11,7 +11,7 @@ meanoverChans_AUD = [4:15,39:52];
 elocs = readlocs('BioSemi64.loc');
 
 job1.plotStimlocked=0;
-job1.plotResplocked=1;
+job1.plotResplocked=0;
 %%
 for ippant=1:length(pfols)
     
