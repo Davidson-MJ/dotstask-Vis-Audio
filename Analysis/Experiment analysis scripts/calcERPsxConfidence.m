@@ -103,13 +103,15 @@ for ippant=1:length(pfols)
         terclists(4).list = t4;
         else
 
-            if quants==max(zconfj)
-             t1 = find(zconfj<quants(1));
-            t2 = find(zconfj>=quants(1));
-            else
+%             if quants==max(zconfj) % asymmetric distribution,
+%              t1 = find(zconfj<quants(1));
+%             t2 = find(zconfj>=quants(1));
+%             else
+
          t1 = find(zconfj<=quants(1));
-         t2 = find(zconfj>quants(1));
-            end
+         t2 = find(zconfj>quants(1)); % note the split
+            
+%             end
            terclists(1).list = t1;
         terclists(2).list = t2;
 %         terclists(3).list = t3;s
@@ -162,6 +164,7 @@ for ippant=1:length(pfols) %
     %store the rest:
     GFX_conf_x_rlEEG(ippant,:,:,:)= conf_x_rlEEG;    
     GFX_conf_x_slEEG(ippant,:,:,:) = conf_x_slEEG;
+    disp(['concat ppant ' num2str(ippant)])
 end
 
 % % save Group FX

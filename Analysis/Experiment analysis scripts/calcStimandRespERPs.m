@@ -181,7 +181,8 @@ if job1.calcindividual == 1
         
         disp(['SAVING: >>> ' pfols(ippant).name])
 
-save('participant EEG preprocessed', 'stimlockedEEG', 'resplockedEEG', 'plotERPtimes','-append');
+% save('participant EEG preprocessed', 'stimlockedEEG', 'resplockedEEG', 'plotERPtimes','-append');
+save('participant EEG preprocessed', 'stimlockedEEG', 'resplockedEEG', 'plotERPtimes');
 
             save('PFX ERPs', ...           
             'corr_Vis_rl','err_Vis_rl',...
@@ -213,8 +214,8 @@ if job1.concat_GFX == 1
         cd(eegdatadir)
         cd(pfols(ippant).name);
         clearvars stimlocked* resplocked*
-        load('PFX ERPs'); % contains ERPs
-        load('participant EEG preprocessed.mat'); % contains all trials.
+        load('PFX ERPs'); % contains ERPs % created above
+        load('participant EEG preprocessed.mat'); % contains all trials (created above)
         load('Epoch information');
         disp(['concat participant.. ' num2str(ippant)]);
         
@@ -230,8 +231,8 @@ if job1.concat_GFX == 1
             
         end
         
-        EEG_visstim = squeeze(nanmean(stimlockedEEG(:,:,visStimindx),3));
-        EEG_audstim = squeeze(nanmean(stimlockedEEG(:,:,audStimindx),3));
+        EEG_visstim = squeeze(mean(stimlockedEEG(:,:,visStimindx),3, 'omitnan'));
+        EEG_audstim = squeeze(mean(stimlockedEEG(:,:,audStimindx),3, 'omitnan'));
         %
         %     %store
         GFX_visstimERP(ippant,:,:)= EEG_visstim;

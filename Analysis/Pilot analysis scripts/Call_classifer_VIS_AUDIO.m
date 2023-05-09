@@ -94,7 +94,7 @@ if useERNorPE==1
 
 DEC_ERN_window = DECout;
 DEC_ERN_windowparams = dec_params;
-save('Classifier_trained_A_resp_Pe_window','DEC_ERN_window', 'DEC_ERN_windowparams','-append');
+save('Classifier_trained_A_resp_ERN_window','DEC_ERN_window', 'DEC_ERN_windowparams','-append');
 else
 DEC_Pe_window = DECout;
 DEC_Pe_windowparams = dec_params;    

@@ -150,6 +150,7 @@ for ippant=1:length(pfols) % 1,3,4
     %store the rest:
     GFX_rt_x_rlEEG(ippant,:,:,:,:)= rt_x_rlEEG;    
     GFX_rt_x_slEEG(ippant,:,:,:,:) = rt_x_slEEG;
+    disp(['concat ppant ' num2str(ippant)])
 end
 
 %% % save Group FX

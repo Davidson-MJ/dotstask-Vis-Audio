@@ -33,7 +33,7 @@ set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .4]);
             case 1
                 datac = GFX_conf_x_slEEG;
                 dtype = 'auditory stimulus onset';
-                usechans = [meanoverChans_FC, meanoverChans_POCC];
+                usechans = [meanoverChans_RESP, meanoverChans_POCC];
             case 2
                 datac = GFX_conf_x_rlEEG; % response locked
                 dtype = 'auditory response onset';
