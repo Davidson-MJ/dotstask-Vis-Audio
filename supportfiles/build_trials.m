@@ -20,7 +20,7 @@ end
 cfg.ntrialsprac             = 30; %30
 cfg.nblocksprac             = 3; %3
 
-
+!%! MD: I think this is older code... check the new. 
 % experimental blocks cfg
 cfg.ntrials                 = 30 ; % instructions provided after each block;
 cfg.SeeAgain_proportion     =.7; % on how many trials should the 'see-again' response be available for partB?

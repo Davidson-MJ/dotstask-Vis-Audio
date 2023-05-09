@@ -56,7 +56,7 @@ for ippant=24:25
         %downsample
         EEG = pop_resample( EEG, 256);
         EEG = eeg_checkset( EEG );
-        
+        %%
         %check for channels:
         EEG=pop_chanedit(EEG, 'lookup',...
             '/Users/matthewdavidson/Documents/MATLAB/Matlab toolboxes/eeglab13_5_4b/plugins/dipfit2.3/standard_BESA/standard-10-5-cap385.elp',...
