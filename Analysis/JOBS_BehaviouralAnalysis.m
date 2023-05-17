@@ -3,20 +3,7 @@
 clear variables
 close all
 
-addpath(genpath('C:\Github\dotstask-Vis-Audio'));
-% addpath('/Users/matthewdavidson/Documents/GitHub/dotstask-Vis-Audio/Analysis/')
-%update to work on external volume:
-homedir = 'C:\Users\mdav0285\OneDrive - The University of Sydney (Staff)\Documents\dotstask- Vis+Audio EXP';
-
-behdatadir = [homedir filesep 'Exp_output/DotsandAudio_behaviour/ver2'];
-figdir =[homedir filesep 'Figures'];
-eegdatadir =[homedir filesep 'EEG/ver2'];
-cd(behdatadir);
-pfols = dir([pwd filesep '*_p*']);
-
-%remove any hidden files (onedrive corrupts the fileist).
-pfols = striphiddenFiles(pfols);      
-
+setdirs_DotsAV;
 %% JOBS LIST:
 
 % % Plot_Accuracy_perExpOrder

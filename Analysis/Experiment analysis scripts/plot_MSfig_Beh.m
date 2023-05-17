@@ -17,6 +17,9 @@ ExperimentOrder = zeros(length(pfols),1); % auditory or visual first
 
 RTs_byAorB = nan(4, length(pfols)); % A_correct, A_error, B_correct, B_error
 
+cd(behdatadir)
+pfols= dir([pwd filesep '*_p*']);
+%%
 
     for ippant = 1:length(pfols)
         
@@ -135,6 +138,7 @@ RTs_byAorB = nan(4, length(pfols)); % A_correct, A_error, B_correct, B_error
                 
             else
                 thisRT= thisRT-.2;
+%                 thisRT= thisRT+.2;
             end
             
             
@@ -232,6 +236,7 @@ viscolour = cmap(3,:);
 audcolour=cmap(9,:);
 %positions of subplot panels:
 subSpots = [2,2,1; ...
+    
     2,2,2; ...
     2,2,3; ...
     2,2,4];
@@ -299,7 +304,7 @@ end
 
 
 %add sig
-        [~, p1] = ttest(plotXdata(:,1), plotXdata(:,2));
+        [~, p1, ci,stat] = ttest(plotXdata(:,1), plotXdata(:,2));
         
         if p1<.001
             psig= '***';
@@ -332,9 +337,11 @@ end
         hold on;
         %     plot(xlim, [yl(1), yl(2)], ['k:' ]);
         plot([sigheight, sigheight], [ytsare(1), ytsare(2)], ['k-' ], 'linew', 1);
+        %%
         
-        disp(get(gca, 'ylim'))
-
+disp(['Mean 1 (' num2str(mean(plotXdata(:,1))) '), SD ' num2str(std(plotXdata(:,1)))])
+disp(['Mean 2 (' num2str(mean(plotXdata(:,2))) '), SD ' num2str(std(plotXdata(:,2)))])
+%%
 end
 
 

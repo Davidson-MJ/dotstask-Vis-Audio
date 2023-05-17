@@ -36,7 +36,8 @@ elocs = readlocs('BioSemi64.loc'); %%
 clf
 
 %%%% first plot the stimulus locked data, then the response locked:
-
+avRTs= [0.2662, 0.2322;... % C, E (vis)
+        0.98, 1.27]; % C E  (Aud) - > copied from behavioural analysis.
 for idata = 1:2
     if idata==1 % stimulus locked. 
         subspots = [1,5];
@@ -182,6 +183,11 @@ ph.FaceAlpha=.4;
 ph.LineStyle= 'none';
 
 
+% %% now add the RT.
+% if iplotd<3 && idata==1
+% showRT = avRTs(ixmod, iplotd);
+% plot([showRT*1000, showRT*1000], [0 1], '-o', 'color', colsAre{iplotd})
+% end
 hold on
 % mean over relevant channels:
 tmp_plotData = squeeze(mean(plotD{iplotd}(:, meanoverChans_tmp,:),2));

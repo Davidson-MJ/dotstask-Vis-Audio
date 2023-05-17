@@ -29,6 +29,9 @@ maxEEGlength = 1000; % ms
 %first job is to match the EEG and behavioural data. This is the most
 %important step!
 %%
+cd(eegdatadir)
+pfols=dir([pwd filesep 'p_*']);
+%%
 if job1.calcindividual == 1
     
     for ippant=1:length(pfols)

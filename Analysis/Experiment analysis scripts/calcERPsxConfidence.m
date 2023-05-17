@@ -12,7 +12,7 @@ for ippant=1:length(pfols)
     
     cd(pfols(ippant).name);    
 
-    load('participant EEG preprocessed.mat');
+    load('participant EEG preprocessed.mat'); % this is after first job (sort and average).
 
     
     %

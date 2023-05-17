@@ -27,6 +27,10 @@ meanoverChans_VIS = [20:31, 57:64];
 meanoverChans_AUD = [4:15,39:52];
     
 meanoverChans_POCC = [20:31, 57:64];
+% for these butterfly plots, we might just want to show the relevant
+% C,P,Occ channels:
+
+showChans = unique([meanoverChans_VIS, meanoverChans_AUD, meanoverChans_RESP]);
 
 %same colours as beh data?
 %separate into Aud and Visual.
@@ -40,9 +44,10 @@ elocs = readlocs('BioSemi64.loc'); %%
 %
 clf
 
+
 %%%% first plot the stimulus locked data, then the response locked:
 
-for idata = 1%
+for idata = 1:2%
 
     if idata==1 % stimulus locked. 
         subspots = [1,5];
@@ -114,9 +119,6 @@ for ixmod = 1:2 % vis - aud
         showt2=[250,450];
         difft1 = [-50,150]; %ms;
         difft2=[250,450];
-        meanoverChans_tmp = meanoverChans_POCC;
-
-%         meanoverChans_tmp = meanoverChans_RESP;
     end
 
 
@@ -152,7 +154,12 @@ for ixmod = 1:2 % vis - aud
 %   
 %   PREPARE ERP PLOTS  (Correct and Error)
 plotD= {datac, datae, datae-datac};
-colsAre= {grCol, redCol, 'k'};
+
+
+% colsAre= {grCol, redCol, 'k'}; % or use alpha version:
+
+
+colsAre={[.2 .6 .2 .7], [.7 .2 .2 .7], [.3 .3 .3 .7]}; 
 legh=[];
 lgc=1; % counter for legend entries (resets at 3)
 for iplotd= 1:3
@@ -191,14 +198,17 @@ ph.LineStyle= 'none';
 hold on
 % mean for all channels, butterfly!
 tmp_plotData = squeeze(plotD{iplotd});
+
 plotMean = squeeze(mean(tmp_plotData,1)); % mean over subjs
 % stE1 = CousineauSEM(plotMean);
 %Corrects, errors, difference:
-plot(use_xvec,plotMean, 'color', [.7 .7 .7,.7]);
 
-sh=shadedErrorBar(use_xvec, plotMean, stE1,{'color',colsAre{iplotd}, 'linew', 1},1);
-p1= sh.mainLine;
-    legh(lgc) = sh.mainLine;
+p1=plot(use_xvec,plotMean(showChans,:), 'color', colsAre{iplotd});
+
+legh(lgc)=p1(1); 
+% sh=shadedErrorBar(use_xvec, plotMean, stE1,{'color',colsAre{iplotd}, 'linew', 1},1);
+% p1= sh.mainLine;
+%     legh(lgc) = sh.mainLine;
 plot([0 0], ylim, ['k-'])
 plot(xlim, [0 0], ['k-'])
 
@@ -256,7 +266,7 @@ compwas = 'corr';
 
              gfx= squeeze(mean(plotD{iplotd},1)); % mean over participants.
              topoData =mean(gfx(:,[topot(1):topot(2)]),2) ;% mean within time points:
-             topoplot(topoData, elocs, 'emarker2', {[meanoverChans_tmp], '.' 'w'} );
+             topoplot(topoData, elocs, 'emarker2', {[showChans], '.' 'w'} );
 %              c=colorbar;
              title({[xlabis];[num2str(realt(1)) '-' num2str(realt(2)) 'ms (' compwas ')']})
              set(gca, 'fontsize', fntsize/2)
