@@ -28,6 +28,7 @@ idatatypes = {'STIM', 'RESP', 'RESP-stimbase'};
 maxEEGlength = 1000; % ms
 %first job is to match the EEG and behavioural data. This is the most
 %important step!
+
 %%
 cd(eegdatadir)
 pfols=dir([pwd filesep 'p_*']);

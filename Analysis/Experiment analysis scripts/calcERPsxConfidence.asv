@@ -108,10 +108,8 @@ for ippant=1:length(pfols)
 %             t2 = find(zconfj>=quants(1));
 %             else
 
-         t1 = find(zconfj<quants(1));
-         t2 = find(zconfj>=quants(1)); % note the split, using > 
-                                    % median produces nan for 
-                                    % some ppants (all confj together).
+         t1 = find(zconfj<=quants(1));
+         t2 = find(zconfj>quants(1)); % note the split
             
 %             end
            terclists(1).list = t1;
@@ -128,9 +126,7 @@ for ippant=1:length(pfols)
                 tempERP = squeeze(nanmean(respEEGd(:,:,terclists(iterc).list),3));
                 % now store:
                 conf_x_rlEEG(:,:,iterc) =tempERP;
-                if any(isnan(tempERP(:)))
-                    error('check code')
-                end
+                if any(isnantempERP)
                 
                 %now take mean for stimulus locked equivalent.
                 tempERP = squeeze(nanmean(stimEEGd(:,:,terclists(iterc).list),3));

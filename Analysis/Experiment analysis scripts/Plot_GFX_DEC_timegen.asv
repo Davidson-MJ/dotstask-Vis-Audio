@@ -68,7 +68,7 @@ if jobs.plot_GFX==1;
         load(['GFX_' savename]);
     end
          %for each comparison made:
-        figure(1); clf
+        figure(2); clf
         set(gcf, 'color', 'w', 'units', 'normalized','position', [.1 .1 .8 .8]);
         shg;
 
@@ -131,7 +131,6 @@ end
 obsV = max(clustertestStat);
 %%
 
-if iplot==3 % perform time-consuming cluster on last plot only.
 % what is the CV cutoff for a perm version?
 % should shuffle labels in this case the comparison (other group) is chance
 % performance.
@@ -223,7 +222,7 @@ clustCol= 'k';
 end
 %%
 %%
-end % cluster
+
 if iplot==3
     c=colorbar;
 ylabel(c, 'A.U.C')

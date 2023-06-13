@@ -154,14 +154,14 @@ for iplotd= 1:3
     if iplotd<3
         figure(1);
         subplot(2,4,subspots(ixmod));
-        ylim([-3 5])
+        ylim([-2 3])
         xlim([- 200 1000]);
         title([titleis])
 
     else % difference waveform: update info for next plot:
         legh=[];
         subplot(2,4,subspots(ixmod)+1);
-        ylim([-3 5])
+        ylim([-2 3])
         xlim([- 500 1000])
         title('difference waveform')
         lgc=1;

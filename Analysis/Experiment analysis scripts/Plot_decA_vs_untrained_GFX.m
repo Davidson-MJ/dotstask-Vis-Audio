@@ -5,7 +5,7 @@
 
 
 
-jobs.concat_GFX=1;
+jobs.concat_GFX=0;
 jobs.plot_GFX=1;
 %%
 %plotType
@@ -138,18 +138,23 @@ for iorder = 1%:3
             subplot(2, 2, 1);
             
             usecol = grCol;
+            modality= 'visual';
             case 2 % corr B
                 subplot(2, 2, 3);
             usecol = grCol;
+                        modality= 'auditory';
+
             case 3
                 %errA
                 subplot(2, 2, 1);
                 usecol= redCol;
-                title('train visual (Pe): test visual resp ')
+                title({['\rmtrain on \bfvisual (Pe)'];['\rmtest on \bfvisual \rmresponse']})
+            modality= 'visual';
             case 4 % err B
                 subplot(2, 2, 3);
-                title('train visual (Pe): test auditory resp')
+                title({['\rmtrain on \bfvisual (Pe)'];['\rmtest on \bfauditory \rmresponse']})
                 usecol= redCol;
+                modality = 'auditory';
                 
         end
 
@@ -204,8 +209,12 @@ for iorder = 1%:3
         % %plot sig points.
         % text(Xtimes(pvals<.05), [0.2], '*',  'color', cmap(itestdata,:), 'FontSize', 5)
     
+    if mod(itestdata,2)==0
+    ylim([.4 .6]);
+    else
+        ylim([.40 .8])
+    end
     
-    ylim([.40 .8])
     % add extra plot elements:
     hold on; plot(xlim, [.5 .5], '--', 'color', [.3 .3 .3], 'linew', 3)
     hold on; plot([0 0 ], ylim, '--', 'color', [.3 .3 .3], 'linew', 3)
@@ -216,7 +225,7 @@ for iorder = 1%:3
         pch = patch([windowvec(1) windowvec(1) windowvec(2) windowvec(2)], [ylims(1) ylims(2) ylims(2) ylims(1)], [.8 .8 .8]);
         pch.FaceAlpha= .1;
     end
-    xlabel('Time since response (ms)')
+    xlabel(['Time since ' modality ' response (ms)'])
     if itestdata<5
         ylabel('p(Error)');
     else
@@ -240,8 +249,12 @@ for iorder = 1%:3
     
     figure(2);
     topoplot(nanmean(GFX_classifierA_topo,1), elocs);
-    title(['GFX, spatial projection'])
-    set(gca, 'fontsize', 15)
+    c=colorbar
+    ylabel(c,'a.u.')
+%     title(['GFX, spatial projection'])
+title([''])
+    set(gca, 'fontsize', 24)
+    set(gcf,'color','w')
     %% print results
     cd(figdir)
     cd(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window']);

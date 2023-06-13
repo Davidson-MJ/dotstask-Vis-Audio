@@ -222,7 +222,7 @@ if job.calcPlot_diagonal_slidingCorr==1
     cfg.expPart='A';
     cfg.EEGtype= 'resp';
 %%
-calcPlot_diagonal_slidingCorr;%(cfg)
+calcPlot_diagonal_slidingCorr(cfg)
 
 
 end
@@ -275,7 +275,7 @@ if job.plot_GFX_timegen
 
     %test (test the above on the below).
     cfg.expPart_test ='B';
-    cfg.EEGtype_test= 'resp';
+    cfg.EEGtype_test= 'stim';
     Plot_GFX_DEC_timegen(cfg); % as above, but we have trained and tested along the same data points.
     
     
@@ -289,14 +289,13 @@ if job.calcPlot_timegen_slidingCorr==1
     cfg.eegdatadir= eegdatadir;
     cfg.behdatadir= behdatadir;
     cfg.figdir= figdir;
-cfg.singleorAvIterations = 2; % 1 for single iterations (slow), 2 for average of iteration discrim vectors.
-   
-cfg.crunchPPant = 1; % also concats GFX
+
+    cfg.crunchPPant = 1; % also concats GFX
     cfg.plotPFX= 1;
     cfg.plotGFX= 1;
 
  cfg.expPart_train ='A';
-    cfg.EEGtype_train = 'stim';
+    cfg.EEGtype_train = 'resp';
 
     %test (test the above on the below).
     cfg.expPart_test ='B';

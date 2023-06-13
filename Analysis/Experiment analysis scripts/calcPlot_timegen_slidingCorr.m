@@ -14,7 +14,7 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 job1.calcandconcat_PFX =0;
 job1.plotPFX=0;
 job1.plotGFX=1;
-
+permTest=0;
 
 
 elocs = readlocs('BioSemi64.loc');
@@ -29,6 +29,16 @@ pfols = cfg.pfols;
 train_name = ['Classifier_trained_' cfg.expPart_train '_' cfg.EEGtype_train '_diagonal'];
 savename = ['Classifier_trained_' cfg.expPart_train '_' cfg.EEGtype_train '_tested_' cfg.expPart_test '_' cfg.EEGtype_test ' timegen_predictsB_Behav'];
 
+if strcmp(cfg.expPart_train, 'A');
+    modtrain= '\bfvisual\rm';
+else
+    modtrain= '\bfauditory\rm';
+end
+if strcmp(cfg.expPart_test, 'A');
+    modtest= '\bfvisual\rm';
+else
+    modtest= '\bfauditory\rm';
+end
 %%
 if job1.calcandconcat_PFX ==1
 
@@ -42,7 +52,7 @@ if job1.calcandconcat_PFX ==1
         cd(eegdatadir)
         cd(pfols(ippant).name);
         %% load the Classifer and behavioural data:
-        load(loadname);
+        load(train_name);
         DEC_trainer = DECout_diagonal_window; % this has a discrim vector for each time point.
 
         load('participant EEG preprocessed');
@@ -118,6 +128,7 @@ if job1.calcandconcat_PFX ==1
                         %note that confjmnts are from sure error - to sure correct.
 
                         allBEH= zscore(abs([BEH_matched.confj{partBindx}]));
+                        % why abs?
                     case 2
                         %these RTs are incorrect (need to be adjusted, as
                         %in prev script).
@@ -269,12 +280,10 @@ end
 
 if job1.plotPFX==1
     % load if needed
-    if ~exist('GFX_DECA_RT_corr_slid','var')
-        cd(eegdatadir);
-        cd('GFX')
-        load('GFX_Classifier_trained_A_resp_diagonal_predictsB_Behav');
-    end
-
+    cd(eegdatadir);
+    cd('GFX')
+    load(['GFX_' savename ]);
+    
     %output to figdir.
     cd(figdir)
     cd('Classifier Results')
@@ -328,11 +337,10 @@ end
 if job1.plotGFX==1
 
     %load if needed
-    if ~job1.calcandconcat_PFX && ~exist('GFX_DECA_Conf_corr_slid','var')
-        cd(eegdatadir);
-        cd('GFX')
-        load(['GFX_' savename]);
-    end
+    
+    cd(eegdatadir);
+    cd('GFX')
+    load(['GFX_' savename ]);
     %%
     cd(figdir)
     cd('Classifier Results');
@@ -362,9 +370,9 @@ if job1.plotGFX==1
             hold on
             %%%%
            imagesc(slideTimes, slideTimes, squeeze(mean(dataINt,1)));
-            ylabel('(visual) Train  (ms)');
-            xlabel('(auditory) Test (ms)');
-
+ylabel(['trained ' modtrain ' ' cfg.EEGtype_train ])
+    xlabel(['Tested ' modtest ' ' cfg.EEGtype_test])
+    
             hold on; plot(xlim, [0 0 ], ['w:'], 'linew', 2)
             hold on; plot([0 0 ], ylim, ['w:'], 'linew', 2)
             set(gca, 'fontsize', 12, 'ydir', 'normal');
@@ -379,12 +387,12 @@ if job1.plotGFX==1
 %            caxis([-.04 .04]) 
            % add sig tests:
             %ttests
-            [NHST,pvals]= deal(zeros(size(dataINt,1), size(dataINt,1)));
+            [nhst,pvals]= deal(zeros(size(dataINt,1), size(dataINt,1)));
             %
             for itime1 = 1:length(slideTimes)
                 for itime2= 1:length(slideTimes)
-                [NHST(itime1,itime2), pvals(itime1,itime2)] = ttest(dataINt(:,itime1,itime2));
-
+                [nhst(itime1,itime2), pvals(itime1,itime2), ~, stat] = ttest(dataINt(:,itime1,itime2));
+                teststats(itime1, itime2)= stat.tstat;
                 end
             end
 
@@ -392,16 +400,126 @@ if job1.plotGFX==1
 
 
             % Extract the boundaries of the clusters
-            B = bwboundaries(NHST);
+            B_obs = bwboundaries(nhst);
 
+            %% work out the largest observed cluster statistic (retain).
+clusttestStat = [];
+
+for k = 1:length(B_obs)
+    boundary = B_obs{k};
+    clustertestStat(k) = abs(sum(nansum(teststats(boundary(:,2), boundary(:,1)))));
+    
+    
+end
+obsV = max(clustertestStat);
+%%
+
+if permTest==1 % perform time-consuming cluster on last plot only.
+% what is the CV cutoff for a perm version?
+% should shuffle labels in this case the comparison (other group) is chance
+% performance.
+group1= dataINt;
+group2= repmat(0, size(group1));
+% for nperms, recalc the largest observed cluster stat, if group assignment
+% is random.
+nPerm=100;
+allsub= 1:size(group1,1);
+clusterResults=[];
+for iperm= 1:nPerm
+    
+    %flip half the participants each time (at random)
+    nshuff= floor(max(allsub)/2);
+    %shuffle order:
+    shfforder = randperm(21);
+    
+    %flip these ppants:
+    flippants= shfforder(1:nshuff);
+    
+    %swaap:
+    group1tmp= group1;
+    group2tmp= group2;
+    
+    group1tmp(flippants,:,:) = group2(flippants,:,:);
+    group2tmp(flippants,:,:)= group1(flippants,:,:);
+    
+    % now with our null, perform the stats test and retain largest cluster.
+    
+    pvals=[];
+    
+    for irow= 1:size(group1,2);
+        for icol= 1:size(group1,3);
+            
+            %pick at random.
+            [nhst(irow, icol), pvals(irow, icol),~,stat]= ttest(group1tmp(:, irow, icol), group2tmp(:,irow,icol), 'alpha', .05);
+            teststats(irow,icol)= stat.tstat;
+            
+        end
+    end
+    
+    %cluster extraction:
+    B_shuff = bwboundaries(nhst);
+    %% work out the largest observed cluster statistic (retain).
+    clusttestStat_shuff = [];
+    
+    for k = 1:length(B_shuff)
+        boundary = B_shuff{k};
+        clustertestStat_shuff(k) = abs(sum(nansum(teststats(boundary(:,2), boundary(:,1)))));
+        
+        
+    end
+    clusterResults(iperm) = max(clustertestStat_shuff);
+    disp(['fin perm ' num2str(iperm)]);
+end
+%% %
+figure(10); clf
+histogram(clusterResults, nPerm);
+hold on;
+plot([obsV,obsV], ylim, 'r-');
+y= quantile(clusterResults,[.05 .5 .95]);
+for iy=1:length(y)
+    plot([y(iy),y(iy)], ylim, 'b-');
+%     
+end
+% 
+% 
+%%
+figure(1);
+
+%%
+% only use those clusters which exceed our 95% CV
+plotcluster= clustertestStat>=y(3);
+% Overlay the boundaries on the image
+Bplot= B_obs(plotcluster);
+hold on
+for k = 1:length(Bplot)
+    boundary = Bplot{k};
+    % determine if pos or negative:
+      
+    Gm= squeeze(mean(useD(:,boundary(:,2), boundary(:,1)),1));
+    posNeg= mean(Gm(:));
+    if posNeg<0.5
+        clustCol= [.7 .7 1];
+    else
+
+        clustCol= [1 .7 .7];
+    end
+clustCol= 'k';
+    plot(Xtimes(boundary(:,2)), Xtimes(boundary(:,1)), 'color',clustCol, 'LineWidth', 2)
+end
+%%
+%%
+else % 
+            
+            
             % Overlay the boundaries on the image
             hold on
-            for k = 1:length(B)
-                boundary = B{k};
+            for k = 1:length(B_obs)
+                boundary = B_obs{k};
                 % determine if pos or negative:
                 clustCol= 'k';
                 plot(slideTimes(boundary(:,2)), slideTimes(boundary(:,1)), 'color',clustCol, 'LineWidth', 2)
             end
+end
 % axis square
         end % trialstype
     end % conf and rt

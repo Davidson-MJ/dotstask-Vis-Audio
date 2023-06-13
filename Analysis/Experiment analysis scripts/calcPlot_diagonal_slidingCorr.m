@@ -16,7 +16,7 @@ job1.plotPFX=0;
 job1.plotGFX=1;
 
 
-
+usecol='k';
 elocs = readlocs('BioSemi64.loc');
 
 normON = 1; % 0,1 ; normalize EEG data.
@@ -25,7 +25,7 @@ smoothON=1;
 
 pfols = cfg.pfols;
 
-loadname = ['Classifier_trained_' cfg.expPart '_' cfg.EEGtype '_diagonal.mat'];
+loadname = ['Classifier_trained_' cfg.expPart '_' cfg.EEGtype '_diagonal'];
     
     
     %%
@@ -95,6 +95,7 @@ loadname = ['Classifier_trained_' cfg.expPart '_' cfg.EEGtype '_diagonal.mat'];
                         %note that confjmnts are from sure error - to sure correct.
                         
                         allBEH= zscore(abs([BEH_matched.confj{partBindx}]));
+                        allBEH= zscore(([BEH_matched.confj{partBindx}]));
                     case 2
                         %these RTs are incorrect (need to be adjusted, as
                         %in prev script).
@@ -213,7 +214,7 @@ PFX_classifier_diagonERP=[];
 
 
 
-            GFX_DecA_ScalpProj(ippant,:) = mean(DEC_Pe_window.scalpproj,1);
+%             GFX_DecA_ScalpProj(ippant,:) = mean(DEC_Pe_window.scalpproj,1);
 %             GFX_ExpOrders(ippant).d= ExpOrder;
             
             disp(['calc sliding window for ppant num ' num2str(ippant)]);
@@ -222,7 +223,7 @@ PFX_classifier_diagonERP=[];
         cd(eegdatadir)
         cd('GFX')
      
-            save('GFX_Classifier_trained_A_resp_diagonal_predictsB_Behav', ...            
+            save(['GFX_' loadname  '_predictsB_Behav'], ...            
             'GFX_DECA_RT_corr_slid', ...
             'GFX_DECA_Conf_corr_slid',... 
             'GFX_DecA_ScalpProj', 'slideTimes' );
@@ -238,11 +239,9 @@ PFX_classifier_diagonERP=[];
     
     if job1.plotPFX==1
         % load if needed
-        if ~exist('GFX_DECA_RT_corr_slid','var')
             cd(eegdatadir);
             cd('GFX')
-            load('GFX_Classifier_trained_A_resp_diagonal_predictsB_Behav');
-        end
+            load(['GFX_' loadname  '_predictsB_Behav']);
         
         %output to figdir.
         cd(figdir)
@@ -293,16 +292,14 @@ PFX_classifier_diagonERP=[];
     end
     
     
-    dataprint = TESTondatatypes{usetype};
+%     dataprint = TESTondatatypes{usetype};
     %%
     if job1.plotGFX==1
         
         %load if needed
-        if ~job1.calcandconcat_PFX && ~exist('GFX_DECA_Conf_corr_slid','var')
             cd(eegdatadir);
             cd('GFX')
-            load('GFX_DecA_Pe_slidingwindow_predictsB_Behav');
-        end
+            load(['GFX_' loadname  '_predictsB_Behav'])
         %%
         cd(figdir)
         cd('Classifier Results');
@@ -349,7 +346,7 @@ PFX_classifier_diagonERP=[];
                     shg
 
 
-                    xlabel(['Time [ms] after ' dataprint ' in part B']);
+                    xlabel(['Time [ms] after response in part B']);
                     ylabel(['p(Error) x ' ylabis])
 
 
@@ -384,12 +381,12 @@ PFX_classifier_diagonERP=[];
 %         
 %         set(gcf,'color', 'w')
         %%
-        cd(figdir)
-        cd('Classifier Results')
-        cd('PFX_Trained on Correct part A, conf x sliding window part B');
-        printname = ['GFX Dec A sliding window confidence correlaiton, for ' ordert ' corr only, nreps 10, test on ' dataprint];
-        print('-dpng', printname)
-        
+%         cd(figdir)
+%         cd('Classifier Results')
+%         cd('PFX_Trained on Correct part A, conf x sliding window part B');
+%         
+%         print('-dpng', printname)
+%         
     end
 
 
