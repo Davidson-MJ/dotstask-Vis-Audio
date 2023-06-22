@@ -14,7 +14,7 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 job1.calcandconcat_PFX =1;
 job1.plotPFX=0;
 job1.plotGFX=1;
-job1.plotGFX_MS=1; % single plot of one condition.
+
 
 
 elocs = readlocs('BioSemi64.loc');
@@ -169,7 +169,7 @@ for usetype = 1:2%; of the above ^
                 %% now take correlation with confidence, in a sliding window:
                 
                 % set up the sliding window. 100ms window, 10 ms steps.
-                movingwin = [.05, .01]; % was 50 ms 5 ms
+                movingwin = [.025, .01]; % was 50 ms 5 ms
                 Fs = 256;
                 Nwin=round(Fs*movingwin(1)); % number of samples in window
                 Nstep=round(movingwin(2)*Fs); % number of samples to step through
@@ -360,13 +360,13 @@ for usetype = 1:2%; of the above ^
             ylimsAre= [-.15 .15; -.2 .2; -.15 .15];
 
             allData= {GFX_DECA_Conf_corr_slid, GFX_DECA_RT_corr_slid,GFX_DECA_Conf_Subjcorr_slid};
-            for idata=[1,2,3]%:length(allData)
+            for idata=3%[1,2,3]%:length(allData)
                 ylabis= ylabsare{idata};
                 dataIN= allData{idata};
-                for itrialtype=1:3
+                for itrialtype=2%1:3
                     
                     
-                    subplot(3,3,itrialtype + (3*(idata-1)));
+%                     subplot(3,3,itrialtype + (3*(idata-1)));
                    %%
                     dataINt = squeeze(dataIN(:,:,itrialtype));
 %                     ylabis ={['Classifier and ' compis ];['[r]']};
@@ -382,7 +382,7 @@ for usetype = 1:2%; of the above ^
                     ytx= get(gca, 'ylim');
                     hold on
                     %plot topo patches (if not stimlocked EEG), to show the
-%                     training window used for the classifier.
+                    %training window used for the classifier.
                     if usetype~=2
                         ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
                         ph.FaceAlpha=.4;
@@ -400,7 +400,7 @@ for usetype = 1:2%; of the above ^
 
 
                     hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 2)
-%                     hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
+                    hold on; plot([0 0 ], ylim, ['k:'], 'linew', 2)
                     set(gca, 'fontsize', 15)
                     
                     title(titlesare{itrialtype}, 'fontsize', 15)
@@ -418,117 +418,13 @@ end
 
                         if pvals(itime)<.05
                             text(slideTimes(itime), [-.1], '*', 'color', 'k','fontsize', 15);
-%                             text(slideTimes(itime), [-.07], '*', 'color', 'k','fontsize', 15);
+                            text(slideTimes(itime), [-.07], '*', 'color', 'k','fontsize', 15);
                         end
                     end
 
 
                 end % trialstype
             end % conf and rt
-        %%
-        % add topoplot of discrim used to aid interpretation.
-        %
-%         subplot(1,3,3)
-%         topoplot(mean(GFX_DecA_ScalpProj(:,:)), elocs);
-%         %             title(['Classifier trained [' num2str(DEC_Pe_windowparams.training_window_ms) ']']);
-%         set(gca, 'fontsize', 25)
-%         
-%         set(gcf,'color', 'w')
-        %%
-        cd(figdir)
-        cd('Classifier Results')
-        cd('PFX_Trained on Correct part A, conf x sliding window part B');
-        printname = ['GFX Dec A sliding window confidence correlaiton, for ' ordert ' corr only, nreps 10, test on ' dataprint];
-        print('-dpng', printname)
-        
-    end
-    
-     %%
-    if job1.plotGFX_MS==1
-        
-        %load if needed
-            cd(eegdatadir);
-            cd('GFX')
-            load('GFX_DecA_Pe_slidingwindow_predictsB_Behav');
-        
-        %%
-        cd(figdir)
-        cd('Classifier Results');
-        
-            %%
-        
-            figure(1); clf; set(gcf, 'color', 'w', 'units', 'normalized', 'position', [0.1 0.1 .4 .4]);
-            % plot results across participants:
-            showt1 = [200, 350];
-        
-            ylabsare= {'confidence', 'rt', 'confidence'};
-            titlesare= {'corrects', 'errors', 'all'};
-            ylimsAre= [-.15 .15; -.2 .2; -.2 .1];
-
-            allData= {GFX_DECA_Conf_corr_slid, GFX_DECA_RT_corr_slid,GFX_DECA_Conf_Subjcorr_slid};
-           
-            idata=3;%[see above
-            ylabis= ylabsare{idata};
-            dataIN= allData{idata};
-            itrialtype=2;%1:3 % correct, error, all.
-                    
-                    
-%                   %
-                    dataINt = squeeze(dataIN(:,:,itrialtype));
-%                     ylabis ={['Classifier and ' compis ];['[r]']};
-
-                usecol='k';
-
-                    Ste = CousineauSEM(dataINt);
-
-
-                    set(gcf, 'color', 'w')
-                    ylim(ylimsAre(idata,:))
-                    %place patches (as background) first:
-                    ytx= get(gca, 'ylim');
-                    hold on
-                    %plot topo patches (if not stimlocked EEG), to show the
-                    %training window used for the classifier.
-%                     if usetype~=2
-%                         ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [1 .9 .9]);
-%                         ph.FaceAlpha=.4;
-%                         ph.LineStyle= 'none';
-%                     end
-                    hold on
-                    %%%%
-                    shadedErrorBar(slideTimes, nanmean(dataINt,1), Ste, [usecol],1);
-%                     shadedErrorBar(plotERPtimes, mean(dataINt,1), Ste, [usecol],1);
-                    shg
-
-
-                    xlabel(['Time after auditory response [ms]']);
-                    ylabel(['p(Error) x ' ylabis])
-                    ylabel('Classifier and confidence correlation [r]');
-
-                    hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 1)
-                    hold on; plot([0 0 ], ylim, ['k:'], 'linew', 1)
-                    set(gca, 'fontsize', 15)
-                    
-                    title(titlesare{itrialtype}, 'fontsize', 15)
-if idata==3
-    title([titlesare{itrialtype} '+ subjcorr only'], 'fontsize', 15)
-end
-    
-                    box on
-                    % add sig tests:
-                    %ttests
-                    pvals= nan(1, length(slideTimes));
-                    %
-                    for itime = 1:length(slideTimes)
-                        [~, pvals(itime)] = ttest(dataIN(:,itime, itrialtype));
-
-                        if pvals(itime)<.05
-                            text(slideTimes(itime), [-.2], '*', 'color', 'b','fontsize', 25);
-%                             text(slideTimes(itime), [-.07], '*', 'color', 'k','fontsize', 15);
-                        end
-                    end
-
-
         %%
         % add topoplot of discrim used to aid interpretation.
         %

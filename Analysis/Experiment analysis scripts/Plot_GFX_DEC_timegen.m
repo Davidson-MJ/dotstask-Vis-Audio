@@ -8,6 +8,7 @@ jobs.concat_GFX=cfg.concat;
 jobs.plot_GFX=cfg.justplot;
 %%
 %plotType
+performClust=1;
 
 train_name = ['Classifier_trained_' cfg.expPart_train '_' cfg.EEGtype_train '_diagonal'];
 savename = ['Classifier_trained_' cfg.expPart_train '_' cfg.EEGtype_train '_tested_' cfg.expPart_test '_' cfg.EEGtype_test ' timegen'];
@@ -131,7 +132,7 @@ end
 obsV = max(clustertestStat);
 %%
 
-if iplot==3 % perform time-consuming cluster on last plot only.
+if iplot==3 && performClust==1% perform time-consuming cluster on last plot only.
 % what is the CV cutoff for a perm version?
 % should shuffle labels in this case the comparison (other group) is chance
 % performance.
@@ -218,15 +219,38 @@ for k = 1:length(Bplot)
 
         clustCol= [1 .7 .7];
     end
-clustCol= 'k';
+clustCol= 'w';
     plot(Xtimes(boundary(:,2)), Xtimes(boundary(:,1)), 'color',clustCol, 'LineWidth', 2)
 end
-%%
-%%
-end % cluster
+
+
+elseif iplot==3 % just plot the (non corrected) cluster.
+    %%
+    Bplot= B_obs;
+    hold on
+    for k = 1:length(Bplot)
+        boundary = Bplot{k};
+        % determine if pos or negative:
+        
+        Gm= squeeze(mean(useD(:,boundary(:,2), boundary(:,1)),1));
+        posNeg= mean(Gm(:));
+        if posNeg<0.5
+            clustCol= [.7 .7 1];
+        else
+            
+            clustCol= [1 .7 .7];
+        end
+        clustCol= 'w';
+        plot(Xtimes(boundary(:,2)), Xtimes(boundary(:,1)), 'color',clustCol, 'LineWidth', 2)
+    end
+    
+    shg
+end
+
+% cluster
 if iplot==3
     c=colorbar;
-ylabel(c, 'A.U.C')
+    ylabel(c, 'A.U.C')
 end
 
 

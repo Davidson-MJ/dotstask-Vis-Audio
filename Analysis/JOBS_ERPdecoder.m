@@ -291,12 +291,12 @@ if job.calcPlot_timegen_slidingCorr==1
     cfg.figdir= figdir;
 cfg.singleorAvIterations = 2; % 1 for single iterations (slow), 2 for average of iteration discrim vectors.
    
-cfg.crunchPPant = 1; % also concats GFX
-    cfg.plotPFX= 1;
+cfg.crunchPPant = 0; % also concats GFX
+    cfg.plotPFX= 0;
     cfg.plotGFX= 1;
 
  cfg.expPart_train ='A';
-    cfg.EEGtype_train = 'stim';
+    cfg.EEGtype_train = 'resp';
 
     %test (test the above on the below).
     cfg.expPart_test ='B';

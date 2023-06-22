@@ -28,14 +28,30 @@ for ippant=1:length(pfols)
     %so we have both stimlocked and resplocked. just need to use the
     %correct indexing, based on the BEH_Matched information.
     
+        for itype=1:2
+            
     % for resp in part B, split by confidence.        
         %pre allocate data (response locked and stim locked)                          
-        [conf_x_rlEEG] = [];%deal(zeros(size(resplockedEEG,1), size(resplockedEEG,2), 4));      
-        [conf_x_slEEG]  = [];%deal(zeros(size(stimlockedEEG,1), size(stimlockedEEG,2), 4));      
+        [tmpconf_x_rlEEG] = [];%deal(zeros(size(resplockedEEG,1), size(resplockedEEG,2), 4));      
+        [tmpconf_x_slEEG]  = [];%deal(zeros(size(stimlockedEEG,1), size(stimlockedEEG,2), 4));      
         
-        %changed to corrects only:
-        partBindx = corBindx;
+            %changed to corrects only:
+            if itype==1
+                partBindx = corBindx;
+            else % subjectively correct only!
+                % this will use either only objectively correct
+                % trials, objectively incorrect trials, or all
+                % trials.
+                % AND
+                % restrict focus to only subjectively correct confidence judgements
+                % (avoids error detection complications).
                 
+                % use all trials
+                sublist = sort([corBindx;errBindx]);
+                allBEH= [BEH_matched.confj{sublist}];
+                subjCorr=  find(allBEH>0); % only subjectively correct responses:
+                partBindx= sublist(subjCorr);
+            end
         %Using  correct  trials, collect confj
 %        confjmnts = ([BEH_matched(partBindx).confj]); 
        
@@ -127,20 +143,37 @@ for ippant=1:length(pfols)
                 %take mean corr ERP for this tercile:
                 tempERP = squeeze(nanmean(respEEGd(:,:,terclists(iterc).list),3));
                 % now store:
-                conf_x_rlEEG(:,:,iterc) =tempERP;
+                tmpconf_x_rlEEG(:,:,iterc) =tempERP;
                 if any(isnan(tempERP(:)))
                     error('check code')
                 end
                 
                 %now take mean for stimulus locked equivalent.
                 tempERP = squeeze(nanmean(stimEEGd(:,:,terclists(iterc).list),3));
-                conf_x_slEEG(:,:,iterc) =tempERP;
+                tmpconf_x_slEEG(:,:,iterc) =tempERP;
             catch
-                conf_x_rlEEG(:,:,iterc)= repmat(nan, [64,length(plotERPtimes)]);
-                conf_x_slEEG(:,:,iterc) = repmat(nan, [64,length(plotERPtimes)]);
+                tmpconf_x_rlEEG(:,:,iterc)= repmat(nan, [64,length(plotERPtimes)]);
+                tmpconf_x_slEEG(:,:,iterc) = repmat(nan, [64,length(plotERPtimes)]);
             end
         end
       
+        
+        
+        
+        if itype==1 % rename
+            conf_x_rlEEG= tmpconf_x_rlEEG;
+            conf_x_slEEG= tmpconf_x_slEEG;
+        elseif itype==2
+            
+            
+            conf_x_rlEEG_subjCorr= tmpconf_x_rlEEG;
+            conf_x_slEEG_subjCorr= tmpconf_x_slEEG;
+        end
+        
+        end
+        
+        
+        
 % %%     %%
 % % % sanity check    
 % clf;
@@ -151,15 +184,16 @@ for ippant=1:length(pfols)
 disp(['saving conf x ERP for ppant ' pfols(ippant).name]);
 
     save('part B ERPs by confidence', ...
-        'conf_x_rlEEG', 'terclists',...
-        'conf_x_slEEG', 'plotXtimes', 'ExpOrder');
+        'conf_x_rlEEG','conf_x_rlEEG_subjCorr', 'terclists',...
+        'conf_x_slEEG','conf_x_slEEG_subjCorr', 'plotXtimes', 'ExpOrder');
 %     
-end
+end % ippant
 
 % now concatenate and save across participants.
     %%
     disp('Concatenating GFX conf x erp');
-[GFX_conf_x_rlEEG,GFX_conf_x_slEEG] =  deal(nan(length(pfols), 64, length(plotXtimesPLOT),length(terclists)));
+[GFX_conf_x_rlEEG,GFX_conf_x_slEEG,...
+    GFX_conf_x_rlEEG_subjCorr,GFX_conf_x_slEEG_subjCorr] =  deal(nan(length(pfols), 64, length(plotXtimesPLOT),length(terclists)));
 
 for ippant=1:length(pfols) %
     cd(eegdatadir)    
@@ -169,6 +203,8 @@ for ippant=1:length(pfols) %
     %store the rest:
     GFX_conf_x_rlEEG(ippant,:,:,:)= conf_x_rlEEG;    
     GFX_conf_x_slEEG(ippant,:,:,:) = conf_x_slEEG;
+    GFX_conf_x_rlEEG_subjCorr(ippant,:,:,:)= conf_x_rlEEG_subjCorr;    
+    GFX_conf_x_slEEG_subjCorr(ippant,:,:,:) = conf_x_slEEG_subjCorr;
     disp(['concat ppant ' num2str(ippant)])
 end
 
@@ -177,6 +213,8 @@ cd(eegdatadir)
 cd('GFX')
 %
     save('GFX_averageERPsxConf',...
-        'GFX_conf_x_slEEG', 'GFX_conf_x_rlEEG', 'plotXtimes');
+        'GFX_conf_x_slEEG', 'GFX_conf_x_rlEEG', ...
+        'GFX_conf_x_slEEG_subjCorr','GFX_conf_x_rlEEG_subjCorr',...
+        'plotXtimes');
  %%
  
