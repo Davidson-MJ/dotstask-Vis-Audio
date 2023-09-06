@@ -7,6 +7,7 @@ catch
     homedir =['/Users/matthewdavidson/Documents/DATA/dotstask- Vis+Audio EXP'];
 
 end
+
 addpath(genpath(homedir));
 %
 % addpath('/Users/matthewdavidson/Documents/GitHub/dotstask-Vis-Audio/Analysis/')

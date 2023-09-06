@@ -8,7 +8,7 @@ jobs.concat_Conf=1; %prepare for plots.
 
 jobs.plotPFX_conf =0; % per ppant
 
-jobs.plotGFX_conf =0 ; %tidy (raincloud) GFX
+jobs.plotGFX_conf =1 ; %tidy (raincloud) GFX
 
 
 ExperimentOrder = zeros(length(pfols),1); % auditory or visual first
@@ -86,6 +86,11 @@ ERRid = find(ConfData.cor1==0);
 ConfData.INDEX_Correct= CORid;
 ConfData.INDEX_Error= ERRid;
 
+
+%NEW, also retain proportion of C and E responses based on binary split of
+%confidence (guess - unsure, unsure - sure correct).
+
+% nGuess_Err = length(intersect(ConfData.IN
 %     Confidence_summary_plot; %xmodd,pname used w/in.
     
     

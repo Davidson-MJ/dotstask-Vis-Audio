@@ -32,6 +32,9 @@ viscolour = cmap(3,:);
 audcolour=cmap(9,:);
 %plots individual participant level histograms of RT, as well as Bar
 %%
+cd(behdatadir)
+pfols = dir([pwd filesep '*_p*']);
+%%
 if jobs.concat_Acc
  for ippant = 1:length(pfols)
      

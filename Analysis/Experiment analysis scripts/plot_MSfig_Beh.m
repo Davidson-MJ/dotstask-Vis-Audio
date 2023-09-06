@@ -137,8 +137,11 @@ pfols= dir([pwd filesep '*_p*']);
                 thisRT = thisRT-.6;
                 
             else
-                thisRT= thisRT-.2;
-%                 thisRT= thisRT+.2;
+                % the EEG trigger to RT had ~.2 delay, but we don't need to
+                % worry about that for behavioural analysis:
+                %thisRT =thisRT
+                
+                %(prev) thisRT=thisRT-0.2;
             end
             
             
@@ -235,16 +238,16 @@ colormap(cmap)
 viscolour = cmap(3,:);
 audcolour=cmap(9,:);
 %positions of subplot panels:
-subSpots = [2,2,1; ...
+subSpots = [1,4,1; ...
     
-    2,2,2; ...
-    2,2,3; ...
-    2,2,4];
+    1,4,2; ...
+    1,4,3; ...
+    1,4,4];
 
 plotData={Xdata_Acc,Xdata_RTsA,Xdata_RTsB, Xdata_Conf};%, Xdata_Conf};
 titlesare ={'Accuracy', 'Visual RT', 'Auditory RT', 'Auditory Confidence'};
 ylabels ={'proportion correct', 'seconds', 'seconds', 'z-scored confidence'};
-ylimsare=[.4,1.1 ; .1 .45; .5 1.9; -3.5 3.5];
+ylimsare=[0,1.05 ; 0, 1.9; 0, 1.9; -3.5 3.5];
 xtickdetails ={{'\bfVisual', '\bfAuditory'},...
     {'Correct', 'Error'},...
     {'Correct', 'Error'},...
@@ -338,11 +341,11 @@ end
         %     plot(xlim, [yl(1), yl(2)], ['k:' ]);
         plot([sigheight, sigheight], [ytsare(1), ytsare(2)], ['k-' ], 'linew', 1);
         %%
-        
+        box on
 disp(['Mean 1 (' num2str(mean(plotXdata(:,1))) '), SD ' num2str(std(plotXdata(:,1)))])
 disp(['Mean 2 (' num2str(mean(plotXdata(:,2))) '), SD ' num2str(std(plotXdata(:,2)))])
 %%
 end
 
-
+shg
   

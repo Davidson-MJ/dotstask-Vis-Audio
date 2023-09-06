@@ -30,6 +30,9 @@ audcolour=cmap(9,:);
 % correct=cmap(4,:); %greenish
 % error =cmap(6,:); %reddish
 
+cd(behdatadir)
+pfols = dir([pwd filesep '*_p*']);
+
 %%
 
 if jobs.concat_RT
@@ -132,10 +135,16 @@ if jobs.concat_RT
                 %now adjust to start RT after second tone ONSET.
                 thisRT = thisRT-.6;
                 
-            else % if visual, the trigger was 0.2 sec early. 
+            else % if visual, the trigger in EEG) was 0.2 sec early. 
                 % i.e. trigger, 0.2s delay, stim on screen for 0.3s, then
                 % response collected.
-                thisRT = thisRT-0.2;
+                
+                %note that the behavioural RT does not need to be adjusted!
+%                 thisRT = thisRT-0.2;
+
+                    
+                    
+                    %! If thisRT is used for epoching ERPs, adjust by 0.2s
             end
             
             
