@@ -162,6 +162,9 @@ for ippant = 1:length(pfols)
 
                     for iwintest = 1:length(DECout_diagonal_window.trainingwindow_centralms);
                         nwinsamps_test = DECout_diagonal_window.trainingwindow_frames(iwintest,:);
+                        
+                        % should we test on the mean within this window?
+                        
                         testON= useDATA(:,nwinsamps_test(1):nwinsamps_test(2),:);
                         %reshape for matrix mult.
                         [nchans, sampsize, ntrials] =size(testON);

@@ -53,7 +53,7 @@ if job1.calcindividual == 1
         %stimulus locked, response locked, and response locked- with a pre-stimulus
         %baseline.
         %%
-        for itype = 1:2
+        for itype = 1:3
             disp(['Preprocessing eeg data ' num2str(itype)]);
             %which data type to load?
             switch itype
@@ -87,8 +87,32 @@ if job1.calcindividual == 1
     
 
 
-            elseif itype==2 % response locked. shrink.
+            elseif itype==2 %response locked. shrink.
                 epochbounds = dsearchn(plotXtimes', [min(plotXtimes) maxEEGlength]');
+                EEG_tmpsub1= EEG_tmpsub1(:, epochbounds(1):epochbounds(2), :);
+
+                plotERPtimes = plotXtimes(epochbounds(1):epochbounds(2));
+            
+            elseif itype==3
+            % we need to adjust stim locked for baseline removal:
+             % for vis stim, simply subselect:
+             
+                epochbounds = dsearchn(plotXtimes', [min(plotXtimes) maxEEGlength]');
+                EEG_tmp= [];
+                EEG_tmp(:,:,visStimindx) = EEG_tmpsub2(:,  epochbounds(1):epochbounds(2),visStimindx);
+               
+                plotERPtimes = plotXtimes(epochbounds(1):epochbounds(2));
+                % for auditory, so that time zero is 700 ms?  (2nd tone trial onset).
+
+                epochStart = dsearchn(plotXtimes', [(800 -(abs(min(plotXtimes))))]'); % same pre onset window.
+                epochEnd = epochStart + epochbounds(2) -1; % same length
+                EEG_tmp(:,:,audStimindx) = EEG_tmpsub2(:,  epochStart:epochEnd,audStimindx);
+                
+                EEG_tmpsub2= EEG_tmp;
+                
+                % and shrink the response locked data:
+                
+                 epochbounds = dsearchn(plotXtimes', [min(plotXtimes) maxEEGlength]');
                 EEG_tmpsub1= EEG_tmpsub1(:, epochbounds(1):epochbounds(2), :);
 
                 plotERPtimes = plotXtimes(epochbounds(1):epochbounds(2));
@@ -96,7 +120,8 @@ if job1.calcindividual == 1
 
 
             if lindetrend==1
-                %% linearly detrend each channel, all trials.
+                %% linearly detrend each channel, all trials. (type 2 for 
+                if itype<3
                 EEGdetr = zeros(size(EEG_tmpsub1));
                 
                 for ichan=1:64
@@ -107,6 +132,24 @@ if job1.calcindividual == 1
                     EEGdetr(ichan,:,:) = detrend(alld);
                 end
                 EEG_tmpsub1=EEGdetr;
+                
+                % repeat the process for idata3
+                elseif itype==3
+                    
+                    EEGdetr = zeros(size(EEG_tmpsub2));
+                    
+                    for ichan=1:64
+                        %detrend each matrix
+                        alld = squeeze(double(EEG_tmpsub2(ichan,:,:)));
+                        
+                        %detrend works across columns (2nd dim)
+                        EEGdetr(ichan,:,:) = detrend(alld);
+                    end
+                    EEG_tmpsub2=EEGdetr;
+                    
+                    
+                    
+                end
             end
             
             
@@ -121,6 +164,8 @@ if job1.calcindividual == 1
 
                 zerostart = dsearchn(plotXtimes', [-100 0]');
                 end
+                
+                
                 %% which data to use for baseline subtraction?
                 if itype <3
                     baselinewith = EEG_tmpsub1;
@@ -169,13 +214,26 @@ if job1.calcindividual == 1
             err_Vis_sl  = squeeze(mean(stimlockedEEG(:,:,errAindx),3));
             corr_Aud_sl = squeeze(mean(stimlockedEEG(:,:,corBindx),3));
             err_Aud_sl  = squeeze(mean(stimlockedEEG(:,:,errBindx),3));
-            
+           
+            corr_Vis_rl_stimbase  = squeeze(mean(resplockedEEG_stimbaserem(:,:,corAindx),3));
+            err_Vis_rl_stimbase  = squeeze(mean(resplockedEEG_stimbaserem(:,:,errAindx),3));
+            corr_Aud_rl_stimbase = squeeze(mean(resplockedEEG_stimbaserem(:,:,corBindx),3));
+            err_Aud_rl_stimbase  = squeeze(mean(resplockedEEG_stimbaserem(:,:,errBindx),3));
+           
         else
+            
             corr_Vis_rl  = squeeze(mean(resplockedEEG(:,:,corBindx),3));
             err_Vis_rl  = squeeze(mean(resplockedEEG(:,:,errBindx),3));
             corr_Aud_rl = squeeze(mean(resplockedEEG(:,:,corAindx),3));
             err_Aud_rl  = squeeze(mean(resplockedEEG(:,:,errAindx),3));
                         
+            
+            corr_Vis_rl_stimbase  = squeeze(mean(resplockedEEG_stimbaserem(:,:,corBindx),3));
+            err_Vis_rl_stimbase  = squeeze(mean(resplockedEEG_stimbaserem(:,:,errBindx),3));
+            corr_Aud_rl_stimbase = squeeze(mean(resplockedEEG_stimbaserem(:,:,corAindx),3));
+            err_Aud_rl_stimbase  = squeeze(mean(resplockedEEG_stimbaserem(:,:,errAindx),3));
+            
+            
             corr_Vis_sl  = squeeze(mean(stimlockedEEG(:,:,corBindx),3));
             err_Vis_sl  = squeeze(mean(stimlockedEEG(:,:,errBindx),3));
             corr_Aud_sl = squeeze(mean(stimlockedEEG(:,:,corAindx),3));
@@ -190,7 +248,9 @@ save('participant EEG preprocessed', 'stimlockedEEG', 'resplockedEEG', 'plotERPt
 
             save('PFX ERPs', ...           
             'corr_Vis_rl','err_Vis_rl',...
-            'corr_Aud_rl','err_Aud_rl',...                        
+            'corr_Aud_rl','err_Aud_rl',... 
+             'corr_Vis_rl_stimbase','err_Vis_rl_stimbase',...
+            'corr_Aud_rl_stimbase','err_Aud_rl_stimbase',... 
             'corr_Vis_sl', 'err_Vis_sl',...
             'corr_Aud_sl', 'err_Aud_sl', 'plotERPtimes');
         
@@ -209,6 +269,10 @@ if job1.concat_GFX == 1
     
     [GFX_visstimERP, GFX_audstimERP,GFX_visstimCOR, GFX_audstimCOR,...
         GFX_visstimERR, GFX_audstimERR ] = deal(nan(length(pfols), 64, size(stimlockedEEG,2)));
+    
+    
+    [GFX_visrespCOR_stimbase, GFX_audrespCOR_stimbase,...
+        GFX_visrespERR_stimbase, GFX_audrespERR_stimbase] =  deal(nan(length(pfols), 64, size(resplockedEEG,2)));
     
     %%
     [vis_first, aud_first] = deal([]);
@@ -238,16 +302,28 @@ if job1.concat_GFX == 1
         EEG_visstim = squeeze(mean(stimlockedEEG(:,:,visStimindx),3, 'omitnan'));
         EEG_audstim = squeeze(mean(stimlockedEEG(:,:,audStimindx),3, 'omitnan'));
         %
-        %     %store
+        %     %store stim overall
         GFX_visstimERP(ippant,:,:)= EEG_visstim;
         GFX_audstimERP(ippant,:,:)= EEG_audstim;
         
+        %resp locked (pre-resp baseline)
         GFX_visrespCOR(ippant,:,:) = corr_Vis_rl;
         GFX_visrespERR(ippant,:,:) = err_Vis_rl;
         
         GFX_audrespCOR(ippant,:,:) = corr_Aud_rl;
         GFX_audrespERR(ippant,:,:) = err_Aud_rl;
         
+        
+        %resp locked (pre-stim baseline)
+        GFX_visrespCOR_stimbase(ippant,:,:) = corr_Vis_rl_stimbase;
+        GFX_visrespERR_stimbase(ippant,:,:) = err_Vis_rl_stimbase;
+        
+        GFX_audrespCOR_stimbase(ippant,:,:) = corr_Aud_rl_stimbase;
+        GFX_audrespERR_stimbase(ippant,:,:) = err_Aud_rl_stimbase;
+        
+       
+        
+        % stim locked (prestimbase)
         GFX_visstimCOR(ippant,:,:) = corr_Vis_sl;
         GFX_visstimERR(ippant,:,:) = err_Vis_sl;
         

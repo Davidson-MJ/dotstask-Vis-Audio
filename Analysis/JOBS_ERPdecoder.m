@@ -91,7 +91,7 @@ if job.trainclassifier_CvsE_diagonal==1
     prts= {'A', 'A', 'B', 'B'};
     tps= {'stim', 'resp', 'stim', 'resp'};
 
-    for id=1:4%
+    for id=1%:4%
         cfg.expPart =prts{id};
         cfg.EEGtype = tps{id};
 

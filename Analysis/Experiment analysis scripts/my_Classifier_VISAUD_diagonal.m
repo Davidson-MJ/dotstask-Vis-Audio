@@ -221,7 +221,10 @@ DECODERout.trainingwindow_centralframe= winmid;
     
     
     % place subset of both correct and errors in same dimension (3rd).
-    x=cat(3,corrects_normtest(chansubset,trainingwindowoffset(i):trainingwindowoffset(i)+trainingwindowlength-1,:), errors_normtest(chansubset,trainingwindowoffset(i):trainingwindowoffset(i)+trainingwindowlength-1,:));
+    correct_traindata=corrects_normtest(chansubset,trainingwindowoffset(i):trainingwindowoffset(i)+trainingwindowlength-1,:);
+    error_traindata= errors_normtest(chansubset,trainingwindowoffset(i):trainingwindowoffset(i)+trainingwindowlength-1,:);
+    
+    x=cat(3,correct_traindata, error_traindata);
     
     x=x(:,:)'; % Rearrange data for logist.m [D (T x trials)]'
     

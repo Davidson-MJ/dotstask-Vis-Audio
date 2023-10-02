@@ -81,7 +81,7 @@ dec_params.dispprogress=0; % 1 for figure output.
 
 % analysis parameters:
 dec_params.window_frames_ms = [plotXtimes(1) plotXtimes(end)];  %needs to be shorter than actual epoch, or will error.
-dec_params.baseline_ms = [-250 -50];% this baseline is subtracted (again).
+dec_params.baseline_ms = [-250 -50];% a baseline is subtracted (cf below).
 dec_params.removebaseline=0;
 
 %create data for classifier:
