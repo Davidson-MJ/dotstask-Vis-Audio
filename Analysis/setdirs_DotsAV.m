@@ -4,8 +4,8 @@ try homedir='C:\Users\mdav0285\Documents\GitHub\dotstask-Vis-Audio';
 cd(homedir);
 catch
     
-    homedir =['/Users/matthewdavidson/Documents/DATA/dotstask- Vis+Audio EXP'];
-
+%     homedir =['/Users/matthewdavidson/Documents/DATA/dotstask- Vis+Audio EXP'];
+homedir = 'C:\Users\mdav0285\Documents\GitHub\dotstask-Vis-Audio';
 end
 
 addpath(genpath(homedir));
@@ -15,7 +15,7 @@ addpath(genpath(homedir));
 % homedir = 'C:\Users\mdav0285\Documents\dotstask- Vis+Audio EXP';
 behdatadir = [homedir filesep 'Exp_output/DotsandAudio_behaviour/ver2'];
 figdir =[homedir  filesep 'Figures'];
-eegdatadir =[homedir filesep 'EEG/ver2'];
+eegdatadir =[homedir filesep 'EEG/ver2']; % note EEG not on work station
 cd(eegdatadir)
 pfols = dir([pwd filesep '*p_*']);
 %
