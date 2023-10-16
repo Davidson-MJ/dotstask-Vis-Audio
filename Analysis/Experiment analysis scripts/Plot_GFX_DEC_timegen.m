@@ -16,7 +16,7 @@ savename = ['Classifier_trained_' cfg.expPart_train '_' cfg.EEGtype_train '_test
 if jobs.concat_GFX==1;
     
     [GFX_classifier_timegen]=deal([]);
-    
+    GFX_culsterstats=[]; % save the results of our perm, to avoid rerunning each time (time consuming)
     for ippant = 1:length(cfg.pfols)
         
         
@@ -41,7 +41,7 @@ if jobs.concat_GFX==1;
     %other plot features:
         
     save(['GFX_' savename], ...
-        'GFX_classifier_timegen','Xtimes');
+        'GFX_classifier_timegen','Xtimes','GFX_culsterstats','-append');
 %     
     
 end % concat job
@@ -131,6 +131,7 @@ for k = 1:length(B_obs)
 end
 obsV = max(clustertestStat);
 %%
+GFX_clusterstats(iplot).maxObserved = obsV;
 
 if iplot==3 && performClust==1% perform time-consuming cluster on last plot only.
 % what is the CV cutoff for a perm version?
@@ -140,64 +141,104 @@ group1= useD;
 group2= repmat(0.5, size(useD));
 % for nperms, recalc the largest observed cluster stat, if group assignment
 % is random.
-nPerm=100;
+nPerm=1000;
 allsub= 1:size(group1,1);
 clusterResults=[];
-for iperm= 1:nPerm
+
+%check it hasn't been completed!
+
+if ~isfield(GFX_clusterstats(iplot), 'criticalQuantiles') || GFX_clusterstats(iplot).nPerm ~=nPerm;
     
-    %flip half the participants each time (at random)
-    nshuff= floor(max(allsub)/2);
-    %shuffle order:
-    shfforder = randperm(21);
-    
-    %flip these ppants:
-    flippants= shfforder(1:nshuff);
-    
-    %swaap:
-    group1tmp= group1;
-    group2tmp= group2;
-    
-    group1tmp(flippants,:,:) = group2(flippants,:,:);
-    group2tmp(flippants,:,:)= group1(flippants,:,:);
-    
-    % now with our null, perform the stats test and retain largest cluster.
-    
-    pvals=[];
-    for irow= 1:size(useD,2);
-        for icol= 1:size(useD,3);
+    for iperm= 1:nPerm
+
+% shuffle assignment?
+        %flip half the participants each time (at random)
+        nshuff= floor(max(allsub)/2);
+        %shuffle order:
+        shfforder = randperm(21);
+        
+        %flip these ppants:
+        flippants= shfforder(1:nshuff);
+        
+        %swaap:
+        group1tmp= group1;
+        group2tmp= group2;
+        
+        group1tmp(flippants,:,:) = group2(flippants,:,:);
+        group2tmp(flippants,:,:)= group1(flippants,:,:);
+        
+        % now with our null, perform the stats test and retain largest cluster.
+        
+        pvals=[];
+        for irow= 1:size(useD,2)
+            for icol= 1:size(useD,3)
+                
+                [nhst(irow, icol), pvals(irow, icol),~,stat]= ttest(group1tmp(:, irow, icol), group2tmp(:,irow,icol), 'alpha', .05);
+                teststats(irow,icol)= stat.tstat;
+                
+            end
+        end
+        
+        %% or shuffle the assignment or rows and cols?
+%         group1tmp= group1(:, randperm(size(group1,2)),randperm(size(group1,3)));
+%         
+%         % shuffle at the ppant level, otherwise we are just permuting the
+%         % GFX result. 
+%         group1tmp=[];
+%         for ippant = 1:size(group1,1)
+%             
+%             group1tmp(ippant,:,:) = group1(ippant,randperm(size(group1,2)),randperm(size(group1,3)));
+%         end
+%         
+%          % now with our null, perform the stats test and retain largest cluster.
+%         
+%         pvals=[];
+%         for irow= 1:size(useD,2);
+%             for icol= 1:size(useD,3);
+%                 
+%                 [nhst(irow, icol), pvals(irow, icol),~,stat]= ttest(group1tmp(:, irow, icol), 0.5, .05);
+%                 teststats(irow,icol)= stat.tstat;
+%                 
+%             end
+%         end
+%         
+%         
+        
+        %cluster extraction:
+        B_shuff = bwboundaries(nhst);
+        %% work out the largest observed cluster statistic (retain).
+        clusttestStat_shuff = [];
+        
+        for k = 1:length(B_shuff)
+            boundary = B_shuff{k};
+            clustertestStat_shuff(k) = abs(sum(nansum(teststats(boundary(:,2), boundary(:,1)))));
             
-            [nhst(irow, icol), pvals(irow, icol),~,stat]= ttest(group1tmp(:, irow, icol), group2tmp(:,irow,icol), 'alpha', .05);
-            teststats(irow,icol)= stat.tstat;
             
         end
+        clusterResults(iperm) = max(clustertestStat_shuff);
+        disp(['fin perm ' num2str(iperm)]);
     end
-    
-    %cluster extraction:
-    B_shuff = bwboundaries(nhst);
-    %% work out the largest observed cluster statistic (retain).
-    clusttestStat_shuff = [];
-    
-    for k = 1:length(B_shuff)
-        boundary = B_shuff{k};
-        clustertestStat_shuff(k) = abs(sum(nansum(teststats(boundary(:,2), boundary(:,1)))));
-        
-        
+    %% %
+    figure(10); clf
+    histogram(clusterResults, nPerm);
+    hold on;
+    plot([obsV,obsV], ylim, 'r-');
+    y= quantile(clusterResults,[.01 .5 .99]);
+    for iy=1:length(y);
+        plot([y(iy),y(iy)], ylim, 'b-');
+        %
     end
-    clusterResults(iperm) = max(clustertestStat_shuff);
-    disp(['fin perm ' num2str(iperm)]);
+    GFX_clusterstats(iplot).nPerm = nPerm;
+    GFX_clusterstats(iplot).criticalQuantiles = y;
+      
+    save(['GFX_' savename], ...
+        'GFX_clusterstats','-append');
+else % already completed.
+    %%
+    disp(['using presaved null distribution cluster quantiles']);
+    y = GFX_clusterstats(iplot).criticalQuantiles;
+    
 end
-%% %
-figure(10); clf
-histogram(clusterResults, nPerm);
-hold on;
-plot([obsV,obsV], ylim, 'r-');
-y= quantile(clusterResults,[.05 .5 .95]);
-for iy=1:length(y);
-    plot([y(iy),y(iy)], ylim, 'b-');
-%     
-end
-% 
-% 
 %%
 figure(1);
 
@@ -224,7 +265,7 @@ clustCol= 'w';
 end
 
 
-elseif iplot==3 % just plot the (non corrected) cluster.
+elseif iplot==3  && performClust==0 % just plot the (non corrected) cluster.
     %%
     Bplot= B_obs;
     hold on
@@ -240,7 +281,7 @@ elseif iplot==3 % just plot the (non corrected) cluster.
             
             clustCol= [1 .7 .7];
         end
-        clustCol= 'w';
+        clustCol= 'b';
         plot(Xtimes(boundary(:,2)), Xtimes(boundary(:,1)), 'color',clustCol, 'LineWidth', 2)
     end
     

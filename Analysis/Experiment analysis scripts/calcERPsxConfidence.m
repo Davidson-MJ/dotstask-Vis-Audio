@@ -6,6 +6,8 @@
 
 % called from Plot_dataforERPs_EEGtrigbased
 
+
+% include with prestim baseline.
 %%
 for ippant=1:length(pfols)
     cd(eegdatadir)
@@ -34,6 +36,7 @@ for ippant=1:length(pfols)
         %pre allocate data (response locked and stim locked)                          
         [tmpconf_x_rlEEG] = [];%deal(zeros(size(resplockedEEG,1), size(resplockedEEG,2), 4));      
         [tmpconf_x_slEEG]  = [];%deal(zeros(size(stimlockedEEG,1), size(stimlockedEEG,2), 4));      
+        tmpconf_x_rlEEG_wprestim=[];
         
             %changed to corrects only:
             if itype==1
@@ -72,6 +75,7 @@ for ippant=1:length(pfols)
         
         respEEGd = resplockedEEG(:,:,partBindx);
         stimEEGd = stimlockedEEG(:,:,partBindx);
+        respEEGd_wprestim = resplockedEEG_stimbaserem(:,:,partBindx);
         
         %%
         %now take terciles, based on conf judgements:        

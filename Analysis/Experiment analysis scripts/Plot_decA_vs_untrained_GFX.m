@@ -2,7 +2,8 @@
 %plot GFX of decoder trained on part A C vs E, on untrained trials.
 
 
-
+% baselinetype=1; % normal response locked.
+baselinetype=2; % response locked with prestim baseline
 
 
 jobs.concat_GFX=0;
@@ -14,8 +15,16 @@ job.plotERNorPe=2; % 1 or 2.
 useVorScalpProjection= 1;
 
 %>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+   
+if baselinetype==1
+    savename= 'GFX_DecA_Pe_predicts_untrainedtrials';
+elseif baselinetype==2
+    savename= 'GFX_DecA_Pe_predicts_untrainedtrials_wprestim';
+end
+
+
 %% % load and concat across subjects (if previous step was re-run).
-if jobs.concat_GFX==1;
+if jobs.concat_GFX==1
     
     [GFX_classifierA_topo_ERN,GFX_classifierA_onERP_ERN ]=deal([]);
     [GFX_classifierA_topo_Pe,GFX_classifierA_onERP_Pe ]=deal([]);
@@ -29,7 +38,13 @@ if jobs.concat_GFX==1;
         cd(eegdatadir)
         cd(pfols(ippant).name);
         %% load the Classifer and behavioural data:
-        load('Classifier_trained_A_resp_Pe_window');
+        if baselinetype==1
+            load('Classifier_trained_A_resp_Pe_window');
+        else
+            load('Classifier_trained_A_resp_Pe_window_wprestim');
+        end
+        
+        %%
         load('Epoch information', 'ExpOrder');
         
         if useVorScalpProjection== 1; % use the raw discrim vector.
@@ -61,8 +76,8 @@ if jobs.concat_GFX==1;
 %     GFX_classifierA_onERP_Pe_fromscalp = GFX_classifierA_onERP_Pe;
 %     save('GFX_DecA_predicts_untrainedtrials', ...
 %         'GFX_classifierA_onERP_Pe_fromscalp', '-append');
-        
-    save('GFX_DecA_Pe_predicts_untrainedtrials', ...
+     
+    save(savename, ...
         'GFX_classifierA_onERP_Pe',...
         'GFX_classifierA_topo_Pe', ...
         'vis_first', 'aud_first', 'Xtimes');
@@ -85,7 +100,8 @@ redCol =cmap(6,:); %reddish
     %load if necessary.
     cd([eegdatadir filesep 'GFX']);
     if ~exist('GFX_classifierA_onERP_ERN', 'var');
-        load('GFX_DecA_predicts_untrainedtrials');
+        
+        load(savename);
     end
     
     smoothON=0; % apply moving window av to prettify plot.
@@ -114,64 +130,61 @@ redCol =cmap(6,:); %reddish
     end
         
     
-for iorder = 1%:3
-    switch iorder
-        case 1
-            useppants = vis_first;
-            orderis = 'visual-audio';
-        case 2
-            useppants = aud_first;
-            orderis = 'audio-visual';
-            
-        case 3
-            useppants = 1:length(pfols);
-            orderis = 'all';
-    end
+    
+    
+    useppants = 1:length(pfols);
+    orderis = 'all';
+    
     figure(1); clf;
     set(gcf, 'units', 'normalized', 'Position', [0.1 0.1 .7 .7]); shg
     leg=[];
     
-    for itestdata = 1:6
+    for itestdata = 1:6 % C,E, diff, C,E,diff.
         
         switch itestdata
             case 1 % corr A
-            subplot(2, 2, 1);
-            
-            usecol = grCol;
-            modality= 'visual';
+                subplot(2, 2, 1);
+                
+                usecol = grCol;
+                modality= 'visual';
+                pheight = .36;
             case 2 % corr B
                 subplot(2, 2, 3);
-            usecol = grCol;
-                        modality= 'auditory';
-
+                usecol = grCol;
+                modality= 'auditory';
+                pheight = .36;
+                
             case 3
                 %errA
                 subplot(2, 2, 1);
                 usecol= redCol;
                 title({['\rmtrain on \bfvisual (Pe)'];['\rmtest on \bfvisual \rmresponse']})
-            modality= 'visual';
+                modality= 'visual';
+                pheight = .38;
             case 4 % err B
                 subplot(2, 2, 3);
                 title({['\rmtrain on \bfvisual (Pe)'];['\rmtest on \bfauditory \rmresponse']})
                 usecol= redCol;
                 modality = 'auditory';
+                pheight = .38;
+            case 5 
+                modality= 'visual';
+                pheight = .37;
+            case 6
+                modality= 'auditory';
                 
         end
 
-
-            plotdata = squeeze(GFX_classifierA_onERP(useppants,itestdata,:));
-      if itestdata==5 % pCorrect
+        
+        plotdata = squeeze(GFX_classifierA_onERP(useppants,itestdata,:));
+        if itestdata==5 % pCorrect
             subplot(2,2,2);
-%             %E + inverse Corr.
-%             plotdata = squeeze(GFX_classifierA_onERP(useppants,3,:))+ (.5-squeeze(GFX_classifierA_onERP(useppants,1,:)));
             usecol='k';
         elseif itestdata==6
             subplot(2,2,4);
-%             plotdata = squeeze(GFX_classifierA_onERP(useppants,4,:))+ (.5-squeeze(GFX_classifierA_onERP(useppants,2,:)));
-%             usecol='k';
+            %             plotdata = squeeze(GFX_classifierA_onERP(useppants,4,:))+ (.5-squeeze(GFX_classifierA_onERP(useppants,2,:)));
+            %             usecol='k';
         end
-        % for plots, zero on y axis:
-%         plotdata = plotdata-0.5; 
         
         if smoothON==1
             winsize = 256/20;
@@ -179,8 +192,9 @@ for iorder = 1%:3
                 plotdata(ip,:) = smooth(plotdata(ip,:), winsize);
             end
         end
-        stE = CousineauSEM(plotdata);
         
+        % 
+        stE = CousineauSEM(plotdata);        
         sh= shadedErrorBar(Xtimes, squeeze(mean(plotdata,1, 'omitnan')), stE, {'color', usecol},1);
         
         
@@ -201,7 +215,7 @@ for iorder = 1%:3
             [~, pvals(itime)] = ttest(plotdata(:,itime), .5);
             
             if pvals(itime)<.05
-                text(Xtimes(itime), [.40+(0.01*itestdata)], '*', 'color', usecol,'fontsize', 25);
+                text(Xtimes(itime), [pheight], '*', 'color', usecol,'fontsize', 25);
             end
         end
         %    pvals(pvals>=.05) = nan;
@@ -210,9 +224,9 @@ for iorder = 1%:3
         % text(Xtimes(pvals<.05), [0.2], '*',  'color', cmap(itestdata,:), 'FontSize', 5)
     
     if mod(itestdata,2)==0
-    ylim([.4 .6]);
+    ylim([.35 .6]);
     else
-        ylim([.40 .8])
+        ylim([.35 .8])
     end
     
     % add extra plot elements:
@@ -225,7 +239,14 @@ for iorder = 1%:3
         pch = patch([windowvec(1) windowvec(1) windowvec(2) windowvec(2)], [ylims(1) ylims(2) ylims(2) ylims(1)], [.8 .8 .8]);
         pch.FaceAlpha= .1;
     end
+    if baselinetype==1
     xlabel(['Time since ' modality ' response (ms)'])
+    elseif baselinetype==2
+        xlabel(['Time since ' modality ' response (w/prestim) (ms)'])
+        
+    end
+    
+    
     if itestdata<5
         ylabel('p(Error)');
     else
@@ -261,12 +282,16 @@ title([''])
     
     %%
     set(gcf, 'color', 'w')
-    printname = ['GFX classifier trained on Correct part A-' winwas ', w-' num2str(nIter) 'reps (fromscalp)' ];
-    
+    if baselinetype==1
+    printname = ['GFX classifier trained on Correct part A-' winwas ', w-' num2str(nIterations) 'reps (fromscalp)' ];
+    elseif baselinetype==2
+            printname = ['GFX classifier trained on Correct part A-' winwas ', w-' num2str(nIterations) 'reps (fromscalp)_wprestim' ];
+    end
+    %%
     if smoothON==1
         printname = [printname ', smoothed'];
     end
     print('-dpng', printname);
     
-end
+
 end % print job.

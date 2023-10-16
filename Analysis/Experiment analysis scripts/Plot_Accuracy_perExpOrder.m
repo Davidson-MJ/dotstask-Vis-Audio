@@ -7,7 +7,7 @@
 %    Grand total (all conditions combined).
 %    Split by order (V-A, A-V). 
 
-cd(behdatadir)
+% cd(behdatadir)
 
 jobs=[];
 
@@ -33,18 +33,23 @@ audcolour=cmap(9,:);
 %plots individual participant level histograms of RT, as well as Bar
 %%
 cd(behdatadir)
+
+% cd(eegdatadir)
 pfols = dir([pwd filesep '*_p*']);
 %%
 if jobs.concat_Acc
  for ippant = 1:length(pfols)
      
     cd(behdatadir);
-    cd(pfols(ippant).name);
-    
+    cd(pfols(ippant).name);    
     lfile = dir([pwd filesep '*final' '*']);
+    load(lfile.name, 'alltrials', 'subject', 'cfg');
     
-    load(lfile.name);
-    
+%     cd(eegdatadir);
+%         cd(pfols(ippant).name);    
+%     load('Epoch information', 'BEH_matched');
+%     alltrials = BEH_matched; % note that 'alltrials' is also in the behdatadir.
+
     %use file name for debugging plots
     pname = ['p_' subject.id];
     pnames{ippant} = pname;

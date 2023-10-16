@@ -39,8 +39,10 @@ clf
 usetopospot=1; % increments on figure 4 showing topos.
 
 %%%% first plot the stimulus locked data, then the response locked:
-avRTs= [0.2662, 0.2322;... % C, E (vis)
+avRTs= [0.4662, 0.4322;... % C, E (vis)
     0.98, 1.27]; % C E  (Aud) - > copied from behavioural analysis.
+
+%stim, resp, or resp with prestim baseline?
 for idata = 3%1:2
     if idata==1 % stimulus locked.
         subspots = [1,5];
@@ -71,7 +73,7 @@ for idata = 3%1:2
         corrB = GFX_audrespCOR_stimbase;
         errB = GFX_audrespERR_stimbase;
         
-        xlabis= 'response (stimbase)';
+        xlabis= 'response (w/prestim)';
         
         
         
@@ -85,15 +87,19 @@ for idata = 3%1:2
                 datac= corrA;
                 datae= errA;
                 %             titleis=  ['Visual ' xlabis ];
+                if idata>1
                 titleis=  ['Visual decision'];
+                else
+                    titleis ='Visual stimulus';
+                end
                 meanoverChans_tmp= meanoverChans_VIS;
                 stimbar = [0 300];
                 
                 % topo times to patch: (stim locked)
                 showt1 = [100,200]; %ms;
                 showt2=[250,400]; % ms
-                % when looking at difference ERP:
                 
+                % when looking at difference ERP:                
                 difft1 = [100,200];
                 difft2 = [300, 500]; % ?
                 
@@ -109,10 +115,11 @@ for idata = 3%1:2
                 showt2=[250,400]; % ms
                 % when looking at difference ERP:
                 
-                difft1 = [100,200];
-                difft2 = [300, 500]; % ?
-                
+                if idata>1
                 titleis=  ['Auditory decision'];
+                else
+                    titleis ='Auditory stimulus';
+                end
                 meanoverChans_tmp= meanoverChans_AUD;
                 stimbar = [0 100]; %!Check!
                 %             use_xvec = plotXtimes;
@@ -120,14 +127,18 @@ for idata = 3%1:2
         
         
         % note that if response locked data, use ERN ,Pe windows:
-        if idata==2
+        if idata==2 || idata==3
+            if ixmod==1
             showt1 = [-50,150]; %ms;
             showt2=[250,450];
-            difft1 = [-50,150]; %ms;
-            difft2=[250,450];
-            meanoverChans_tmp = meanoverChans_POCC;
-            
-            %         meanoverChans_tmp = meanoverChans_RESP;
+            else
+                showt1=[-400 -200];
+                showt2 = [400 700];
+            end
+%             meanoverChans_tmp = meanoverChans_POCC;           
+%                     meanoverChans_tmp = meanoverChans_RESP;
+
+        meanoverChans_tmp =unique([meanoverChans_POCC,meanoverChans_RESP]);
         end
         
         
@@ -170,20 +181,28 @@ for idata = 3%1:2
             if iplotd<3 % cirrect, error ,diff
                 figure(1);
                 subplot(2,2,ixmod);
-                ylim([-2 2])
-                xlim([- 200 1000]);
+                %set y limits:
+                
+                if idata==1 %stimlocked                    
+                ylim([-2.5 4])
+                
+                elseif idata==2 %resplocked
+                    ylim([-2.5 3.5]);
+                elseif idata==3
+                    ylim([-2.5 5]);
+                end
+                
+                xlim([- 500 1000]);
                 title([titleis])
                 
             else % difference waveform: update info for next plot:
                 legh=[];
                 subplot(2,2,ixmod+2);
-                ylim([-1 3])
+                ylim([-2 3])
                 xlim([- 500 1000])
                 title('difference waveform')
                 lgc=1;
-                
-                showt1 = difft1;
-                showt2= difft2;
+               
             end
             
             %place patches first (as background)
@@ -192,19 +211,29 @@ for idata = 3%1:2
             hold on
             if iplotd==3 % show on difference
                 %plot topo patches.
+                if idata~=1 %skip first patch for vis stim locked.
                 ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [.9 .9 .9]);
                 ph.FaceAlpha=.4;
                 ph.LineStyle= 'none';
+                end
                 ph=patch([showt2(1) showt2(1) showt2(2) showt2(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [.9 .9 .9]);
                 ph.FaceAlpha=.4;
                 ph.LineStyle= 'none';
                 
             end
+            
             % %% now add the RT.
-            % if iplotd<3 && idata==1
-            % showRT = avRTs(ixmod, iplotd);
-            % plot([showRT*1000, showRT*1000], [0 1], '-o', 'color', colsAre{iplotd})
-            % end
+            if iplotd<3 && idata==1
+%             showRT = avRTs(ixmod, iplotd);
+%             plot([showRT*1000, showRT*1000], [-1 0], '-o', 'color', colsAre{iplotd})
+               %plot stim bar to aid interp of ERP waveforms
+        
+             xvs= [stimbar(1) stimbar(1) stimbar(2) stimbar(2)];
+             yvs= [-2.4 -2.1 -2.1 -2.4];
+             pch=patch(xvs, yvs, ['k']);
+             pch.FaceColor= [.8 .8 .8];
+             
+            end
             hold on
             % mean over relevant channels:
             tmp_plotData = squeeze(mean(plotD{iplotd}(:, meanoverChans_tmp,:),2));
@@ -235,11 +264,30 @@ for idata = 3%1:2
             % ax= subplot('Position', newpos)
             
             
+            %% add sig for id==3?
+           if iplotd==3
+              pvals =[];
+              for itime= 1:length(use_xvec)
+                  
+                 [h,pvals(itime),ci,stat] = ttest(tmp_plotData(:,itime),0); 
+                  
+                 if pvals(itime)<.05
+                     text(use_xvec(itime), -1.5, '*','fontsize',25, 'HorizontalAlignment', 'center');
+                 end
+              end
+               
+               
+               
+           end
+            
+            
+            
+            
             if iplotd==2 && ixmod==1
-                legend([legh(1) legh(2)], {'Correct', 'Error'}, 'autoupdate', 'off');
+             lg=   legend([legh(1) legh(2)], {'Correct', 'Error'}, 'autoupdate', 'off', 'Orientation','Horizontal');
                 
             elseif iplotd==3 && ixmod==1
-                legend([legh(1)], {'E-C'}, 'autoupdate', 'off');
+                legend([legh(1)], {'Err-Corr'}, 'autoupdate', 'off');
             end
             
             lgc= lgc+1;
@@ -307,14 +355,7 @@ for idata = 3%1:2
         end % after all 3
         % tidy axes:
         
-        %plot stim bar to aid interp of ERP waveforms
-        
-        %      xvs= [stimbar(1) stimbar(1) stimbar(2) stimbar(2)];
-        %      yvs= [-4.95 -5 -5 -4.95];
-        %      pch=patch(xvs, yvs, ['k']);
-        %      if ixmod==2 % add second tone.
-        %      patch(xvs+600, yvs,['k'])
-        %      end
+     
         %      xlim([])
         %      legend([p1, p2, sh.mainLine, pch], {'cor', 'err', 'diff','stimulus'}, 'location', 'NorthEast')
         %      legend([p1, p2, pch], {'cor', 'err', 'stimulus'}, 'location', 'NorthEast')
@@ -327,7 +368,8 @@ for idata = 3%1:2
         
         
     end
-end % stim and response locked
+end
+%% stim and response locked
 colormap('inferno')
 cd(figdir)
 % cd('Stimulus locked ERPs')

@@ -3,6 +3,11 @@
 % classifer decoding accuracy on second half.
 
 
+
+% baselinetype= 1; % response locked
+baselinetype= 2; % response locked with pre-stimulus baseline (sanity check)
+
+
 %%
 %for all participants, specify output
 
@@ -18,7 +23,7 @@ nIter = 20; % 10; % n iterations, final output is the average spatial discrimina
 
 useERNorPE=2;
 meanoverChans_RESP = [4,38,39,11,12,19,47,46,48,49,32,56,20,31,57]; % show channel ERP:
-for ippant =1:length(pfols);
+for ippant =2:length(pfols)
     
 pcounter=1;
 
@@ -68,7 +73,11 @@ dec_params.training_window_ms= [200 350]; % Pe
 end
 
 %create data for classifier:
+if baselinetype==1
 allD = resplockedEEG;
+else
+    allD= resplockedEEG_stimbaserem;
+end
 dec_params.data = allD;
 
 %save correct trial assignment (correct and errors).
@@ -94,14 +103,22 @@ if useERNorPE==1
 
 DEC_ERN_window = DECout;
 DEC_ERN_windowparams = dec_params;
-save('Classifier_trained_A_resp_ERN_window','DEC_ERN_window', 'DEC_ERN_windowparams','-append');
+
+if baselinetype==1
+    save('Classifier_trained_A_resp_ERN_window','DEC_ERN_window', 'DEC_ERN_windowparams','-append');
 else
-DEC_Pe_window = DECout;
-DEC_Pe_windowparams = dec_params;    
-save('Classifier_trained_A_resp_Pe_window', 'DEC_Pe_window','DEC_Pe_windowparams');
+    save('Classifier_trained_A_resp_ERN_window_wprestim','DEC_ERN_window', 'DEC_ERN_windowparams','-append');
 end
+else
+    DEC_Pe_window = DECout;
+    DEC_Pe_windowparams = dec_params;
+    if baselinetype==1
+        save('Classifier_trained_A_resp_Pe_window', 'DEC_Pe_window','DEC_Pe_windowparams');
+    else
+        save('Classifier_trained_A_resp_Pe_window_wprestim', 'DEC_Pe_window','DEC_Pe_windowparams');
+    end
 
-
+end
 
 %% Now also create classifer for part B.
 % 

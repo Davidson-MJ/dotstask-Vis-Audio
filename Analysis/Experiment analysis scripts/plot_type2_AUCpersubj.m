@@ -11,7 +11,7 @@ job.plotperppant=1; % using concat GFX
 job.plotGFX =1;
 
 %%
-cd(eegdatadir);
+cd(eegdatadir); % note now using the BEH_matched
 pfols = dir([pwd filesep '*p_*']);
 
 %%
@@ -19,7 +19,7 @@ storeAUC_ax = nan(length(pfols), 2,100); % for plotting.
 storeAUC = nan(1,length(pfols)); % AUC
 Expmodality = cell(1,length(pfols));
 
-if job.calcperppant;
+if job.calcperppant
     for ippant = 1:length(pfols)
         
         %%
@@ -29,9 +29,9 @@ if job.calcperppant;
         %%
         load('Epoch information', 'BEH_matched', 'corBindx', 'errBindx', 'ExpOrder');
         
-        allB = [corBindx, errBindx];
-        allScores = [BEH_matched(allB).confj];
-        allLabels = double([BEH_matched(allB).cor]); % 1 ior 0.
+        allB = [corBindx; errBindx];
+        allScores = [BEH_matched.confj{allB}];
+        allLabels = double([BEH_matched.cor(allB)]); % 1 ior 0.
         
         % calc AUC for all trials.
         [x, y, ~ ,AUC]= perfcurve(allLabels, allScores, 1);

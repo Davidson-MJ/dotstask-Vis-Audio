@@ -121,7 +121,8 @@ end
 end
 %%
 if jobs.plotPFX_conf
-   for ippant=1:length(pfols)
+    %%
+   for ippant=8%:length(pfols)
        cd(behdatadir);
        cd(pfols(ippant).name);
         lfile = dir([pwd filesep '*final' '*']);

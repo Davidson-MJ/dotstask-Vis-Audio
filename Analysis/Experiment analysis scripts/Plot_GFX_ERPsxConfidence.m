@@ -78,7 +78,6 @@ meanoverChans_POCC = [20:31, 57:64];
 %      63     {'PO4'}
 %      64     {'O2' }
 
-showtoppotimes = [250 400; 750,900]; % ms for topo averages
 % showt1 = [800 900]; % ms for topo averages
 
 tcounter=1;
@@ -91,19 +90,19 @@ load('GFX_averageERPsxConf.mat');
 use_xvec = plotXtimes(1:size(GFX_conf_x_slEEG,3)); % adjusting for preprocessed length
 %
 figure(1);  clf;
-set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .4]);
+set(gcf, 'units', 'normalized', 'position', [0.1 .1 .8 .3],'color', 'w');
 figure(4); clf;
 
-set(gcf, 'units', 'normalized', 'position', [0 .45 .8 .4]);
 %     use_xvec =
 
 tpcounter=1; % topoplot counter.
-    for idtype = 3%1:3
+    for idtype = [3,4]%[3,4]%1:3 (stim locked, resp locked, rl subjcorr)
+        usechans = [meanoverChans_RESP, meanoverChans_POCC];
         switch idtype
             case 1
                 datac = GFX_conf_x_slEEG;
                 dtype = 'auditory stimulus onset';
-                usechans = [meanoverChans_RESP, meanoverChans_POCC];
+%                 usechans = [meanoverChans_RESP, meanoverChans_POCC];
             case 2
                 datac = GFX_conf_x_rlEEG; % response locked
                 dtype = 'auditory response onset';
@@ -112,9 +111,16 @@ tpcounter=1; % topoplot counter.
 %                 usechans = meanoverChans_Pe;
             case 3
                 
+                datac = GFX_conf_x_slEEG_subjCorr; % response locked
+                dtype = 'auditory stimulus onset';
+                showtoppotimes = [250 450]; % ms for topo averages
+
+          case 4
+                
                 datac = GFX_conf_x_rlEEG_subjCorr; % response locked
+                showtoppotimes = [750 950]; % ms for topo averages
+
                 dtype = 'auditory response onset';
-%           
         end
         
      
@@ -136,32 +142,36 @@ tpcounter=1; % topoplot counter.
            end
 
         
-        showt = [50, 300]; % times for topoplots to be displayed.
+        
     lg=[];
 
     figure(1); hold on;
     
-%     subplot(1,3,idtype); hold on
+    subplot(1,2,idtype-2); hold on
     
     ylim([-4 6]);
 % show patch first:
 ytx= get(gca, 'ylim');
 hold on
 %plot topo patches.
-% if idtype==2
+
 for itwin= 1:size(showtoppotimes,1)
 ph=patch([showtoppotimes(itwin,1) showtoppotimes(itwin,1) showtoppotimes(itwin,2) showtoppotimes(itwin,2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [.9 .9 .9]);
 ph.FaceAlpha=.4;
 ph.LineStyle= 'none';
 end
-% end
 
+
+
+%%
 nQuants= size(GFX_conf_x_slEEG,4);
 if nQuants==4
 topospots= [1,3,5,7,9,11, 2,4,6,8,10,12];% order for topoplots in FIgure 4
 else
     topospots= [1,2,7,8,3,4,9,10,5,6,11,12];
 end
+%%
+
     for iterc =1:nQuants
       
         datatoplot = squeeze(datap(:,:,iterc));
@@ -203,34 +213,38 @@ for itwin = 1:size(showtoppotimes,1)
              topoData =nanmean(gfx(:,[topot(1):topot(2)]),2) ;% mean within time points:
              topoplot(topoData, elocs, 'emarker2', {[usechans], '.' 'w'} );
 %              c=colorbar;
-             title([num2str(showt1(1)) '-' num2str(showt1(2)) 'ms (' dtype ' terc: ' num2str(iterc) ')'])
+             title([num2str(showtoppotimes(1)) '-' num2str(showtoppotimes(2)) 'ms (' dtype ' terc: ' num2str(iterc) ')'])
 % title(['split: ' num2str(iterc) ' time: ' num2str(itwin)])
 
 set(gca, 'fontsize', fntsize/2)
 caxis([-2 2]);
-set(gcf,'color', 'w')
+set(gcf,'color', [.9 .9 .9])
 tcounter=tcounter+1;
 
              
 end
 %%
 figure(10);
-subplot(3,1,idtype);
+subplot(4,1,idtype);
 topoData= ones(1,length(elocs));
 topoplot(topoData, elocs, 'emarker2', {[usechans], '.' 'm'}, 'whitebk', 'on' ,'conv', 'on','numcontour',1);
 cmapG=[.9 .9 .9];
 colormap(cmapG);
 shg
-             figure(1); hold on;
+
+
+figure(1); hold on;
 %              tpcounter= tpcounter+1;
              
 % ifr 
     end
-    
-    if idtype==2
+    %%
+    if idtype==4
+       
        hold on;
-       plot([800 800], [0 1], 'b-', 'linew', 2);
-        
+       p=plot([800 800], [0 2], ['b-'],'linewidth',3, 'MarkerFaceColor', 'b')
+       p=plot([800 800], [.3 .3], ['bv'], 'MarkerFaceColor', 'b','Markersize',10)
+
     end
 
 %% add ttests if nquants ==2
@@ -267,7 +281,7 @@ end
     plot(xlim, [0 0], 'k:')
     if idtype==2 && nQuants==4
     legend(lg, {'lowest confidence', 'lower confidence', 'higher confidence', 'highest confidence'}, 'location', 'NorthEast', 'fontsize', 12) ; 
-    elseif idtype==1 && nQuants ==2
+    elseif idtype==3 && nQuants ==2
         legend(lg, {'low confidence', 'high confidence'}, 'location','NorthWest');
     end
     set(gca, 'fontsize', 15);

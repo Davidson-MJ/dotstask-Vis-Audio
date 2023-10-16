@@ -121,7 +121,7 @@ if job1.calcindividual == 1
 
             if lindetrend==1
                 %% linearly detrend each channel, all trials. (type 2 for 
-                if itype<3
+                if itype<3 % one data type
                 EEGdetr = zeros(size(EEG_tmpsub1));
                 
                 for ichan=1:64
@@ -244,7 +244,7 @@ if job1.calcindividual == 1
         disp(['SAVING: >>> ' pfols(ippant).name])
 
 % save('participant EEG preprocessed', 'stimlockedEEG', 'resplockedEEG', 'plotERPtimes','-append');
-save('participant EEG preprocessed', 'stimlockedEEG', 'resplockedEEG', 'plotERPtimes');
+save('participant EEG preprocessed', 'stimlockedEEG', 'resplockedEEG', 'resplockedEEG_stimbaserem','plotERPtimes');
 
             save('PFX ERPs', ...           
             'corr_Vis_rl','err_Vis_rl',...
@@ -344,6 +344,8 @@ if job1.concat_GFX == 1
         'GFX_visstimCOR', 'GFX_visstimERR', ...
         'GFX_audstimCOR', 'GFX_audstimERR', ...
         'GFX_visstimERP', 'GFX_audstimERP',... 
+        'GFX_visrespCOR_stimbase','GFX_visrespERR_stimbase',...
+        'GFX_audrespCOR_stimbase','GFX_audrespERR_stimbase',...       
         'plotXtimes',...
         'vis_first', 'aud_first');
 end

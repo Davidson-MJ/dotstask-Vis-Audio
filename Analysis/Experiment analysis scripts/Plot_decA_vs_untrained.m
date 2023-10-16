@@ -4,9 +4,15 @@ elocs= readlocs('BioSemi64.loc');
 jobs.useERNorPe =2; % 1 or 2.
 useSingleorMeanvector= 2;% 2 % ahve tested performance, result is the same if we take the average.
 
+baselinetype= 1; % response locked
+baselinetype= 2; % response locked with pre-stimulus baseline (sanity check)
+
+
+
+
 % BOTH jobs performed within the for-loop (NEED TO FIX)
 
-jobs.calculate_perppant =1; % perform once (slow).
+jobs.calculate_perppant =0; % perform once (slow).
 jobs.plot_perppant=1;
 
 normON=1; % needed for this type of decoding. (match the processin call_classifier)
@@ -27,7 +33,13 @@ useVorScalpProjection= 1;
         sstr= pfols(ippant).name;
         %% load the Classifer and behavioural data:
 %               
+        if baselinetype==1
         load('Classifier_trained_A_resp_Pe_window');
+        elseif baselinetype==2
+            load('Classifier_trained_A_resp_Pe_window_wprestim');
+        end
+            
+            
 
         [PFX_classifierA_onERP_fromscalp, PFX_classifierA_onERP] =deal([]); % note that there will be an extra dimension, for each iteration.
         
@@ -38,6 +50,15 @@ useVorScalpProjection= 1;
         %how many times was the classifier repeated?
         nIterations = size(DEC_Pe_window.scalpproj,1);
         %% %%%%%%%%%% Crunch per ppant.  
+        
+                
+        if baselinetype==1
+        useEEG= resplockedEEG;
+        elseif baselinetype==2
+            useEEG= resplockedEEG_stimbaserem;
+        end
+            
+        
         if jobs.calculate_perppant==1;
            
 
@@ -45,11 +66,11 @@ useVorScalpProjection= 1;
 % first notm data if we need to
  % normalize by rescaling.
  if normON==1
-     data_norm = zeros(size(resplockedEEG));
-     [nchans, ~, ntrials] = size(resplockedEEG);
+     data_norm = zeros(size(useEEG));
+     [nchans, ~, ntrials] = size(useEEG);
      for ichan = 1:nchans
          for itrial=1:ntrials
-             temp = resplockedEEG(ichan,:,itrial);
+             temp = useEEG(ichan,:,itrial);
              % rescale
              temp=temp-(0.5*(min(temp)+max(temp)));
              if(min(temp)~=max(temp))
@@ -61,7 +82,7 @@ useVorScalpProjection= 1;
      end
      dataIN= data_norm;
  else
-     dataIN= resplockedEEG;
+     dataIN= useEEG;
  end            
 
 
@@ -86,7 +107,7 @@ useVorScalpProjection= 1;
                         case 5
 %                             tmptrials = sort([corAindx; errAindx]);
                             %use logical instead.
-                            tmptrials= zeros(1,size(resplockedEEG,3));
+                            tmptrials= zeros(1,size(useEEG,3));
                             tmptrials(corAindx)=1;
                             tmptrials(errAindx)=1;
                             
@@ -97,7 +118,7 @@ useVorScalpProjection= 1;
                             truth= truth(tmptrials);
                              case 6
                             %use logical instead.
-                            tmptrials= zeros(1,size(resplockedEEG,3));
+                            tmptrials= zeros(1,size(useEEG,3));
                             tmptrials(corBindx)=1;
                             tmptrials(errBindx)=1;
                             
@@ -199,14 +220,27 @@ useVorScalpProjection= 1;
             if jobs.useERNorPe==1;
                 PFX_classifierA_onERP_ERNtrained = PFX_classifierA_onERP;
                 PFX_classifierA_onERP_ERNtrained_fromscalp = PFX_classifierA_onERP_fromscalp;
+                
+                if baselinetype==1
                 save('Classifier_trained_A_resp_ERN_window', 'PFX_classifierA_onERP_ERNtrained', ...
                     'PFX_classifierA_onERP_ERNtrained_fromscalp','-append')
-            elseif jobs.useERNorPe==2;
+                elseif baselinetype==2
+                    save('Classifier_trained_A_resp_ERN_window_wprestim', 'PFX_classifierA_onERP_ERNtrained', ...
+                    'PFX_classifierA_onERP_ERNtrained_fromscalp','-append')
+                end
+                    
+            elseif jobs.useERNorPe==2
                 
                 PFX_classifierA_onERP_PEtrained = PFX_classifierA_onERP;
                 PFX_classifierA_onERP_PEtrained_fromscalp = PFX_classifierA_onERP_fromscalp;
+                if baselinetype==1
                 save('Classifier_trained_A_resp_Pe_window', 'PFX_classifierA_onERP_PEtrained', ...
                     'PFX_classifierA_onERP_PEtrained_fromscalp','-append')
+                elseif baselinetype==2
+                     save('Classifier_trained_A_resp_Pe_window_wprestim', 'PFX_classifierA_onERP_PEtrained', ...
+                    'PFX_classifierA_onERP_PEtrained_fromscalp','-append')
+                end
+                    
             end
         disp(['fin saving for ippant ' num2str(ippant)])
         end
@@ -316,14 +350,23 @@ useVorScalpProjection= 1;
         %% print results
        cd(figdir)
         %%
-        try cd(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window']);
-        catch 
-            mkdir(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window'])
-            cd(['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window']);
+        if baselinetype==1
+            printdir = ['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window'];
+        elseif baselinetype==2
+            printdir = ['Classifier Results' filesep 'PFX_Trained on resp Errors in part A, Pe window wprestim'];
         end
+        
+        
+        try cd(printdir);
+        catch 
+            mkdir(printdir)
+            cd(printdir)
+        end
+        
+            
         %%
         set(gcf, 'color', 'w')
-        print('-dpng', [sstr ', w-' num2str(nIter) 'reps (Pe)']);
+        print('-dpng', [sstr ', w-' num2str(nIterations) 'reps (Pe)']);
         
         
         end % job: plot

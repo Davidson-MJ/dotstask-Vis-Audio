@@ -9,8 +9,8 @@ setdirs_DotsAV;
 job.trainclassifierpartA_Pe_CvsE            =0; % first version, with a fixed time window.
 
 %perform calc, then plot the above:
-job.plot_Pe_vs_Untrainedtrials            = 1;   % applies the discrim to untrained data. saves. plots PFX
-job.plot_Pe_vs_Untrainedtrials_GFX        = 1;   % concats after the above. then plots GFX
+job.plot_Pe_vs_Untrainedtrials            = 0;   % applies the discrim to untrained data. saves. plots PFX
+job.plot_Pe_vs_Untrainedtrials_GFX        = 0;   % concats after the above. then plots GFX
 job.plot_Pe_vs_Confidence_split            =0;
 job.plot_Pe_vs_SLIDINGwindow_corr_in_B      =0;
    
@@ -23,7 +23,7 @@ job.trainclassifier_CvsE_diagonal=1; % diagonal training and testing (same axis)
 % Call_classifier... .m
 
 % perform calc, then plot the above
-job.calcplot_diagonal_vs_Untrainedtrials   = 1;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
+job.calcplot_diagonal_vs_Untrainedtrials   = 0;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
 job.plot_GFX_diagonal                       =  0 ; % shows diagonal decoding for all time points.
 job.plot_GFX_diagonal_MSver1             =0; % shows just within same condition, with overall accuracy as the main feature (mean Errors and Correct performance).
 
@@ -39,8 +39,9 @@ job.plot_GFX_timegen                    =0;
 %confidence.
 job.calcPlot_timegen_slidingCorr =0;
 
+ %pretty  Manuscript versions:
 
-
+ job.plot_GFX_timegen_MSVER =0;
 %%
  % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  % BEGIN analysis of jobs above
@@ -238,8 +239,8 @@ if job.calcplot_diagonal_timegen==1 % participant level effects.
     cfg.eegdatadir= eegdatadir;
     cfg.behdatadir= behdatadir;
     cfg.figdir= figdir;
-    cfg.crunchPPant = 1;
-    cfg.justplot= 0;
+    cfg.crunchPPant = 0;
+    cfg.justplot= 1; %(these are participant level effects)
 
     % can cycle through different combinations as we plase:
     cfg.singleorAvIterations = 2; % 1 for single iterations (slow), 2 for average of iteration discrim vectors.
@@ -250,7 +251,7 @@ if job.calcplot_diagonal_timegen==1 % participant level effects.
 
     %test (test the above on the below).
     cfg.expPart_test ='B';
-    cfg.EEGtype_test= 'stim';
+    cfg.EEGtype_test= 'resp';
     % ^ will cycle through all time points.
 
 Plot_decA_diagonal_timegen(cfg);
@@ -264,7 +265,7 @@ if job.plot_GFX_timegen
     cfg.behdatadir= behdatadir;
     cfg.figdir= figdir;
 
-    cfg.concat = 1;
+    cfg.concat = 0;
     cfg.justplot= 1;
 
 
@@ -281,6 +282,43 @@ if job.plot_GFX_timegen
     
 end
 
+
+%%
+% the MS version of the time-gen results (4 panels).
+if job.plot_GFX_timegen_MSVER ==1
+    %%
+     cfg=[];
+    cfg.pfols=pfols;
+    cfg.eegdatadir= eegdatadir;
+    cfg.behdatadir= behdatadir;
+    cfg.figdir= figdir;
+
+    cfg.concat = 0;
+    cfg.justplot= 1;
+
+
+    
+    % trained (use which decoder as our trained set->)
+    expPart_train ={'A', 'A', 'A', 'A'};
+    EEGtype_train = {'stim', 'stim', 'resp', 'resp'};
+
+    %test (test the above on the below).
+    expPart_test ={'B', 'B', 'B', 'B'};
+    EEGtype_test= {'stim', 'resp', 'stim', 'resp'};
+    
+    for icomp=1:4
+        cfg.expPart_train = expPart_train{icomp};
+        cfg.EEGtype_train = EEGtype_train{icomp};
+        cfg.expPart_test = expPart_test{icomp};
+        cfg.EEGtype_test = EEGtype_test{icomp};
+        cfg.pcounter= icomp;
+    Plot_GFX_DEC_timegen_msver1(cfg); % as above, but we have trained and tested along the same data points.
+    
+    end
+end
+
+
+%%
 if job.calcPlot_timegen_slidingCorr==1
 
 
