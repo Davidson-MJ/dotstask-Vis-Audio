@@ -11,13 +11,13 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 %amended 23/06/20 -MD
 
 baselinetype=1; % for response-locked with response baseline
-baselinetype=2;% for response-locked with prestimulus baseline
+% baselinetype=2;% for response-locked with prestimulus baseline
 
 job1.calcandconcat_PFX =0;
 job1.plotPFX=0;
-job1.plotGFX=1;
+job1.plotGFX=0;
 job1.plotGFX_MS=0; % single plot of one condition
-job1.plotGFX_MS2=0; % 2x2 plot of interest 
+job1.plotGFX_MS2=1; % 2x2 plot of interest 
 
 
 elocs = readlocs('BioSemi64.loc');
@@ -31,7 +31,10 @@ savenamecell= {'GFX_DecA_Pe_slidingwindow_predictsB_Behav',...
                 'GFX_DecA_Pe_slidingwindow_predictsB_Behav_wprestim'};
 savename= savenamecell{baselinetype};
 %
-
+    
+    ylabsare= {'confidence', 'rt', 'confidence'};
+    titlesare= {'corrects', 'errors', 'all'};
+    ylimsAre= [-.15 .15; -.2 .2; -.15 .15];
 
 %%
 if job1.calcandconcat_PFX ==1
@@ -692,7 +695,7 @@ if job1.plotGFX_MS2==1
     
     
     % if the last one, also plot AUC split.
-    if itrialtype==3
+    if itrialtype==2 % was 3
         subplot(2,2,4)
         shleg=[];
         for isubs=2:3 % plot the total data first (each plot)

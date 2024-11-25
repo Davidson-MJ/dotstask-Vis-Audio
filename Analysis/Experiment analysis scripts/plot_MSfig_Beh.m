@@ -268,6 +268,7 @@ for idtype=1:4
     dataX{1} = b(:,1);
     dataX{2} = b(:,2);
     bh =rm_raincloud(dataX', [cmap(2,:)]);
+    
    if idtype>1
     % change colours if RTs:
     % change colours

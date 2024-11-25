@@ -4,8 +4,8 @@ try homedir='C:\Users\mdav0285\Documents\GitHub\dotstask-Vis-Audio';
 cd(homedir);
 catch
     
-%     homedir =['/Users/matthewdavidson/Documents/DATA/dotstask- Vis+Audio EXP'];
-homedir = 'C:\Users\mdav0285\Documents\GitHub\dotstask-Vis-Audio';
+    homedir =['/Users/matthewdavidson/Documents/DATA/dotstask- Vis+Audio EXP'];
+% homedir = 'C:\Users\mdav0285\Documents\GitHub\dotstask-Vis-Audio';
 end
 
 addpath(genpath(homedir));
