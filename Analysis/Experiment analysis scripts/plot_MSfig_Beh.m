@@ -145,11 +145,11 @@ pfols= dir([pwd filesep '*_p*']);
             end
             
             
-            ReactionTimesALL(ic,ippant).mean = nanmean(thisRT);
+            ReactionTimesALL(ic,ippant).mean = mean(thisRT, 'omitnan');
 %             ReactionTimesALL(ic,ippant).all = [thisRT];
 %             CorErrcountsALL(ic, ippant) = length(thisRT);
 %             
-            RTs_byAorB(ic,ippant) = nanmean(thisRT);
+            RTs_byAorB(ic,ippant) = mean(thisRT, 'omitnan');
           
         end        
         
