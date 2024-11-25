@@ -305,8 +305,11 @@ end % each plot.
         %% print results
         cd(cfg.figdir)
         %
-        cd(['Classifier Results' filesep 'PFX_Trained on ' cfg.EEGtype_train ' Errors in part ' cfg.expPart_train ' timegen']);
-
+        try cd(['Classifier Results' filesep 'PFX_Trained on ' cfg.EEGtype_train ' Errors in part ' cfg.expPart_train ' timegen']);
+        catch
+            mkdir(['Classifier Results' filesep 'PFX_Trained on ' cfg.EEGtype_train ' Errors in part ' cfg.expPart_train ' timegen'])
+            cd(['Classifier Results' filesep 'PFX_Trained on ' cfg.EEGtype_train ' Errors in part ' cfg.expPart_train ' timegen'])
+        end
         %%
         set(gcf, 'color', 'w');
         printname= [sstr ', w-' num2str(nIterations) 'reps ',...

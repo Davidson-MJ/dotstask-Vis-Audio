@@ -40,8 +40,12 @@ if jobs.concat_GFX==1;
     cd('GFX')
     %other plot features:
         
-    save(['GFX_' savename], ...
+    try save(['GFX_' savename], ...
         'GFX_classifier_timegen','Xtimes','GFX_culsterstats','-append');
+    catch
+        save(['GFX_' savename], ...
+        'GFX_classifier_timegen','Xtimes','GFX_culsterstats');
+    end
 %     
     
 end % concat job
@@ -223,12 +227,13 @@ if ~isfield(GFX_clusterstats(iplot), 'criticalQuantiles') || GFX_clusterstats(ip
     histogram(clusterResults, nPerm);
     hold on;
     plot([obsV,obsV], ylim, 'r-');
-    y= quantile(clusterResults,[.01 .5 .99]);
+    y= quantile(clusterResults,[.01 .5 .99]); % p<.001 cluster correct
     for iy=1:length(y);
         plot([y(iy),y(iy)], ylim, 'b-');
         %
     end
     GFX_clusterstats(iplot).nPerm = nPerm;
+    GFX_clusterstats(iplot).clusterResults = clusterResults;
     GFX_clusterstats(iplot).criticalQuantiles = y;
       
     save(['GFX_' savename], ...
@@ -238,52 +243,55 @@ else % already completed.
     disp(['using presaved null distribution cluster quantiles']);
     y = GFX_clusterstats(iplot).criticalQuantiles;
     
-end
+end % if
 %%
 figure(1);
 
 %%
-% only use those clusters which exceed our 95% CV
+% only use those clusters which exceed our upper CI (now .99)
 plotcluster= clustertestStat>=y(3);
 % Overlay the boundaries on the image
 Bplot= B_obs(plotcluster);
 hold on
 for k = 1:length(Bplot)
     boundary = Bplot{k};
-    % determine if pos or negative:
+    % determine if pos or negative: (change colour)
       
     Gm= squeeze(mean(useD(:,boundary(:,2), boundary(:,1)),1));
     posNeg= mean(Gm(:));
+    
     if posNeg<0.5
         clustCol= [.7 .7 1];
     else
 
         clustCol= [1 .7 .7];
     end
+%override
 clustCol= 'w';
+
     plot(Xtimes(boundary(:,2)), Xtimes(boundary(:,1)), 'color',clustCol, 'LineWidth', 2)
 end
 
 
-elseif iplot==3  && performClust==0 % just plot the (non corrected) cluster.
-    %%
-    Bplot= B_obs;
-    hold on
-    for k = 1:length(Bplot)
-        boundary = Bplot{k};
-        % determine if pos or negative:
-        
-        Gm= squeeze(mean(useD(:,boundary(:,2), boundary(:,1)),1));
-        posNeg= mean(Gm(:));
-        if posNeg<0.5
-            clustCol= [.7 .7 1];
-        else
-            
-            clustCol= [1 .7 .7];
-        end
-        clustCol= 'b';
-        plot(Xtimes(boundary(:,2)), Xtimes(boundary(:,1)), 'color',clustCol, 'LineWidth', 2)
-    end
+% % elseif iplot==3  && performClust==0 % just plot the (non corrected) cluster.
+%     %%
+%     Bplot= B_obs;
+%     hold on
+%     for k = 1:length(Bplot)
+%         boundary = Bplot{k};
+%         % determine if pos or negative:
+%         
+%         Gm= squeeze(mean(useD(:,boundary(:,2), boundary(:,1)),1));
+%         posNeg= mean(Gm(:));
+%         if posNeg<0.5
+%             clustCol= [.7 .7 1];
+%         else
+%             
+%             clustCol= [1 .7 .7];
+%         end
+%         clustCol= 'b';
+%         plot(Xtimes(boundary(:,2)), Xtimes(boundary(:,1)), 'color',clustCol, 'LineWidth', 2)
+%     end
     
     shg
 end

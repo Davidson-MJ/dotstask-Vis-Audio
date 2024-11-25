@@ -33,7 +33,7 @@ job.calcPlot_diagonal_slidingCorr               =0; % incl. calc, concat, PFX, G
 %% timegen. Note this uses the results from *diagonal above. 
 % all 4 combinations must have been completed (A stim,resp, B stim resp).
 
-job.calcplot_diagonal_timegen           =1; % calcs and saves per ppant first.
+job.calcplot_diagonal_timegen           =0; % calcs and saves per ppant first.
 job.plot_GFX_timegen                    =0;
 %plot results from classifier trained on part B of exp, on predicting
 %confidence.
@@ -246,11 +246,11 @@ if job.calcplot_diagonal_timegen==1 % participant level effects.
     cfg.singleorAvIterations = 2; % 1 for single iterations (slow), 2 for average of iteration discrim vectors.
 
     % trained (use which decoder as our trained set->)
-    cfg.expPart_train ='A';
+    cfg.expPart_train ='B';
     cfg.EEGtype_train = 'resp';
 
     %test (test the above on the below).
-    cfg.expPart_test ='B';
+    cfg.expPart_test ='A';
     cfg.EEGtype_test= 'resp';
     % ^ will cycle through all time points.
 
@@ -266,6 +266,7 @@ if job.plot_GFX_timegen
     cfg.figdir= figdir;
 
     cfg.concat = 0;
+    
     cfg.justplot= 1;
 
 
