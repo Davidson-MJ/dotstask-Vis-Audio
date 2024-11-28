@@ -397,6 +397,7 @@ if job1.plotGFX==1
     ylimsAre= [-.15 .15; -.2 .2; -.15 .15];
     
     allData= {GFX_DECA_Conf_corr_slid, GFX_DECA_RT_corr_slid,GFX_DECA_Conf_Subjcorr_slid};
+    
     for idata=[1,2,3]%:length(allData)
         ylabis= ylabsare{idata};
         dataIN= allData{idata};
@@ -602,9 +603,10 @@ if job1.plotGFX_MS2==1
 
         %load AUC for split:
         load('GFX_AUC_predicts_EEG', 'storeAUC'); % from plot_type2_AUCpersubj (jobs_BehaviouralAnalysis).
-        g1= find(storeAUC<median(storeAUC));
-        g2 = find(storeAUC>=median(storeAUC));
-    applysplit=1; % to plot the results after median split (1-0).
+        g1= find(storeAUC<=median(storeAUC));
+        g2 = find(storeAUC>median(storeAUC));
+
+        applysplit=1; % to plot the results after median split (1-0).
         baselinetype=1;
         savename = savenamecell{baselinetype};
         %
@@ -616,14 +618,18 @@ if job1.plotGFX_MS2==1
         load(savenamenow);
     
     % %% what to plot?
-    idata=3; 
+    idata=3; %(confidence, rts or confidence when subj correct)
+
     allData= {GFX_DECA_Conf_corr_slid, GFX_DECA_RT_corr_slid,GFX_DECA_Conf_Subjcorr_slid};
     ylabis= ylabsare{idata};
     dataIN= allData{idata};
     clf
+
+
     % corrects, errors, or all responses (within above datatypes)
     % note on the 4th plot , we will split by AUC
     subcounter=1;
+
     for itrialtype=1:3 
     titlesare= {'Correct trials', 'Errors (undetected)', 'All subjectively correct trials'};
     
@@ -634,14 +640,19 @@ if job1.plotGFX_MS2==1
     %
     
     figure(1); 
-     set(gcf, 'color', 'w', 'units', 'normalized', 'position', [0.1 0.1 .8 .6]);
-    subplot(2,2,subcounter)
+    %size at UTS: 
+    set(gcf, 'color', 'w', 'units', 'normalized', 'position', [0.1 0.1 .35 .6]);
+    fsize=20;
+
+     subplot(2,2,subcounter)
      % plot results across participants:
     showt1 = [200, 350];
     
     ylabsare= {'confidence', 'rt', 'confidence'};
     
-    ylimsAre= [-.1 .1; -.2 .2; -.1 .1];
+    ylimsAre= [-.15 .1; ...
+        -.25 .2;...
+        -.15 .1];
     
     
     %
@@ -669,16 +680,27 @@ if job1.plotGFX_MS2==1
     % add sig tests:
     %ttests
     pvals= nan(1, length(slideTimes));
+    tvals= nan(1, length(slideTimes));
     %
     for itime = 1:length(slideTimes)
-        [~, pvals(itime)] = ttest(dataINt(grsare{isubs},itime));
+        [~, pvals(itime),~,stat] = ttest(dataINt(grsare{isubs},itime));
+        tvals(itime)=stat.tstat;
         
-        if pvals(itime)<.05
-            text(slideTimes(itime), [ylimsAre(itrialtype,1)], '*', 'color', usecols{isubs},'fontsize', 25);
-            %                             text(slideTimes(itime), [-.07], '*', 'color', 'k','fontsize', 15);
-        end
+        % plot uncorrected?
+        % if pvals(itime)<.05
+        %     text(slideTimes(itime), [ylimsAre(itrialtype,1)], '*', 'color', usecols{isubs},'fontsize', 25);
+        %     %                             text(slideTimes(itime), [-.07], '*', 'color', 'k','fontsize', 15);
+        % end
+
     end
-    
+
+    %perform clustercorrection:
+    ttestdata = dataINt(grsare{isubs},:);
+    compareTo=0; % null dataset ?
+    xvec = slideTimes;
+    sigcol='k';
+    usesigmod=0.1;
+    temporalclustercheck;
     
     subcounter=subcounter+1;
     
@@ -689,16 +711,16 @@ if job1.plotGFX_MS2==1
     
     hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 1)
     hold on; plot([0 0 ], ylim, ['k:'], 'linew', 1)
-    set(gca, 'fontsize', 15)
+    set(gca, 'fontsize', fsize)
     
-    title(titlesare{itrialtype}, 'fontsize', 15)
+    title(titlesare{itrialtype}, 'fontsize', fsize)
     
     
-    % if the last one, also plot AUC split.
-    if itrialtype==2 % was 3
+    % if the last one, also plot AUC split (on itrial type)
+    if itrialtype==3 % was 2
         subplot(2,2,4)
         shleg=[];
-        for isubs=2:3 % plot the total data first (each plot)
+        for isubs=2:3 % [1,2,3] = all ppants, below median split, above median split.
             
             Ste = CousineauSEM(dataINt(grsare{isubs},:));
             sh=shadedErrorBar(slideTimes, nanmean(dataINt(grsare{isubs},:),1), Ste, [usecols{isubs}],1);
@@ -718,12 +740,28 @@ if job1.plotGFX_MS2==1
             for itime = 1:length(slideTimes)
                 [~, pvals(itime)] = ttest(dataINt(grsare{isubs},itime));
                 
-                if pvals(itime)<.05
-                    text(slideTimes(itime), [ylimsAre(itrialtype,1)], '*', 'color', usecols{isubs},'fontsize', 25);
-                    %                             text(slideTimes(itime), [-.07], '*', 'color', 'k','fontsize', 15);
-                end
+                % if pvals(itime)<.05
+                %     text(slideTimes(itime), [ylimsAre(itrialtype,1)], '*', 'color', 'k','fontsize', 25);
+                %     %                             text(slideTimes(itime), [-.07], '*', 'color', 'k','fontsize', 15);
+                % end
             end
-            
+           
+            % check the new pvals:
+            if isubs==3
+                ttestdata = dataINt(grsare{isubs},:);
+                compareTo=0; % ttest against?
+                temporalclustercheck;
+            end
+            %also show the timepoints that survive FDR correction:
+            % a= pvals(pvals<.05);
+            % q= fdr(a,.05);           
+            % q= fdr(pvals,.05);
+            % pfdr = find(pvals<q);
+            % for ip=1:length(pfdr)
+            %     text(slideTimes(pfdr(ip)), [ylimsAre(itrialtype,1)]+.01, '*', 'color', 'k','fontsize', 25);
+            % end
+
+
         end
         
     legend([shleg(1), shleg(2)], {'low AUROC2', 'high AUROC2'}, 'autoupdate','off')    
@@ -737,8 +775,8 @@ if job1.plotGFX_MS2==1
     
     hold on; plot(xlim, [0 0 ], ['k:'], 'linew', 1)
     hold on; plot([0 0 ], ylim, ['k:'], 'linew', 1)
-    set(gca, 'fontsize', 15)
-        title(titlesare{itrialtype}, 'fontsize', 15)
+    set(gca, 'fontsize', fsize)
+        title(titlesare{itrialtype}, 'fontsize', fsize)
 
     
     end

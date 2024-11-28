@@ -10,7 +10,7 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 
 
 
-job1.calcandconcat_PFX =1;
+job1.calcandconcat_PFX =0;
 
 job1.plotPFX=0;
 job1.plotGFX=1;

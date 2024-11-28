@@ -43,7 +43,7 @@ avRTs= [0.4662, 0.4322;... % C, E (vis)
     0.98, 1.27]; % C E  (Aud) - > copied from behavioural analysis.
 
 %stim, resp, or resp with prestim baseline?
-for idata = 3%1:2
+for idata = 2%1:2
     if idata==1 % stimulus locked.
         subspots = [1,5];
         %         tspots = [1, 9];
@@ -213,11 +213,11 @@ for idata = 3%1:2
                 %plot topo patches.
                 if idata~=1 %skip first patch for vis stim locked.
                 ph=patch([showt1(1) showt1(1) showt1(2) showt1(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [.9 .9 .9]);
-                ph.FaceAlpha=.4;
+                % ph.FaceAlpha=.4;
                 ph.LineStyle= 'none';
                 end
                 ph=patch([showt2(1) showt2(1) showt2(2) showt2(2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [.9 .9 .9]);
-                ph.FaceAlpha=.4;
+                % ph.FaceAlpha=.4;
                 ph.LineStyle= 'none';
                 
             end
@@ -373,7 +373,8 @@ end
 colormap('inferno')
 cd(figdir)
 % cd('Stimulus locked ERPs')
-set(gcf, 'color', 'w')
+set(gcf, 'color', [.9 .9 .9]); %same colour as patch to align on figure
+
 
 
 

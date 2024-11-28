@@ -10,9 +10,12 @@ job.trainclassifierpartA_Pe_CvsE            =0; % first version, with a fixed ti
 
 %perform calc, then plot the above:
 job.plot_Pe_vs_Untrainedtrials            = 0;   % applies the discrim to untrained data. saves. plots PFX
+
+% MS plot:
 job.plot_Pe_vs_Untrainedtrials_GFX        = 0;   % concats after the above. then plots GFX
+
 job.plot_Pe_vs_Confidence_split            =0;
-job.plot_Pe_vs_SLIDINGwindow_corr_in_B      =0;
+job.plot_Pe_vs_SLIDINGwindow_corr_in_B      =1;
    
  
 %% DIAGONAL (test train same times), also used in time-gen below.
@@ -25,6 +28,8 @@ job.trainclassifier_CvsE_diagonal=1; % diagonal training and testing (same axis)
 % perform calc, then plot the above
 job.calcplot_diagonal_vs_Untrainedtrials   = 0;       %  PFX_ Plots the results of discrim component Cor vs Err in A, on all response locked ERP.
 job.plot_GFX_diagonal                       =  0 ; % shows diagonal decoding for all time points.
+
+%MS plot
 job.plot_GFX_diagonal_MSver1             =0; % shows just within same condition, with overall accuracy as the main feature (mean Errors and Correct performance).
 
 job.calcPlot_diagonal_predictsConfidence         =0; % incl. calc, concat, PFX, GFX
@@ -40,9 +45,10 @@ job.plot_GFX_timegen                    =0;
 job.calcPlot_timegen_slidingCorr =0;
 
  %pretty  Manuscript versions:
-
+ %MS plot:
  job.plot_GFX_timegen_MSVER =0;
-%%
+
+ %%
  % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  % BEGIN analysis of jobs above
  % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -60,12 +66,12 @@ if job.plot_Pe_vs_Untrainedtrials==1
   Plot_decA_vs_untrained;
 end
 
-%
+%%
 if job.plot_Pe_vs_Untrainedtrials_GFX==1   
     Plot_decA_vs_untrained_GFX; %concats then plots (PFX calcd above), also includes overall accuracy
 end
 
-%
+%%
 
 if job.plot_Pe_vs_Confidence_split==1
  Plot_decA_vs_Confidence_split;

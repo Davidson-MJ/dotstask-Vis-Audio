@@ -345,6 +345,10 @@ end
         box on
 disp(['Mean 1 (' num2str(mean(plotXdata(:,1))) '), SD ' num2str(std(plotXdata(:,1)))])
 disp(['Mean 2 (' num2str(mean(plotXdata(:,2))) '), SD ' num2str(std(plotXdata(:,2)))])
+
+% compute effect size:
+d= computeCohen_d(plotXdata(:,1), plotXdata(:,2),'paired');
+disp(['Cohens d= ' num2str(d)])
 %%
 end
 

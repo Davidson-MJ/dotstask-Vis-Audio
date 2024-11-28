@@ -2,8 +2,8 @@
 %plot GFX of decoder trained on part A C vs E, on untrained trials.
 
 
-% baselinetype=1; % normal response locked.
-baselinetype=2; % response locked with prestim baseline
+baselinetype=1; % normal response locked.
+% baselinetype=2; % response locked with prestim baseline
 
 
 jobs.concat_GFX=0;
@@ -135,11 +135,12 @@ redCol =cmap(6,:); %reddish
     useppants = 1:length(pfols);
     orderis = 'all';
     
-    figure(1); clf;
-    set(gcf, 'units', 'normalized', 'Position', [0.1 0.1 .7 .7]); shg
+    figure(1); 
+    set(gcf, 'units', 'normalized', 'Position', [0.1 0.1 .35 .6]); shg
     leg=[];
+    fsize=20;
     
-    for itestdata = 1:6 % C,E, diff, C,E,diff.
+    for itestdata = 6 % C,E, diff, C,E,diff.
         
         switch itestdata
             case 1 % corr A
@@ -150,9 +151,10 @@ redCol =cmap(6,:); %reddish
                 pheight = .36;
             case 2 % corr B
                 subplot(2, 2, 3);
+                cla
                 usecol = grCol;
                 modality= 'auditory';
-                pheight = .36;
+                pheight = .42;
                 
             case 3
                 %errA
@@ -166,13 +168,16 @@ redCol =cmap(6,:); %reddish
                 title({['\rmtrain on \bfvisual (Pe)'];['\rmtest on \bfauditory \rmresponse']})
                 usecol= redCol;
                 modality = 'auditory';
-                pheight = .38;
+                pheight = .44;
             case 5 
                 modality= 'visual';
-                pheight = .37;
+                pheight = .43; % ylim .35 .8
+                pheight2= .39;
             case 6
                 modality= 'auditory';
                 
+                pheight = .44; % ylim .40 .65
+                pheight2= .42;
         end
 
         
@@ -181,13 +186,13 @@ redCol =cmap(6,:); %reddish
             subplot(2,2,2);
             usecol='k';
         elseif itestdata==6
-            subplot(2,2,4);
+            subplot(2,2,4); cla
             %             plotdata = squeeze(GFX_classifierA_onERP(useppants,4,:))+ (.5-squeeze(GFX_classifierA_onERP(useppants,2,:)));
             %             usecol='k';
         end
         
         if smoothON==1
-            winsize = 256/20;
+            winsize = 256/20; % 50 ms moving average?
             for ip = 1:size(plotdata,1)
                 plotdata(ip,:) = smooth(plotdata(ip,:), winsize);
             end
@@ -196,8 +201,16 @@ redCol =cmap(6,:); %reddish
         % 
         stE = CousineauSEM(plotdata);        
         sh= shadedErrorBar(Xtimes, squeeze(mean(plotdata,1, 'omitnan')), stE, {'color', usecol},1);
-        
-        
+
+
+
+
+        if mod(itestdata,2)==0
+            ylim([.4 .65]);
+            % ylim([.35 .8])
+        else
+            ylim([.35 .8])
+        end
         if itestdata<3
             sh.mainLine.LineWidth = 3;
             sh.mainLine.LineStyle= '-';
@@ -210,24 +223,42 @@ redCol =cmap(6,:); %reddish
         
         hold on
         %ttests
-        pvals= nan(1, length(Xtimes));
+        [pvals, tvals]= deal(nan(1, length(Xtimes)));
+
         for itime = 1:length(Xtimes)
-            [~, pvals(itime)] = ttest(plotdata(:,itime), .5);
+            [~, pvals(itime),~, stat] = ttest(plotdata(:,itime), .5);
             
+            tvals(itime)=stat.tstat;
+            % plot uncorrected?
             if pvals(itime)<.05
-                text(Xtimes(itime), [pheight], '*', 'color', usecol,'fontsize', 25);
+                % text(Xtimes(itime), [pheight], '*', 'color', usecol,'fontsize', 25);
             end
         end
-        %    pvals(pvals>=.05) = nan;
-        %    plot(Xtimes, pvals<.05, '*');
-        % %plot sig points.
-        % text(Xtimes(pvals<.05), [0.2], '*',  'color', cmap(itestdata,:), 'FontSize', 5)
+        
+%temporal cluster correction.
+checkcluster=1;
+compareTo=0.5;
+ttestdata= plotdata;
+xvec = Xtimes;
+sigcol=usecol;
+usesigmod=0.1; % determines placement of the asterisks (if significant). is % of ylim.
+if itestdata==3;
+    usesigmod=0.15; % determines placement of the asterisks (if significant). is % of ylim.
+end
+
+if itestdata~=4
+temporalclustercheck;
+end
+
+        % qfdr? 
+        % if itestdata>=5
+        % q= fdr(pvals,.05);
+        % sigtimes = find(pvals<=q);
+        %     text(Xtimes(sigtimes), ones(1,length(sigtimes)).*(pheight2), '*', 'color', 'b','fontsize', 25);
+        % end
+        % 
     
-    if mod(itestdata,2)==0
-    ylim([.35 .6]);
-    else
-        ylim([.35 .8])
-    end
+    
     
     % add extra plot elements:
     hold on; plot(xlim, [.5 .5], '--', 'color', [.3 .3 .3], 'linew', 3)
@@ -252,12 +283,12 @@ redCol =cmap(6,:); %reddish
     else
         ylabel('A.U.C.');
     end
-    set(gca, 'fontsize', 15)
+    set(gca, 'fontsize', fsize)
      set(gca,'ydir', 'normal')
      
-     if itestdata>2
+     if itestdata==3
         % place legend. 
-        legend([leg(1) leg(3)] , {'corrects', 'errors'});
+        legend([leg(1) leg(3)] , {'corrects', 'errors'}, 'autoupdate', 'off');
         
      end
     end % itest data
@@ -268,7 +299,7 @@ redCol =cmap(6,:); %reddish
    
     
     
-    figure(2);
+    figure(3);
     topoplot(nanmean(GFX_classifierA_topo,1), elocs);
     c=colorbar
     ylabel(c,'a.u.')
@@ -282,6 +313,8 @@ title([''])
     
     %%
     set(gcf, 'color', 'w')
+
+    nIterations = size(DEC_Pe_window.all_trials_y,1);
     if baselinetype==1
     printname = ['GFX classifier trained on Correct part A-' winwas ', w-' num2str(nIterations) 'reps (fromscalp)' ];
     elseif baselinetype==2

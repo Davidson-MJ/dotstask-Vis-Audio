@@ -1,11 +1,11 @@
 
-elocs= getelocs(3); % biosemi
+% elocs= getelocs(3); % biosemi
 
 cmap = flipud(cbrewer('seq', 'Reds', 5));
 smoothON=0;
 
 meanoverChans_RESP = [4,38,39,11,12,19,47,46,48,49,32,56,20,31,57];
-% meanoverChans_RESP_POCC= 
+% meanoverChans_RESP_POCC=
 
 meanoverChans_POCC = [20:31, 57:64];
 
@@ -83,100 +83,103 @@ meanoverChans_POCC = [20:31, 57:64];
 tcounter=1;
 % PLOT Group level ERPs.
 cd(eegdatadir)
-fntsize= 12;
+fntsize= 20;
 cd('GFX')
 %
 load('GFX_averageERPsxConf.mat');
 use_xvec = plotXtimes(1:size(GFX_conf_x_slEEG,3)); % adjusting for preprocessed length
 %
 figure(1);  clf;
-set(gcf, 'units', 'normalized', 'position', [0.1 .1 .8 .3],'color', 'w');
+set(gcf, 'color', 'w', 'units', 'normalized', 'position', [0.1 0.1 .35 .6]);
+fsize=20;
+
+% set(gcf, 'units', 'normalized', 'position', [0.1 .1 .8 .3],'color', 'w');
 figure(4); clf;
 
 %     use_xvec =
 
 tpcounter=1; % topoplot counter.
-    for idtype = [3,4]%[3,4]%1:3 (stim locked, resp locked, rl subjcorr)
-        usechans = [meanoverChans_RESP, meanoverChans_POCC];
-        switch idtype
-            case 1
-                datac = GFX_conf_x_slEEG;
-                dtype = 'auditory stimulus onset';
-%                 usechans = [meanoverChans_RESP, meanoverChans_POCC];
-            case 2
-                datac = GFX_conf_x_rlEEG; % response locked
-                dtype = 'auditory response onset';
-%                 usechans = meanoverChans_POCC;
-%                 usechans = meanoverChans_RESP;
-%                 usechans = meanoverChans_Pe;
-            case 3
-                
-                datac = GFX_conf_x_slEEG_subjCorr; % response locked
-                dtype = 'auditory stimulus onset';
-                showtoppotimes = [250 450]; % ms for topo averages
+for idtype = [3,4]%[3,4]%1:3 (stim locked, resp locked, rl subjcorr)
+    usechans = [meanoverChans_RESP, meanoverChans_POCC];
+    switch idtype
+        case 1
+            datac = GFX_conf_x_slEEG;
+            dtype = 'auditory stimulus onset';
+            %                 usechans = [meanoverChans_RESP, meanoverChans_POCC];
+        case 2
+            datac = GFX_conf_x_rlEEG; % response locked
+            dtype = 'auditory response onset';
+            %                 usechans = meanoverChans_POCC;
+            %                 usechans = meanoverChans_RESP;
+            %                 usechans = meanoverChans_Pe;
+        case 3
 
-          case 4
-                
-                datac = GFX_conf_x_rlEEG_subjCorr; % response locked
-                showtoppotimes = [750 950]; % ms for topo averages
+            datac = GFX_conf_x_slEEG_subjCorr; % response locked
+            dtype = 'auditory stimulus onset';
+            showtoppotimes = [250 450]; % ms for topo averages
 
-                dtype = 'auditory response onset';
-        end
-        
-     
+        case 4
+
+            datac = GFX_conf_x_rlEEG_subjCorr; % response locked
+            showtoppotimes = [750 950]; % ms for topo averages
+
+            dtype = 'auditory response onset';
+    end
 
 
-        datap = squeeze(mean(datac(:, usechans,:,:),2)); % mean over chans
-    
-           if smoothON==1
-            winsizet = dsearchn(use_xvec', [0 100]'); % 100ms smooth window.
-            winsize = diff(winsizet);
-             dataout= zeros(size(datap));
-            for isubj=1:size(datap,1)
-                for iterc= 1:size(datap,3)
+
+
+    datap = squeeze(mean(datac(:, usechans,:,:),2)); % mean over chans
+
+    if smoothON==1
+        winsizet = dsearchn(use_xvec', [0 100]'); % 100ms smooth window.
+        winsize = diff(winsizet);
+        dataout= zeros(size(datap));
+        for isubj=1:size(datap,1)
+            for iterc= 1:size(datap,3)
                 dataout(isubj,:,iterc) = smooth(squeeze(datap(isubj,:, iterc)), winsize);
-                end
             end
-            datap=dataout;
-            disp(['HAVE SMOOTHED at participant level!']);
-           end
+        end
+        datap=dataout;
+        disp(['HAVE SMOOTHED at participant level!']);
+    end
 
-        
-        
+
+
     lg=[];
 
     figure(1); hold on;
-    
-    subplot(1,2,idtype-2); hold on
+
+    subplot(2,2,idtype-2); hold on
     
     ylim([-4 6]);
-% show patch first:
-ytx= get(gca, 'ylim');
-hold on
-%plot topo patches.
+    % show patch first:
+    ytx= get(gca, 'ylim');
+    hold on
+    %plot topo patches.
 
-for itwin= 1:size(showtoppotimes,1)
-ph=patch([showtoppotimes(itwin,1) showtoppotimes(itwin,1) showtoppotimes(itwin,2) showtoppotimes(itwin,2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [.9 .9 .9]);
-ph.FaceAlpha=.4;
-ph.LineStyle= 'none';
-end
+    for itwin= 1:size(showtoppotimes,1)
+        ph=patch([showtoppotimes(itwin,1) showtoppotimes(itwin,1) showtoppotimes(itwin,2) showtoppotimes(itwin,2)], [ytx(1) ytx(2) ytx(2) ytx(1) ],  [.9 .9 .9]);
+        % ph.FaceAlpha=.4;
+        ph.LineStyle= 'none';
+    end
 
 
 
-%%
-nQuants= size(GFX_conf_x_slEEG,4);
-if nQuants==4
-topospots= [1,3,5,7,9,11, 2,4,6,8,10,12];% order for topoplots in FIgure 4
-else
-    topospots= [1,2,7,8,3,4,9,10,5,6,11,12];
-end
-%%
+    %%
+    nQuants= size(GFX_conf_x_slEEG,4);
+    if nQuants==4
+        topospots= [1,3,5,7,9,11, 2,4,6,8,10,12];% order for topoplots in FIgure 4
+    else
+        topospots= [1,2,7,8,3,4,9,10,5,6,11,12];
+    end
+    %%
 
     for iterc =1:nQuants
-      
+
         datatoplot = squeeze(datap(:,:,iterc));
-        
-        
+
+
         stE = CousineauSEM(datatoplot);
         sh = shadedErrorBar(use_xvec, squeeze(nanmean(datatoplot,1)), stE, [],1);
         sh.mainLine.Color = cmap(iterc,:);
@@ -186,117 +189,134 @@ end
         sh.edge(2).Color =   cmap(iterc,:);
 
         lg(iterc)= sh.mainLine;
-       
+
         set(gca, 'ydir', 'normal')
         hold on;
-%         plot([showt(1) showt(1)], [ -2 2], 'r', 'linew', 4)
-%         plot([showt(2) showt(2)], [ -2 2], 'r', 'linew', 4)
-%         xlim([- 500 950])
+        %         plot([showt(1) showt(1)], [ -2 2], 'r', 'linew', 4)
+        %         plot([showt(2) showt(2)], [ -2 2], 'r', 'linew', 4)
+        %         xlim([- 500 950])
         xlabel(['Time from ' dtype ' [ms]'])
         ylabel(['\muV']);
-        
-        set(gca, 'fontsize', 15);
+
+        set(gca, 'fontsize', fsize);
         %%
-       
+
         plot([0 0], ylim, ['k-'])
 
         figure(4); hold on;
-%         pspot = topospots(tcounter);
-ncols=nQuants*size(showtoppotimes,1)*3;
+        %         pspot = topospots(tcounter);
+        ncols=nQuants*size(showtoppotimes,1)*3;
 
-for itwin = 1:size(showtoppotimes,1)
-        subplot(2,ncols,topospots(tcounter));
+        for itwin = 1:size(showtoppotimes,1)
+            subplot(2,ncols,topospots(tcounter));
 
-        %convert showt to topotime:
-        topot  =dsearchn(use_xvec', showtoppotimes(itwin,:)');
-        gfx= squeeze(nanmean(datac(:,:,:,iterc),1)); % mean over participants.
-             topoData =nanmean(gfx(:,[topot(1):topot(2)]),2) ;% mean within time points:
-             topoplot(topoData, elocs, 'emarker2', {[usechans], '.' 'w'} );
-%              c=colorbar;
-             title([num2str(showtoppotimes(1)) '-' num2str(showtoppotimes(2)) 'ms (' dtype ' terc: ' num2str(iterc) ')'])
-% title(['split: ' num2str(iterc) ' time: ' num2str(itwin)])
+            %convert showt to topotime:
+            topot  =dsearchn(use_xvec', showtoppotimes(itwin,:)');
+            gfx= squeeze(nanmean(datac(:,:,:,iterc),1)); % mean over participants.
+            topoData =nanmean(gfx(:,[topot(1):topot(2)]),2) ;% mean within time points:
+            topoplot(topoData, elocs, 'emarker2', {[usechans], '.' 'w'} );
+            %              c=colorbar;
+            title([num2str(showtoppotimes(1)) '-' num2str(showtoppotimes(2)) 'ms (' dtype ' terc: ' num2str(iterc) ')'])
+            % title(['split: ' num2str(iterc) ' time: ' num2str(itwin)])
 
-set(gca, 'fontsize', fntsize/2)
-caxis([-2 2]);
-set(gcf,'color', [.9 .9 .9])
-tcounter=tcounter+1;
-
-             
-end
-%%
-figure(10);
-subplot(4,1,idtype);
-topoData= ones(1,length(elocs));
-topoplot(topoData, elocs, 'emarker2', {[usechans], '.' 'm'}, 'whitebk', 'on' ,'conv', 'on','numcontour',1);
-cmapG=[.9 .9 .9];
-colormap(cmapG);
-shg
+            set(gca, 'fontsize', fntsize/2)
+            caxis([-2 2]);
+            set(gcf,'color', [.9 .9 .9])
+            tcounter=tcounter+1;
 
 
-figure(1); hold on;
-%              tpcounter= tpcounter+1;
-             
-% ifr 
+        end
+        %%
+        figure(10);
+        subplot(4,1,idtype);
+        topoData= ones(1,length(elocs));
+        topoplot(topoData, elocs, 'emarker2', {[usechans], '.' 'm'}, 'whitebk', 'on' ,'conv', 'on','numcontour',1);
+        cmapG=[.9 .9 .9];
+        colormap(cmapG);
+        shg
+
+
+        figure(1); hold on;
+        %              tpcounter= tpcounter+1;
+
+        % ifr
     end
     %%
     if idtype==4
-       
-       hold on;
-       p=plot([800 800], [0 2], ['b-'],'linewidth',3, 'MarkerFaceColor', 'b')
-       p=plot([800 800], [.3 .3], ['bv'], 'MarkerFaceColor', 'b','Markersize',10)
+
+        hold on;
+        p=plot([800 800], [0 2], ['b-'],'linewidth',3, 'MarkerFaceColor', 'b');
+        p=plot([800 800], [.3 .3], ['bv'], 'MarkerFaceColor', 'b','Markersize',10);
 
     end
 
-%% add ttests if nquants ==2
-% subplot(2,2, idtype+2); % plot diff for sanity check.
-% diffP = datap(:,:,2) - datap(:,:,1);
-% stE- CousineauSEM(diffP);
-%  sh = shadedErrorBar(use_xvec, squeeze(nanmean(diffP,1)), stE, [],1); 
-%  xlim([- 500 950])
- %%
+    %% add ttests if nquants ==2
+    % subplot(2,2, idtype+2); % plot diff for sanity check.
+    % diffP = datap(:,:,2) - datap(:,:,1);
+    % stE- CousineauSEM(diffP);
+    %  sh = shadedErrorBar(use_xvec, squeeze(nanmean(diffP,1)), stE, [],1);
+    %  xlim([- 500 950])
+    %%
 
- figure(1);
-if nQuants==2
-    pvals=[];
-    for itime= 1:length(use_xvec)
-        [h, pvals(itime)]= ttest(squeeze(datap(:, itime,1)), squeeze(datap(:, itime, 2)));
+    figure(1);
+    if nQuants==2
 
-        if pvals(itime)<= .05
-            text(use_xvec(itime), -3, '*', 'HorizontalAlignment','center')
+        pvals=[];
+        tvals=[];
+
+        for itime= 1:length(use_xvec)
+            [h, pvals(itime),~,stats]= ttest(squeeze(datap(:, itime,1)), squeeze(datap(:, itime, 2)));
+
+            tvals(itime) = stats.tstat;
+
+            %plot uncorrected?
+            if pvals(itime)<= .05
+                % text(use_xvec(itime), -3, '*', 'HorizontalAlignment','center')
+
+            end
+
 
         end
 
+        if idtype==4
+        %% temporal cluster based correction:
+        ttestdata = datap; %(size = ppants, timepoints, groups)
+        compareTo=0; % null dataset ?
+        %note that pvals and tvals are fed in:
+        temporalclustercheck_2group;
+        end
+
+
 
     end
-end
-% 
-% [q,thresh]=FDR(pvals);
-% pcorr= find(pvals<thresh);
-% if ~isempty(pcorr)
-%     
-% text(use_xvec(pcorr), repmat(-3, [1, length(pcorr)]), '*', 'fontsize',20,'HorizontalAlignment', 'center');
-% end
+    %
+    % [q,thresh]=FDR(pvals);
+    % pcorr= find(pvals<thresh);
+    % if ~isempty(pcorr)
+    %
+    % text(use_xvec(pcorr), repmat(-3, [1, length(pcorr)]), '*', 'fontsize',20,'HorizontalAlignment', 'center');
+    % end
     %%
     hold on;
     plot(xlim, [0 0], 'k:')
     if idtype==2 && nQuants==4
-    legend(lg, {'lowest confidence', 'lower confidence', 'higher confidence', 'highest confidence'}, 'location', 'NorthEast', 'fontsize', 12) ; 
+        legend(lg, {'lowest confidence', 'lower confidence', 'higher confidence', 'highest confidence'}, 'location', 'NorthEast', 'fontsize', 12) ;
     elseif idtype==3 && nQuants ==2
         legend(lg, {'low confidence', 'high confidence'}, 'location','NorthWest');
     end
-    set(gca, 'fontsize', 15);
-    
-    end
-    %%   
-    cd(figdir);
-        cd('Confidence x ERPs')
-    set(gcf, 'color', 'w')
-    %%
-    printname = ['GFX partB ERPs x Conf terc '];
-    figure(1);
-    print('-dpng', printname)
-figure(4);
-    printname = ['GFX partB ERPs x Conf topos '];
-        print('-dpng', printname)
+    set(gca, 'fontsize', fsize);
 
-    %%
+end
+%%
+cd(figdir);
+cd('Confidence x ERPs')
+set(gcf, 'color', 'w')
+%%
+printname = ['GFX partB ERPs x Conf terc '];
+figure(1);
+print('-dpng', printname)
+figure(4);
+printname = ['GFX partB ERPs x Conf topos '];
+print('-dpng', printname)
+
+%%
