@@ -98,6 +98,16 @@ grCol=cmap(4,:); %greenish
 redCol =cmap(6,:); %reddish
     
     %load if necessary.
+
+    % baselinetype=1; % normal response locked.
+    baselinetype=2; % response locked with prestim baseline
+
+    if baselinetype==1
+        savename= 'GFX_DecA_Pe_predicts_untrainedtrials';
+    elseif baselinetype==2
+        savename= 'GFX_DecA_Pe_predicts_untrainedtrials_wprestim';
+    end
+
     cd([eegdatadir filesep 'GFX']);
     if ~exist('GFX_classifierA_onERP_ERN', 'var');
         
@@ -135,12 +145,12 @@ redCol =cmap(6,:); %reddish
     useppants = 1:length(pfols);
     orderis = 'all';
     
-    figure(1); 
+    figure(1); clf
     set(gcf, 'units', 'normalized', 'Position', [0.1 0.1 .35 .6]); shg
     leg=[];
     fsize=20;
     
-    for itestdata = 6 % C,E, diff, C,E,diff.
+    for itestdata = 1:6 % C,E, diff, C,E,diff.
         
         switch itestdata
             case 1 % corr A
