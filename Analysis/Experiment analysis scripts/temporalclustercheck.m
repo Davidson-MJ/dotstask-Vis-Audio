@@ -156,10 +156,18 @@
                     %the X values (actual CV) corresponding to .01
                     [~,cv95uncorr] = (min(abs(cdf-.95)));
                     [~,cv05uncorr] = (min(abs(cdf-.05)));
+                    [~,cv99uncorr] = (min(abs(cdf-.99)));
+                    [~,cv01uncorr] = (min(abs(cdf-.01)));
+                    [~,cv999uncorr] = (min(abs(cdf-.999)));
+                    [~,cv001uncorr] = (min(abs(cdf-.001)));
                     hold on
                     pCV=plot([observedCV observedCV], ylim, ['r-']);                   
                     p95=plot([H.Data(cv95uncorr) H.Data(cv95uncorr)], ylim, ['k:']);
                     p05=plot([H.Data(cv05uncorr) H.Data(cv05uncorr)], ylim, ['k:']);
+                    plot([H.Data(cv99uncorr) H.Data(cv99uncorr)], ylim, ['k:']);
+                    plot([H.Data(cv01uncorr) H.Data(cv01uncorr)], ylim, ['k:']);
+                    plot([H.Data(cv999uncorr) H.Data(cv999uncorr)], ylim, ['k:']);
+                    plot([H.Data(cv001uncorr) H.Data(cv001uncorr)], ylim, ['k:']);
                     legend([pCV p05], {['observed'] ['95%'] })
                  
                     %compare to full cluster? 
@@ -184,7 +192,7 @@ figure(1)
                         sigplace = yl(1) + usesigmod*(diff(yl)); % place at bottom for catch
                         
 %%
-                        disp([' plotting significnt cluster:' num2str(xvec(checktimes(1))) ' - ' num2str(xvec(checktimes(end))) ]);
+                        
                        %%
                        for itime=checktimes
 
@@ -193,6 +201,7 @@ figure(1)
                            
                        end
                         
+                       disp([' plotting significnt cluster:' num2str(xvec(checktimes(1))) ' - ' num2str(xvec(checktimes(end))) ]);
                        txtplace =  xl(2) - .1*(diff(xl)); % place at bottom for catch
                        % text(txtplace, sigplace, '\itp\rm_(_c_l_u_s_t_e_r_) < .05', 'HorizontalAlignment','center', 'FontSize', 12);
                     end

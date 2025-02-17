@@ -80,7 +80,7 @@ if jobs.concat_GFX==1
     save(savename, ...
         'GFX_classifierA_onERP_Pe',...
         'GFX_classifierA_topo_Pe', ...
-        'vis_first', 'aud_first', 'Xtimes');
+        'vis_first', 'aud_first', 'Xtimes', 'DEC_Pe_windowparams');
 %     
     
 end % concat job
@@ -88,6 +88,8 @@ end % concat job
 %%%%%%%
 %% now plot GFX
 if jobs.plot_GFX==1;
+    
+    load(savename)
     
     %separate into Aud and Visual.
 cmap = cbrewer('qual', 'Paired',10);
@@ -121,7 +123,7 @@ redCol =cmap(6,:); %reddish
     if job.plotERNorPe==1; % 1 or 2.
        %data
         GFX_classifierA_onERP =GFX_classifierA_onERP_ERN;
-        %training window (ms)           
+        %training window (ms) - needs to be loaded from participant level.            
     windowvec = DEC_ERN_windowparams.training_window_ms;
         %scalp topo
         GFX_classifierA_topo =GFX_classifierA_topo_ERN;
@@ -310,6 +312,7 @@ end
     
     
     figure(3);
+    subplot(221);
     topoplot(nanmean(GFX_classifierA_topo,1), elocs);
     c=colorbar
     ylabel(c,'a.u.')
