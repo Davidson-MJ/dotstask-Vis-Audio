@@ -36,6 +36,7 @@ cd(behdatadir)
 
 % cd(eegdatadir)
 pfols = dir([pwd filesep '*_p*']);
+pfols = striphiddenFiles(pfols);
 %%
 if jobs.concat_Acc
  for ippant = 1:length(pfols)

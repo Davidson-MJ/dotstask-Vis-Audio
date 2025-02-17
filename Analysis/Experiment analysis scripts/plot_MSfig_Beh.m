@@ -4,7 +4,7 @@
 %plots raincloud distributions of accuracy, RT and conf, ready for paper.
 
 
-job.concatData=1; %acc, rts, and conf.
+job.concatData=0; %acc, rts, and conf.
 job.plot_MSFig_Beh =1; % combined/tiled in one.
 
 
@@ -13,12 +13,13 @@ if job.concatData
 % Accuracy data
 
 ExperimentOrder = zeros(length(pfols),1); % auditory or visual first
-[Accuracy_byAorB, nErrors_byAorB, GFX_allConfD] = deal(zeros(length(pfols),2)); % Acc and Conf
+[Accuracy_byAorB, nErrors_byAorB, GFX_allConfD_z,GFX_allConfD] = deal(zeros(length(pfols),2)); % Acc and Conf
 
 RTs_byAorB = nan(4, length(pfols)); % A_correct, A_error, B_correct, B_error
 
 cd(behdatadir)
 pfols= dir([pwd filesep '*_p*']);
+pfols=striphiddenFiles(pfols);
 %%
 
     for ippant = 1:length(pfols)
@@ -188,9 +189,11 @@ pfols= dir([pwd filesep '*_p*']);
         %for GFX.
         ppantz =zscore(ConfData.confj,1);
         
-        GFX_allConfD(ippant,1) = nanmean(ppantz(ConfData.INDEX_Correct));
-        GFX_allConfD(ippant,2) = nanmean(ppantz(ConfData.INDEX_Error));
+        GFX_allConfD_z(ippant,1) = nanmean(ppantz(ConfData.INDEX_Correct));
+        GFX_allConfD_z(ippant,2) = nanmean(ppantz(ConfData.INDEX_Error));
         
+        GFX_allConfD(ippant,1)= nanmean(ConfData.confj(ConfData.INDEX_Correct));
+        GFX_allConfD(ippant,1)= nanmean(ConfData.confj(ConfData.INDEX_Error));
         
         
         disp(['fin concat ppant ' num2str(ippant)]);
@@ -221,6 +224,7 @@ Xdata_RTsA = [RTs_byAorB(1,vis_first)',RTs_byAorB(2,vis_first)'];
    Xdata_RTsB=[RTs_byAorB(3,vis_first)',RTs_byAorB(4,vis_first)'];
 
 %Conf:
+Xdata_Conf_z = GFX_allConfD_z;
 Xdata_Conf = GFX_allConfD;
 end
 
@@ -238,17 +242,20 @@ colormap(cmap)
 viscolour = cmap(3,:);
 audcolour=cmap(9,:);
 %positions of subplot panels:
-subSpots = [1,4,1; ...
+subSpots = [2,3,1; ...
     
-    1,4,2; ...
-    1,4,3; ...
-    1,4,4];
+    2,3,2; ...
+    2,3,3; ...
+    2,2,3;...
+    2,2,4];
 
-plotData={Xdata_Acc,Xdata_RTsA,Xdata_RTsB, Xdata_Conf};%, Xdata_Conf};
-titlesare ={'Accuracy', 'Visual RT', 'Auditory RT', 'Auditory Confidence'};
-ylabels ={'proportion correct', 'seconds', 'seconds', 'z-scored confidence'};
-ylimsare=[0,1.05 ; 0, 1.9; 0, 1.9; -3.5 3.5];
+plotData={Xdata_Acc,Xdata_RTsA,Xdata_RTsB, Xdata_Conf,Xdata_Conf_z};%, Xdata_Conf};
+titlesare ={'Accuracy', 'Visual RT', 'Auditory RT', 'Auditory Confidence','Auditory Confidence'};
+ylabels ={'proportion correct', 'seconds', 'seconds', 'raw confidence','z-scored confidence'};
+ylimsare=[0,1.05 ; 0, 1.9; 0, 1.9; -55 55; -3.5 3.5];
+
 xtickdetails ={{'\bfVisual', '\bfAuditory'},...
+    {'Correct', 'Error'},...
     {'Correct', 'Error'},...
     {'Correct', 'Error'},...
     {'Correct', 'Error'}};
@@ -256,8 +263,8 @@ xtickdetails ={{'\bfVisual', '\bfAuditory'},...
 
 % plot_MSFig_Beh
 %Acc, RTs, Conf 
-
-for idtype=1:4
+%
+for idtype=1:5
     subplot(subSpots(idtype,1),subSpots(idtype,2),subSpots(idtype,3));
     expo = xtickdetails{idtype};
    plotXdata=plotData{idtype};
@@ -331,16 +338,41 @@ end
         %rain clouds have weird axes:
         yl= get(gca, 'ylim');
         mY= (mean(ytsare));
-        %place at base + 90% diff
+        
+        %use the range below
+        expandBy = sum(abs(yl))/2;
+        ylim([mY-expandBy*1.3 mY+expandBy*1.2 ]);
+        
+        %place text at base + 90% diff
         sigheight = ylimsare(idtype,1) + ...
             (ylimsare(idtype,2) - ylimsare(idtype,1)) *.9;
         
-        ts=text(sigheight, mY, psig, 'fontsize', textsz);
+        ts=text(sigheight, mY, psig, 'fontsize', textsz); %X is Y for rainclouds.
         ts.VerticalAlignment= textalgn;
         ts.HorizontalAlignment= 'center';
         hold on;
         %     plot(xlim, [yl(1), yl(2)], ['k:' ]);
         plot([sigheight, sigheight], [ytsare(1), ytsare(2)], ['k-' ], 'linew', 1);
+        
+        %% tidy axes for raw confidence panel:
+        if idtype==4
+            % Remove default x-tick labels
+        % set(gca, 'XTickLabel', []);
+        % customlabels = {'100% \newline Sure wrong', '0', '100% \newlineSure correct'};
+        % ticksat = [-55,0,55];
+        % % Add centered labels manually
+        % for i = 1:length(ticksat)
+        %     text(ticksat(i), yl(2), customlabels{i}, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle', 'FontSize', fontsizeX);
+        % end
+        hold on;
+        set(gca,'xtick', [-55,0,55], 'XTickLabels', {'100% \newline Sure wrong', '0', '100% \newlineSure correct'})
+
+       hold on; plot([0 0], ylim, 'k:', 'linew', 3)
+        % xlabel(ylabels{idtype}, 'HorizontalAlignment','right');
+        text(0, yl(2)+.05, 'raw confidence', 'Rotation', 90, 'FontSize', fontsizeX, 'HorizontalAlignment','center')
+        end
+        shg
+        
         %%
         box on
 disp(['Mean 1 (' num2str(mean(plotXdata(:,1))) '), SD ' num2str(std(plotXdata(:,1)))])
@@ -354,3 +386,7 @@ end
 
 shg
   
+%% some descripvies.
+% mean var on correct, and subjectivel correct trials.
+disp(['M correct ' num2str(mean(GFX_allConfDescriptives.MeanRaw_correct)) ',SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_correct))]);
+disp(['M correct (Subjective) ' num2str(mean(GFX_allConfDescriptives.MeanRaw_correct_subjective)) ',SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_correct_subjective))]);

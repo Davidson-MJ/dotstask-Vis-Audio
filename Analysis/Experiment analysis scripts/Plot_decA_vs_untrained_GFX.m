@@ -99,8 +99,8 @@ redCol =cmap(6,:); %reddish
     
     %load if necessary.
 
-    % baselinetype=1; % normal response locked.
-    baselinetype=2; % response locked with prestim baseline
+    baselinetype=1; % normal response locked.
+    % baselinetype=2; % response locked with prestim baseline
 
     if baselinetype==1
         savename= 'GFX_DecA_Pe_predicts_untrainedtrials';
@@ -274,7 +274,7 @@ end
     hold on; plot(xlim, [.5 .5], '--', 'color', [.3 .3 .3], 'linew', 3)
     hold on; plot([0 0 ], ylim, '--', 'color', [.3 .3 .3], 'linew', 3)
     
-    if itestdata==1;
+    if itestdata==1 || itestdata==5
         %add patch
         ylims = get(gca, 'ylim');
         pch = patch([windowvec(1) windowvec(1) windowvec(2) windowvec(2)], [ylims(1) ylims(2) ylims(2) ylims(1)], [.8 .8 .8]);

@@ -16,6 +16,8 @@ ExperimentOrder = zeros(length(pfols),1); % auditory or visual first
 
 Expver=2;
  
+%UPDATED to extract distributions / descriptive summaries of confidence
+%statistics.
 
 
 %! including a count per ppant, of nErrors in the failure to detect error
@@ -39,19 +41,25 @@ audcolour=cmap(9,:);
 
 %plots individual participant level histograms of Conf, as well as Bar
 %%
+cd(behdatadir)
+pfols = dir([pwd filesep '*_p*']);
+pfols = striphiddenFiles(pfols);
+
 if jobs.concat_Conf==1 %prepare for plots.
     
     ExperimentOrder = nan(length(pfols),1);
     pnames = cell(length(pfols),1);
-    GFX_allConfD = nan(length(pfols), 2); % Correct and Errors
     
+    GFX_allConfD_z = nan(length(pfols), 2); % Correct and Errors (zscored
+    GFX_allConfD= nan(length(pfols),2);  % not zcored.
     GFX_prop_trueError= nan(length(pfols),1);
     
+    GFX_allConfDescriptives= [];% will add as a structure.
 for ippant = 1:length(pfols)
     cd(behdatadir);
     cd(pfols(ippant).name);    
     lfile = dir([pwd filesep '*final' '*']);
-    
+    lfile = striphiddenFiles(lfile);
     load(lfile.name);
     
     pname = ['p_' subject.id];
@@ -103,19 +111,65 @@ ConfData.INDEX_Error= ERRid;
     %for GFX.
     ppantz =zscore(ConfData.confj,1);
     
-    GFX_allConfD(ippant,1) = nanmean(ppantz(ConfData.INDEX_Correct));
-    GFX_allConfD(ippant,2) = nanmean(ppantz(ConfData.INDEX_Error));
+    %mean z-scored cofidence per correct and error:
+    GFX_allConfD_z(ippant,1) = nanmean(ppantz(ConfData.INDEX_Correct));
+    GFX_allConfD_z(ippant,2) = nanmean(ppantz(ConfData.INDEX_Error));
+    GFX_allConfD(ippant,1) = nanmean(ConfData.confj(ConfData.INDEX_Correct));
+    GFX_allConfD(ippant,2) = nanmean(ConfData.confj(ConfData.INDEX_Error));
     
+
     
     %keep the count.
     errorConf = ConfData.confj(ConfData.INDEX_Error);
-    %prop failure to detect: (note that 55, -55 are both a guess).
+    %prop failure to detect: (note that 55, -55 are the extrema (-55 <> +55) .
 %     errorConf(errorConf==-55) =55;
     nGuess_C = length(find(errorConf>0));
     nGuess_W = length(find(errorConf<0));
     
     GFX_prop_trueError(ippant) = nGuess_C / length(errorConf);
     
+
+
+    %new addition:
+    % include result for the subjectively correct (only) subtype:
+    subCindex = find(ConfData.confj>0);
+
+    %raw conf
+    M_Correct = nanmean(ConfData.confj(ConfData.INDEX_Correct));
+    var_Correct = std(ConfData.confj(ConfData.INDEX_Correct));
+    
+    var_subjCorrect = std(ConfData.confj(subCindex));
+    M_subjCorrect = nanmean(ConfData.confj(subCindex));
+
+    M_Error= nanmean(ConfData.confj(ConfData.INDEX_Error));    
+    var_Error= std(ConfData.confj(ConfData.INDEX_Error));
+    
+    %zscore conf (as above)
+     M_Correct_Z = nanmean(ppantz(ConfData.INDEX_Correct));
+    var_Correct_Z = std(ppantz(ConfData.INDEX_Correct));
+    
+    var_subjCorrect_Z = std(ppantz(subCindex));
+    M_subjCorrect_Z = nanmean(ppantz(subCindex));
+
+    M_Error_Z= nanmean(ppantz(ConfData.INDEX_Error));    
+    var_Error_Z= std(ppantz(ConfData.INDEX_Error));
+    
+    % store: 
+    %raw
+    GFX_allConfDescriptives.MeanRaw_correct(ippant)= M_Correct;
+    GFX_allConfDescriptives.stdRaw_correct(ippant)= var_Correct;
+    GFX_allConfDescriptives.MeanRaw_Subjcorrect(ippant)= M_subjCorrect;
+    GFX_allConfDescriptives.stdRaw_Subjcorrect(ippant)= var_subjCorrect;
+    GFX_allConfDescriptives.MeanRaw_error(ippant)= M_Error;
+    GFX_allConfDescriptives.stdRaw_error(ippant)= var_Error;
+
+    %z
+    GFX_allConfDescriptives.MeanZ_correct(ippant)= M_Correct_Z;
+    GFX_allConfDescriptives.stdZ_correct(ippant)= var_Correct_Z;
+    GFX_allConfDescriptives.MeanZ_Subjcorrect(ippant)= M_subjCorrect_Z;
+    GFX_allConfDescriptives.stdZ_Subjcorrect(ippant)= var_subjCorrect_Z;
+    GFX_allConfDescriptives.MeanZ_error(ippant)= M_Error_Z;
+    GFX_allConfDescriptives.stdZ_error(ippant)= var_Error_Z;
     
 end
 end
@@ -151,11 +205,11 @@ set(gcf, 'units', 'normalized', 'position', [0 0 .8 .8], 'color', 'w')
 for iorder = 1%:2
     
  if iorder==1
-     barDD = GFX_allConfD(vis_first,:);
+     barDD = GFX_allConfD_z(vis_first,:);
      expo = {'visual','auditory'};
      colnow = audcolour;
  else
-     barDD = GFX_allConfD(aud_first,:);
+     barDD = GFX_allConfD_z(aud_first,:);
      expo = {'auditory','visual'};
      colnow = viscolour;
  end
@@ -249,3 +303,22 @@ end
     
     
     
+%% some descripvies.
+% mean var on correct, and subjectivel correct trials.
+pset = 1:21;
+% pset= [1:18,20,21]; 
+% participants 
+disp(['raw conf values:'])
+disp(['M value correct ' num2str(mean(GFX_allConfDescriptives.MeanRaw_correct(pset))) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_correct(pset)))]);
+disp(['M value correct ' num2str(mean(GFX_allConfDescriptives.MeanRaw_Subjcorrect(pset))) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_Subjcorrect(pset))) '(Subjective)'] );
+%%
+disp(['Zscored conf values:'])
+disp(['M correct ' num2str(mean(GFX_allConfDescriptives.MeanZ_correct)) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdZ_correct))]);
+disp(['M correct ' num2str(mean(GFX_allConfDescriptives.MeanZ_Subjcorrect)) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdZ_Subjcorrect)) '(Subjective) ']);
+%%
+
+% [h,p,i,stat]= ttest(GFX_allConfDescriptives.MeanZ_correct, GFX_allConfDescriptives.MeanZ_Subjcorrect)
+
+[h,p,i,stat]= ttest(GFX_allConfDescriptives.MeanRaw_correct(pset), GFX_allConfDescriptives.MeanRaw_Subjcorrect(pset))
+% [h,p,i,stat]= ttest(GFX_allConfDescriptives.stdRaw_correct, GFX_allConfDescriptives.stdRaw_Subjcorrect)
+% [h,p,i,stat]= ttest(GFX_allConfDescriptives.stdZ_correct, GFX_allConfDescriptives.stdZ_Subjcorrect)

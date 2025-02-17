@@ -183,6 +183,8 @@ figure(1)
                         xl=get(gca, 'xlim');
                         sigplace = yl(1) + usesigmod*(diff(yl)); % place at bottom for catch
                         
+%%
+                        disp([' plotting significnt cluster:' num2str(xvec(checktimes(1))) ' - ' num2str(xvec(checktimes(end))) ]);
                        %%
                        for itime=checktimes
 

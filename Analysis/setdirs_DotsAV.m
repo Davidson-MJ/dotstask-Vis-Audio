@@ -6,6 +6,8 @@ cd(homedir);
 catch
     homedir = '/Users/164376/Documents/DATA/dotstask- Vis+Audio EXP'; % UTS mac
 
+    homedir =  '/Volumes/WHITEHD_TB/dotstask- Vis+Audio EXP'; %White HD
+
 % homedir =['/Users/matthewdavidson/Documents/DATA/dotstask- Vis+Audio EXP'];
 % homedir = 'C:\Users\mdav0285\Documents\GitHub\dotstask-Vis-Audio';
 end
