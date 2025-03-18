@@ -193,7 +193,7 @@ pfols=striphiddenFiles(pfols);
         GFX_allConfD_z(ippant,2) = nanmean(ppantz(ConfData.INDEX_Error));
         
         GFX_allConfD(ippant,1)= nanmean(ConfData.confj(ConfData.INDEX_Correct));
-        GFX_allConfD(ippant,1)= nanmean(ConfData.confj(ConfData.INDEX_Error));
+        GFX_allConfD(ippant,2)= nanmean(ConfData.confj(ConfData.INDEX_Error));
         
         
         disp(['fin concat ppant ' num2str(ippant)]);
@@ -252,7 +252,15 @@ subSpots = [2,3,1; ...
 plotData={Xdata_Acc,Xdata_RTsA,Xdata_RTsB, Xdata_Conf,Xdata_Conf_z};%, Xdata_Conf};
 titlesare ={'Accuracy', 'Visual RT', 'Auditory RT', 'Auditory Confidence','Auditory Confidence'};
 ylabels ={'proportion correct', 'seconds', 'seconds', 'raw confidence','z-scored confidence'};
-ylimsare=[0,1.05 ; 0, 1.9; 0, 1.9; -55 55; -3.5 3.5];
+ylimsare=[0,1 ; 0, 2.1; 0, 2.1; -55 55; -4 1];
+%specify the datarange to compute ks density (rainclouds) over.
+datarange= [0,1;... % accuracy proportion
+           0,1; ...% rt ]
+           0,2; ...% rt
+           -55, 55; ... % conf
+           -inf, inf]; %zscore conf
+
+% rm_bandwidths= [.1, .2, ]
 
 xtickdetails ={{'\bfVisual', '\bfAuditory'},...
     {'Correct', 'Error'},...
@@ -263,19 +271,27 @@ xtickdetails ={{'\bfVisual', '\bfAuditory'},...
 
 % plot_MSFig_Beh
 %Acc, RTs, Conf 
-%
+
 for idtype=1:5
+
     subplot(subSpots(idtype,1),subSpots(idtype,2),subSpots(idtype,3));
+    % subplot(1,4,idtype);
     expo = xtickdetails{idtype};
    plotXdata=plotData{idtype};
    
     
     [a,b]=CousineauSEM(plotXdata);
     
-    dataX{1} = b(:,1);
-    dataX{2} = b(:,2);
-    bh =rm_raincloud(dataX', [cmap(2,:)]);
-    
+    % dataX{1} = b(:,1);
+    % dataX{2} = b(:,2);
+
+    dataX{1} = plotXdata(:,1);
+    dataX{2} = plotXdata(:,2);
+
+    % note that this raincloud function now takes data ranges (MD addition)
+    bh =rm_raincloud(dataX', [cmap(2,:)], 0, 'ks',[],datarange(idtype,:));
+    % bh =rm_raincloud(dataX', [cmap(2,:)], 0, 'ks',0.2);
+    %
    if idtype>1
     % change colours if RTs:
     % change colours
@@ -303,15 +319,8 @@ for idtype=1:5
     set(gcf, 'color', 'w');
     set(gca, 'fontsize', fontsizeX)
     
-    
-if idtype==1
-    hold on; plot([.5 .5], ylim, 'k:', 'linew', 3)
-end
-if idtype==3 % hide yticks
-%     set(gca,'xtick', []);
-%     axis off
-%     xlabel('');
-end
+    hold on;
+
 
 
 %add sig
@@ -354,6 +363,11 @@ end
         %     plot(xlim, [yl(1), yl(2)], ['k:' ]);
         plot([sigheight, sigheight], [ytsare(1), ytsare(2)], ['k-' ], 'linew', 1);
         
+        if idtype==1
+            plot([.5 .5], ylim, 'k:', 'linew', 2)
+        elseif idtype==4 || idtype == 5
+            plot([0 0], ylim, 'k:', 'linew', 2)
+        end
         %% tidy axes for raw confidence panel:
         if idtype==4
             % Remove default x-tick labels
@@ -365,22 +379,27 @@ end
         %     text(ticksat(i), yl(2), customlabels{i}, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle', 'FontSize', fontsizeX);
         % end
         hold on;
-        set(gca,'xtick', [-55,0,55], 'XTickLabels', {'100% \newline Sure wrong', '0', '100% \newlineSure correct'})
-
-       hold on; plot([0 0], ylim, 'k:', 'linew', 3)
-        % xlabel(ylabels{idtype}, 'HorizontalAlignment','right');
-        text(0, yl(2)+.05, 'raw confidence', 'Rotation', 90, 'FontSize', fontsizeX, 'HorizontalAlignment','center')
+        set(gca,'xtick', [-55,0,55], 'XTickLabels', {'Sure \newlinewrong', 'Guess', 'Sure \newlinecorrect'})
+      
+        xlabel(ylabels{idtype});
+        % text(0, yl(2)+.05, 'raw confidence', 'Rotation', 90, 'FontSize', fontsizeX, 'HorizontalAlignment','center')
+        % xlabel('')
         end
         shg
         
         %%
         box on
+        
+disp(['>'])
+disp(titlesare{idtype});
 disp(['Mean 1 (' num2str(mean(plotXdata(:,1))) '), SD ' num2str(std(plotXdata(:,1)))])
 disp(['Mean 2 (' num2str(mean(plotXdata(:,2))) '), SD ' num2str(std(plotXdata(:,2)))])
 
+
 % compute effect size:
 d= computeCohen_d(plotXdata(:,1), plotXdata(:,2),'paired');
-disp(['Cohens d= ' num2str(d)])
+% disp(['Cohens d= ' num2str(d)])
+disp(['t (' num2str(stat.df) ')=' num2str(stat.tstat) ', p=' num2str(p1) ',d=' num2str(d)])
 %%
 end
 
@@ -388,5 +407,6 @@ shg
   
 %% some descripvies.
 % mean var on correct, and subjectivel correct trials.
+%calculated in plot_confidencedistributions
 disp(['M correct ' num2str(mean(GFX_allConfDescriptives.MeanRaw_correct)) ',SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_correct))]);
 disp(['M correct (Subjective) ' num2str(mean(GFX_allConfDescriptives.MeanRaw_correct_subjective)) ',SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_correct_subjective))]);

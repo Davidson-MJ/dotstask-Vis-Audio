@@ -8,7 +8,7 @@ jobs.concat_Conf=1; %prepare for plots.
 
 jobs.plotPFX_conf =0; % per ppant
 
-jobs.plotGFX_conf =1 ; %tidy (raincloud) GFX
+jobs.plotGFX_conf =0 ; %tidy (raincloud) GFX
 
 
 ExperimentOrder = zeros(length(pfols),1); % auditory or visual first
@@ -156,12 +156,15 @@ ConfData.INDEX_Error= ERRid;
     
     % store: 
     %raw
-    GFX_allConfDescriptives.MeanRaw_correct(ippant)= M_Correct;
+    GFX_allConfDescriptives.MeanRaw_correct(ippant)= M_Correct;    
     GFX_allConfDescriptives.stdRaw_correct(ippant)= var_Correct;
     GFX_allConfDescriptives.MeanRaw_Subjcorrect(ippant)= M_subjCorrect;
     GFX_allConfDescriptives.stdRaw_Subjcorrect(ippant)= var_subjCorrect;
     GFX_allConfDescriptives.MeanRaw_error(ippant)= M_Error;
     GFX_allConfDescriptives.stdRaw_error(ippant)= var_Error;
+
+    GFX_allConfDescriptives.countRawCorrect(ippant) = length(find(ConfData.INDEX_Correct));
+    GFX_allConfDescriptives.countSubjCorrect(ippant) = length(subCindex);
 
     %z
     GFX_allConfDescriptives.MeanZ_correct(ippant)= M_Correct_Z;
@@ -170,7 +173,8 @@ ConfData.INDEX_Error= ERRid;
     GFX_allConfDescriptives.stdZ_Subjcorrect(ippant)= var_subjCorrect_Z;
     GFX_allConfDescriptives.MeanZ_error(ippant)= M_Error_Z;
     GFX_allConfDescriptives.stdZ_error(ippant)= var_Error_Z;
-    
+   
+    disp(['fin cat for ppant ' num2str(ippant)]); 
 end
 end
 %%
@@ -309,8 +313,8 @@ pset = 1:21;
 % pset= [1:18,20,21]; 
 % participants 
 disp(['raw conf values:'])
-disp(['M value correct ' num2str(mean(GFX_allConfDescriptives.MeanRaw_correct(pset))) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_correct(pset)))]);
-disp(['M value correct ' num2str(mean(GFX_allConfDescriptives.MeanRaw_Subjcorrect(pset))) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_Subjcorrect(pset))) '(Subjective)'] );
+disp(['M count ' num2str(mean(GFX_allConfDescriptives.countRawCorrect(pset))) ' M value correct ' num2str(mean(GFX_allConfDescriptives.MeanRaw_correct(pset))) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_correct(pset)))]);
+disp(['M count ' num2str(mean(GFX_allConfDescriptives.countSubjCorrect(pset))) ' M value correct ' num2str(mean(GFX_allConfDescriptives.MeanRaw_Subjcorrect(pset))) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdRaw_Subjcorrect(pset))) '(Subjective)'] );
 %%
 disp(['Zscored conf values:'])
 disp(['M correct ' num2str(mean(GFX_allConfDescriptives.MeanZ_correct)) ', average SD ' num2str(mean(GFX_allConfDescriptives.stdZ_correct))]);

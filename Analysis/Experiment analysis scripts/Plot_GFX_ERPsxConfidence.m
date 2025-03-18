@@ -171,7 +171,7 @@ for idtype = [3,4]%[3,4]%1:3 (stim locked, resp locked, rl subjcorr)
     if nQuants==4
         topospots= [1,3,5,7,9,11, 2,4,6,8,10,12];% order for topoplots in FIgure 4
     else
-        topospots= [1,2,7,8,3,4,9,10,5,6,11,12];
+        topospots= [1,2,3,4];
     end
     %%
 
@@ -205,22 +205,34 @@ for idtype = [3,4]%[3,4]%1:3 (stim locked, resp locked, rl subjcorr)
 
         figure(4); hold on;
         %         pspot = topospots(tcounter);
-        ncols=nQuants*size(showtoppotimes,1)*3;
-
+        % ncols=nQuants*size(showtoppotimes,1)*3;
+        ncols=4
         for itwin = 1:size(showtoppotimes,1)
-            subplot(2,ncols,topospots(tcounter));
+            subplot(2,2,topospots(tcounter));
 
             %convert showt to topotime:
             topot  =dsearchn(use_xvec', showtoppotimes(itwin,:)');
             gfx= squeeze(nanmean(datac(:,:,:,iterc),1)); % mean over participants.
+            % or difference
+            tmpD= squeeze(datac(:,:,:,2)-datac(:,:,:,1));
+            gfx=squeeze(nanmean(tmpD,1));
+            
             topoData =nanmean(gfx(:,[topot(1):topot(2)]),2) ;% mean within time points:
             topoplot(topoData, elocs, 'emarker2', {[usechans], '.' 'w'} );
             %              c=colorbar;
-            title([num2str(showtoppotimes(1)) '-' num2str(showtoppotimes(2)) 'ms (' dtype ' terc: ' num2str(iterc) ')'])
+            % title([num2str(showtoppotimes(1)) '-' num2str(showtoppotimes(2)) 'ms (' dtype ' terc: ' num2str(iterc) ')'])
             % title(['split: ' num2str(iterc) ' time: ' num2str(itwin)])
-
+            c=colorbar;
+            ylabel(c,'\muV', 'fontsize', 25);
+            set(c,'fontsize',25)
+            
+            if idtype==3;
+            caxis([-1 1]);
+            elseif idtype==4
+                caxis([-1 1])
+            end
             set(gca, 'fontsize', fntsize/2)
-            caxis([-2 2]);
+            % caxis([-2 2]);
             set(gcf,'color', [.9 .9 .9])
             tcounter=tcounter+1;
 
