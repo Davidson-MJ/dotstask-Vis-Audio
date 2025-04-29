@@ -303,6 +303,8 @@ end
         legend([leg(1) leg(3)] , {'corrects', 'errors'}, 'autoupdate', 'off');
         
      end
+     
+     box off;
     end % itest data
     %%
 %     title({['Order ' orderis ', nreps ' num2str(nIterations)];['Time-course of discriminating component, (trained Corr A vs Err A)']}, 'fontsize', 25);
@@ -341,3 +343,10 @@ title([''])
     
 
 end % print job.
+
+
+%% prep for publication (eneuro format:)
+addPanelLabels('fontsize',24, 'labels', {'a','c','b','d'});
+%%
+set(gcf,'Renderer', 'painters');
+print(gcf,'-dsvg', '-vector', '-r300', 'figure4-topo.svg');

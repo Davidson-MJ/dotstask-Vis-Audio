@@ -4,7 +4,7 @@
 %plots raincloud distributions of accuracy, RT and conf, ready for paper.
 
 
-job.concatData=0; %acc, rts, and conf.
+job.concatData=1; %acc, rts, and conf.
 job.plot_MSFig_Beh =1; % combined/tiled in one.
 
 
@@ -388,7 +388,7 @@ for idtype=1:5
         shg
         
         %%
-        box on
+        box off
         
 disp(['>'])
 disp(titlesare{idtype});
@@ -404,6 +404,7 @@ disp(['t (' num2str(stat.df) ')=' num2str(stat.tstat) ', p=' num2str(p1) ',d=' n
 end
 
 shg
+addPanelLabels('fontsize', 24); % in MD misc 
   
 %% some descripvies.
 % mean var on correct, and subjectivel correct trials.

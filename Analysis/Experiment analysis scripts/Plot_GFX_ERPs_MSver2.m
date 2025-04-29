@@ -3,6 +3,8 @@
 % In this version (2), we will focus only on the response locked data, with
 % topos inset.
 
+
+% updated to conform to eNeuro requests.
 cd(eegdatadir)
 cd('GFX')
 load('GFX_averageERPs TRIG based.mat')
@@ -175,6 +177,7 @@ for idata = 2%1:2
         %   PREPARE ERP PLOTS  (Correct and Error)
         plotD= {datac, datae, datae-datac};
         colsAre= {grCol, redCol, 'k'};
+        stylesAre= {'-', ':', '-'};
         legh=[];
         lgc=1; % counter for legend entries (resets at 3)
         for iplotd= 1:3
@@ -241,7 +244,7 @@ for idata = 2%1:2
             stE1 = CousineauSEM(tmp_plotData );
             %Corrects, errors, difference:
             
-            sh=shadedErrorBar(use_xvec, plotMean, stE1,{'color',colsAre{iplotd}, 'linew', 2},1);
+            sh=shadedErrorBar(use_xvec, plotMean, stE1,{'color',colsAre{iplotd}, 'linestyle', stylesAre{iplotd}, 'linew', 2},1);
             p1= sh.mainLine;
             legh(lgc) = sh.mainLine;
             plot([0 0], ylim, ['k-'])
@@ -283,10 +286,10 @@ for idata = 2%1:2
             
             
             
-            if iplotd==2 && ixmod==1
+            if iplotd==2 %&& ixmod==1
              lg=   legend([legh(1) legh(2)], {'Correct', 'Error'}, 'autoupdate', 'off', 'Orientation','Horizontal');
                 
-            elseif iplotd==3 && ixmod==1
+            elseif iplotd==3 %&& ixmod==1
                 legend([legh(1)], {'Err-Corr'}, 'autoupdate', 'off');
             end
             
@@ -376,5 +379,8 @@ cd(figdir)
 set(gcf, 'color', [.9 .9 .9]); %same colour as patch to align on figure
 
 
-
+%%
+addPanelLabels('fontsize',16)
+%%
+set(gcf,'Renderer', 'painters'); %ensure scalable vector graphics.
 

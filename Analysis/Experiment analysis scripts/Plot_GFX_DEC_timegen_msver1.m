@@ -318,3 +318,7 @@ end
 
 
 end
+%% prep for plot:
+addPanelLabels('fontsize', 24);
+set(gcf, 'Renderer', 'painters');
+print('-dsvg', '-painters', '-r300', 'figure5.svg')

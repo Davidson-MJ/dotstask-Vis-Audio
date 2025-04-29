@@ -331,4 +331,9 @@ figure(4);
 printname = ['GFX partB ERPs x Conf topos '];
 print('-dpng', printname)
 
-%%
+%% prep for pub: 
+addPanelLabels('fontsize', 24);
+set(gcf,'Renderer','painters');
+print(gcf,'-dsvg', '-painters', '-r300', 'figure6Conftopos.svg')
+
+

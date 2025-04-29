@@ -13,7 +13,7 @@ cmap = flip(cbrewer('seq', 'RdPu', 5));
 baselinetype=1; % for response-locked with response baseline
 % baselinetype=2;% for response-locked with prestimulus baseline
 
-job1.calcandconcat_PFX =0;
+job1.calcandconcat_PFX =1;
 job1.plotPFX=0;
 job1.plotGFX=0;
 job1.plotGFX_MS=0; % single plot of one condition
@@ -798,5 +798,10 @@ if job1.plotGFX_MS2==1
     
 end
 
+%% prep for pub: 
+addPanelLabels('fontsize', 24)
+%%
+set(gcf,'Renderer', 'painters');
+print('-dsvg', '-painters', '-r300', 'figure6.svg')
 
 

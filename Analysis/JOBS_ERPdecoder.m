@@ -11,11 +11,11 @@ job.trainclassifierpartA_Pe_CvsE            =0; % first version, with a fixed ti
 %perform calc, then plot the above:
 job.plot_Pe_vs_Untrainedtrials            = 0;   % applies the discrim to untrained data. saves. plots PFX
 
-% MS plot:
-job.plot_Pe_vs_Untrainedtrials_GFX        = 1;   % concats after the above. then plots GFX
+% MS plots:
+job.plot_Pe_vs_Untrainedtrials_GFX        = 0;   % concats after the above. then plots GFX (Fig 3)
 
 job.plot_Pe_vs_Confidence_split            =0;
-job.plot_Pe_vs_SLIDINGwindow_corr_in_B      =0;
+job.plot_Pe_vs_SLIDINGwindow_corr_in_B      =1; 
    
  
 %% DIAGONAL (test train same times), also used in time-gen below.
@@ -46,7 +46,7 @@ job.calcPlot_timegen_slidingCorr =0;
 
  %pretty  Manuscript versions:
  %MS plot:
- job.plot_GFX_timegen_MSVER =0;
+ job.plot_GFX_timegen_MSVER =0; % MS Fig 4
 
  %%
  % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
